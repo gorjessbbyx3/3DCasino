@@ -7,6 +7,7 @@ import { useUser } from "./lib/stores/useUser";
 import { Coins, LogOut } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { apiRequest } from "./lib/queryClient";
+import { Toaster } from "sonner";
 import "@fontsource/inter";
 
 function App() {
@@ -86,6 +87,7 @@ function App() {
       <CasinoScene />
       <AuthModal />
       <CashierModal />
+      <Toaster position="top-right" richColors />
 
       <div className="absolute bottom-6 left-0 right-0 z-10 text-center">
         <div className="inline-flex items-center gap-4 bg-gradient-to-r from-black/80 via-black/70 to-black/80 px-8 py-4 rounded-2xl border border-gray-500/30 backdrop-blur-md shadow-2xl">

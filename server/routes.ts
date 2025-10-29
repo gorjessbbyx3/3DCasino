@@ -99,6 +99,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  app.post("/api/cashier/deposit", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const { amount } = req.body;
+      const amountNum = parseInt(amount);
+      
+      if (isNaN(amountNum) || amountNum <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const result = await storage.deposit(userId, amountNum);
+      res.json({
+        user: {
+          id: result.user.id,
+          username: result.user.username,
+          balance: result.user.balance,
+        },
+        transaction: result.transaction,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Deposit failed" });
+    }
+  });
+
+  app.post("/api/cashier/withdraw", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const { amount } = req.body;
+      const amountNum = parseInt(amount);
+      
+      if (isNaN(amountNum) || amountNum <= 0) {
+        return res.status(400).json({ message: "Invalid amount" });
+      }
+
+      const result = await storage.withdraw(userId, amountNum);
+      res.json({
+        user: {
+          id: result.user.id,
+          username: result.user.username,
+          balance: result.user.balance,
+        },
+        transaction: result.transaction,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Withdrawal failed" });
+    }
+  });
+
+  app.get("/api/transactions", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
+      const transactions = await storage.getUserTransactions(userId, limit);
+      res.json(transactions);
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;
