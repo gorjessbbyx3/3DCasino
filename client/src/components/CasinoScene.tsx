@@ -61,18 +61,18 @@ function CasinoWalls() {
     metalness: 0.1,
   }), []);
 
-  const walls = [
-    { position: [0, wallHeight / 2, -roomSize / 2], dimensions: [roomSize, wallHeight, wallThickness] },
-    { position: [0, wallHeight / 2, roomSize / 2], dimensions: [roomSize, wallHeight, wallThickness] },
-    { position: [-roomSize / 2, wallHeight / 2, 0], dimensions: [wallThickness, wallHeight, roomSize] },
-    { position: [roomSize / 2, wallHeight / 2, 0], dimensions: [wallThickness, wallHeight, roomSize] }
-  ];
+  const walls = useMemo(() => [
+    { position: [0, wallHeight / 2, -roomSize / 2] as [number, number, number], dimensions: [roomSize, wallHeight, wallThickness] as [number, number, number] },
+    { position: [0, wallHeight / 2, roomSize / 2] as [number, number, number], dimensions: [roomSize, wallHeight, wallThickness] as [number, number, number] },
+    { position: [-roomSize / 2, wallHeight / 2, 0] as [number, number, number], dimensions: [wallThickness, wallHeight, roomSize] as [number, number, number] },
+    { position: [roomSize / 2, wallHeight / 2, 0] as [number, number, number], dimensions: [wallThickness, wallHeight, roomSize] as [number, number, number] }
+  ], [wallHeight, roomSize, wallThickness]);
 
   return (
     <group>
       {walls.map((wall, i) => (
-        <mesh key={i} position={wall.position as [number, number, number]} receiveShadow castShadow>
-          <boxGeometry args={wall.dimensions as [number, number, number]} />
+        <mesh key={i} position={wall.position} receiveShadow castShadow>
+          <boxGeometry args={wall.dimensions} />
           <primitive object={wallMaterial.clone()} />
         </mesh>
       ))}
@@ -428,11 +428,15 @@ function CasinoLighting() {
 function FirstPersonControls() {
   const { camera, gl } = useThree();
   const [movement, setMovement] = useState({ forward: 0, right: 0 });
+  const [rotation, setRotation] = useState({ yaw: 0, pitch: 0 });
   const velocity = useRef(new THREE.Vector3());
-  const [mousePressed, setMousePressed] = useState(false);
-  const lastMousePosition = useRef({ x: 0, y: 0 });
-
+  const rotationRef = useRef({ yaw: 0, pitch: 0 });
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+  
+  // Desktop controls
   useEffect(() => {
+    if (isMobile) return;
+
     const keys: Record<string, boolean> = {};
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -455,49 +459,130 @@ function FirstPersonControls() {
       setMovement({ forward, right });
     };
 
-    const handleMouseDown = (e: MouseEvent) => {
-      setMousePressed(true);
-      lastMousePosition.current = { x: e.clientX, y: e.clientY };
-    };
-
-    const handleMouseUp = () => {
-      setMousePressed(false);
-    };
-
     const handleMouseMove = (e: MouseEvent) => {
-      if (mousePressed) {
-        const deltaX = e.clientX - lastMousePosition.current.x;
-        const deltaY = e.clientY - lastMousePosition.current.y;
+      if (document.pointerLockElement === gl.domElement) {
+        const sensitivity = 0.002;
+        rotationRef.current = {
+          yaw: rotationRef.current.yaw - e.movementX * sensitivity,
+          pitch: Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotationRef.current.pitch - e.movementY * sensitivity))
+        };
+        setRotation(rotationRef.current);
+      }
+    };
 
-        camera.rotation.y -= deltaX * 0.002;
-        camera.rotation.x -= deltaY * 0.002;
-        camera.rotation.x = Math.max(-Math.PI / 6, Math.min(Math.PI / 6, camera.rotation.x));
-
-        lastMousePosition.current = { x: e.clientX, y: e.clientY };
+    const handleClick = () => {
+      if (!document.pointerLockElement) {
+        gl.domElement.requestPointerLock();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-    window.addEventListener('mousedown', handleMouseDown);
-    window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('mousemove', handleMouseMove);
-
+    gl.domElement.addEventListener('click', handleClick);
+    
     const interval = setInterval(updateMovement, 16);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
-      window.removeEventListener('mousedown', handleMouseDown);
-      window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mousemove', handleMouseMove);
+      gl.domElement.removeEventListener('click', handleClick);
       clearInterval(interval);
+      if (document.pointerLockElement === gl.domElement) {
+        document.exitPointerLock();
+      }
     };
-  }, [camera, mousePressed]);
+  }, [gl, isMobile]);
+
+  // Mobile touch controls
+  useEffect(() => {
+    if (!isMobile) return;
+
+    let movementTouchId: number | null = null;
+    let lookTouchId: number | null = null;
+    const movementStart = { x: 0, y: 0 };
+    const lookStart = { x: 0, y: 0 };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      Array.from(e.changedTouches).forEach((touch) => {
+        const x = touch.clientX;
+        const y = touch.clientY;
+        const isLeftSide = x < window.innerWidth / 2;
+
+        if (isLeftSide && movementTouchId === null) {
+          movementTouchId = touch.identifier;
+          movementStart.x = x;
+          movementStart.y = y;
+        } else if (!isLeftSide && lookTouchId === null) {
+          lookTouchId = touch.identifier;
+          lookStart.x = x;
+          lookStart.y = y;
+        }
+      });
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      Array.from(e.changedTouches).forEach((touch) => {
+        if (touch.identifier === movementTouchId) {
+          const dx = touch.clientX - movementStart.x;
+          const dy = touch.clientY - movementStart.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          const maxDistance = 50;
+          const clampedDistance = Math.min(distance, maxDistance);
+          const angle = Math.atan2(dy, dx);
+          
+          setMovement({
+            forward: -Math.sin(angle) * (clampedDistance / maxDistance),
+            right: Math.cos(angle) * (clampedDistance / maxDistance)
+          });
+        } else if (touch.identifier === lookTouchId) {
+          const dx = touch.clientX - lookStart.x;
+          const dy = touch.clientY - lookStart.y;
+          const sensitivity = 0.005;
+          
+          rotationRef.current = {
+            yaw: rotationRef.current.yaw - dx * sensitivity,
+            pitch: Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotationRef.current.pitch - dy * sensitivity))
+          };
+          setRotation(rotationRef.current);
+          
+          lookStart.x = touch.clientX;
+          lookStart.y = touch.clientY;
+        }
+      });
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      Array.from(e.changedTouches).forEach((touch) => {
+        if (touch.identifier === movementTouchId) {
+          movementTouchId = null;
+          setMovement({ forward: 0, right: 0 });
+        } else if (touch.identifier === lookTouchId) {
+          lookTouchId = null;
+        }
+      });
+    };
+
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isMobile]);
 
   useFrame((state, delta) => {
     const speed = 8;
     const dampening = 0.85;
+
+    // Apply rotation to camera
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = rotation.yaw;
+    camera.rotation.x = rotation.pitch;
 
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
     forward.y = 0;
