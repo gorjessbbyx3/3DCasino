@@ -688,13 +688,13 @@ function FirstPersonControls() {
     direction.normalize();
 
     const right = new THREE.Vector3();
-    right.crossVectors(camera.up, direction).normalize();
+    right.crossVectors(direction, camera.up).normalize();
 
     if (moveForward) {
-      camera.position.addScaledVector(direction, -speed);
+      camera.position.addScaledVector(direction, speed);
     }
     if (moveBackward) {
-      camera.position.addScaledVector(direction, speed);
+      camera.position.addScaledVector(direction, -speed);
     }
     if (moveLeft) {
       camera.position.addScaledVector(right, -speed);
