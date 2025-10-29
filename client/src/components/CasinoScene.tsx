@@ -153,36 +153,36 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
       {/* Back Wall with optional doors underneath sign */}
       {backLeftDoor || backRightDoor ? (
         <>
-          {/* Wall above doors */}
+          {/* Wall above doors with background image */}
           <mesh position={[0, wallHeight - doorHeight / 2 - 0.5, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[roomSize, wallHeight - doorHeight - 1, 1]} />
             <meshStandardMaterial 
-              color="#0f0f1a"
-              roughness={0.6}
-              metalness={0.4}
+              map={useTexture("/casino-bg.jpg")}
+              roughness={0.4}
+              metalness={0.2}
             />
           </mesh>
           
-          {/* Center divider between doors */}
+          {/* Center divider between doors with background image */}
           <mesh position={[0, doorHeight / 2, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[2, doorHeight, 1]} />
             <meshStandardMaterial 
-              color="#0f0f1a"
-              roughness={0.6}
-              metalness={0.4}
+              map={useTexture("/casino-bg.jpg")}
+              roughness={0.4}
+              metalness={0.2}
             />
           </mesh>
           
           {/* Left hallway entrance - Fish Games */}
           {backLeftDoor && (
             <>
-              {/* Left wall section beside hallway */}
+              {/* Left wall section beside hallway with background image */}
               <mesh position={[-roomSize / 2 + doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial 
-                  color="#0f0f1a"
-                  roughness={0.6}
-                  metalness={0.4}
+                  map={useTexture("/casino-bg.jpg")}
+                  roughness={0.4}
+                  metalness={0.2}
                 />
               </mesh>
               
@@ -300,13 +300,13 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           {/* Right door opening */}
           {backRightDoor && (
             <>
-              {/* Right wall section beside right door */}
+              {/* Right wall section beside right door with background image */}
               <mesh position={[roomSize / 2 - doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial 
-                  color="#0f0f1a"
-                  roughness={0.6}
-                  metalness={0.4}
+                  map={useTexture("/casino-bg.jpg")}
+                  roughness={0.4}
+                  metalness={0.2}
                 />
               </mesh>
               {/* Right door frame - glowing cyan */}
@@ -338,29 +338,19 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         </mesh>
       )}
 
-      {/* Left Wall - dark */}
+      {/* Left Wall - with casino background */}
       <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
         <meshStandardMaterial 
-          color="#0f0f1a"
-          roughness={0.6}
-          metalness={0.4}
+          map={useTexture("/casino-bg.jpg")}
+          roughness={0.4}
+          metalness={0.2}
         />
       </mesh>
 
-      {/* Right Wall - dark */}
+      {/* Right Wall - with casino background */}
       <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
-        <meshStandardMaterial 
-          color="#0f0f1a"
-          roughness={0.6}
-          metalness={0.4}
-        />
-      </mesh>
-
-      {/* Front Wall (entrance side) - with casino background */}
-      <mesh position={[0, wallHeight / 2, roomSize / 2]} receiveShadow>
-        <boxGeometry args={[roomSize, wallHeight, 1]} />
         <meshStandardMaterial 
           map={useTexture("/casino-bg.jpg")}
           roughness={0.4}
@@ -371,7 +361,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
       {/* Back wall sign - Broadway/Hollywood style */}
       {backSign && (
         <group position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}>
-          {/* Main sign text - green with white glow - Fancy cursive font */}
+          {/* Main sign text - green with white glow */}
           <Text
             position={[0, 0, 0]}
             fontSize={2.5}
@@ -381,7 +371,6 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
             outlineWidth={0.25}
             outlineColor="#ffffff"
             letterSpacing={0.1}
-            font="https://fonts.gstatic.com/s/greatvibes/v19/RWmMoKWR9v4ksMfaWd_JN-XCg6UKDXlq.woff"
           >
             {backSign}
           </Text>
@@ -529,9 +518,6 @@ function GameObject({
   const [hovered, setHovered] = useState(false);
   const coinsRef = useRef<Array<{ offset: [number, number, number], speed: number, angle: number, startTime: number }>>([]);
   
-  // Load game logo texture for slot machines (always load to avoid conditional hook)
-  const gameLogoTexture = useTexture("/game-logo.png");
-  
   // Initialize coins for slot machine hover effect
   React.useEffect(() => {
     if (modelPath.includes('slot-machine')) {
@@ -600,7 +586,7 @@ function GameObject({
             <mesh position={[0, 0, 0.05]}>
               <planeGeometry args={[1.3, 0.4]} />
               <meshStandardMaterial 
-                map={gameLogoTexture}
+                map={useTexture("/game-logo.png")}
                 transparent={true}
               />
             </mesh>
