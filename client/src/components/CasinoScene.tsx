@@ -1,6 +1,6 @@
-import React, { useRef, useState, Suspense } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Environment, OrbitControls, Text, Float } from "@react-three/drei";
+import React, { useRef, useState, useEffect, Suspense } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Environment, Text, PointerLockControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
 
@@ -222,27 +222,27 @@ function GameObject({
     } else if (modelPath.includes('fish-table')) {
       return (
         <group>
-          {/* Table surface - dark base */}
+          {/* Rectangular table surface */}
           <mesh position={[0, 0.8, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[1.5, 1.5, 0.1]} />
+            <boxGeometry args={[3, 0.1, 2]} />
             <meshStandardMaterial 
               color="#0a2540" 
               metalness={0.8} 
               roughness={0.3}
             />
           </mesh>
-          {/* Screen - cyan glow */}
+          {/* Screen - cyan glow rectangular */}
           <mesh position={[0, 0.86, 0]} castShadow>
-            <cylinderGeometry args={[1.3, 1.3, 0.05]} />
+            <boxGeometry args={[2.8, 0.05, 1.8]} />
             <meshStandardMaterial 
               color="#000000" 
               emissive="#06b6d4" 
               emissiveIntensity={2}
             />
           </mesh>
-          {/* Base */}
+          {/* Rectangular base */}
           <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.5, 0.8, 0.8]} />
+            <boxGeometry args={[2, 0.8, 1.5]} />
             <meshStandardMaterial 
               color="#1a1a2e" 
               metalness={0.7}
@@ -416,34 +416,34 @@ function CasinoGames() {
 
   return (
     <>
-      {/* 10 Slot Machines in two rows */}
+      {/* 10 Slot Machines lined up along the back wall - BIGGER */}
       {Array.from({ length: 10 }, (_, i) => (
         <GameObject
           key={`slot-${i}`}
           position={[
-            ((i % 5) - 2) * 6,
+            (i - 4.5) * 7,
             0,
-            Math.floor(i / 5) === 0 ? -15 : 5
+            -37
           ]}
           modelPath="slot-machine"
-          scale={1}
+          scale={2.5}
           onClick={() => handleSlotMachineClick(i + 1)}
           label={`Slot Machine ${i + 1}`}
           glowColor="#a855f7"
         />
       ))}
 
-      {/* 6 Fish Tables in two rows */}
+      {/* 6 Rectangular Fish Tables in center area */}
       {Array.from({ length: 6 }, (_, i) => (
         <GameObject
           key={`fish-${i}`}
           position={[
-            ((i % 3) - 1) * 8,
+            ((i % 3) - 1) * 10,
             0,
-            Math.floor(i / 3) === 0 ? -30 : 20
+            Math.floor(i / 3) === 0 ? -5 : 15
           ]}
           modelPath="fish-table"
-          scale={1}
+          scale={1.5}
           onClick={handleGameClick}
           label={`Fish Table ${i + 1}`}
           glowColor="#06b6d4"
@@ -514,9 +514,103 @@ function SceneLighting() {
   );
 }
 
+// First-person WASD movement controls
+function FirstPersonControls() {
+  const { camera } = useThree();
+  const [moveForward, setMoveForward] = useState(false);
+  const [moveBackward, setMoveBackward] = useState(false);
+  const [moveLeft, setMoveLeft] = useState(false);
+  const [moveRight, setMoveRight] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      switch (event.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+          setMoveForward(true);
+          break;
+        case 'KeyS':
+        case 'ArrowDown':
+          setMoveBackward(true);
+          break;
+        case 'KeyA':
+        case 'ArrowLeft':
+          setMoveLeft(true);
+          break;
+        case 'KeyD':
+        case 'ArrowRight':
+          setMoveRight(true);
+          break;
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      switch (event.code) {
+        case 'KeyW':
+        case 'ArrowUp':
+          setMoveForward(false);
+          break;
+        case 'KeyS':
+        case 'ArrowDown':
+          setMoveBackward(false);
+          break;
+        case 'KeyA':
+        case 'ArrowLeft':
+          setMoveLeft(false);
+          break;
+        case 'KeyD':
+        case 'ArrowRight':
+          setMoveRight(false);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  useFrame((_, delta) => {
+    const speed = 15 * delta;
+    const direction = new THREE.Vector3();
+
+    camera.getWorldDirection(direction);
+    direction.y = 0;
+    direction.normalize();
+
+    const right = new THREE.Vector3();
+    right.crossVectors(camera.up, direction).normalize();
+
+    if (moveForward) {
+      camera.position.addScaledVector(direction, -speed);
+    }
+    if (moveBackward) {
+      camera.position.addScaledVector(direction, speed);
+    }
+    if (moveLeft) {
+      camera.position.addScaledVector(right, -speed);
+    }
+    if (moveRight) {
+      camera.position.addScaledVector(right, speed);
+    }
+
+    // Keep camera within casino bounds
+    camera.position.x = Math.max(-35, Math.min(35, camera.position.x));
+    camera.position.z = Math.max(-35, Math.min(35, camera.position.z));
+    camera.position.y = 1.7; // Eye level
+  });
+
+  return null;
+}
+
 function Scene() {
   return (
     <>
+      <FirstPersonControls />
       <SceneLighting />
       <CasinoFloor />
       <CasinoWalls />
@@ -530,8 +624,8 @@ function CanvasWrapper() {
     <Canvas
       shadows
       camera={{ 
-        position: [0, 8, 40], 
-        fov: 60,
+        position: [0, 1.7, 25], 
+        fov: 75,
         near: 0.1,
         far: 1000
       }}
@@ -550,14 +644,7 @@ function CanvasWrapper() {
       <Suspense fallback={null}>
         <Scene />
         <Environment preset="night" background={false} />
-        <OrbitControls 
-          enablePan={true}
-          enableZoom={true}
-          enableRotate={true}
-          maxPolarAngle={Math.PI / 2.2}
-          minDistance={8}
-          maxDistance={60}
-        />
+        <PointerLockControls />
       </Suspense>
     </Canvas>
   );
