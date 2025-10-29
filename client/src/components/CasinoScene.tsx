@@ -1336,7 +1336,12 @@ function CanvasWrapper() {
           scene.fog = new THREE.Fog('#000011', 30, 60);
         }}
       >
-        <Suspense fallback={null}>
+        <Suspense fallback={
+          <mesh>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshBasicMaterial color="white" />
+          </mesh>
+        }>
           <Scene />
           <Environment preset="night" background={false} />
           <PointerLockControls 
