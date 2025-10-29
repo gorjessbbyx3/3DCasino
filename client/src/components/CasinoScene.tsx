@@ -15,26 +15,90 @@ const openSlotMachineModal = (machineNumber: number) => {
   window.dispatchEvent(event);
 };
 
-// Enhanced Floor with wooden plank texture
+// Enhanced Floor with LED light-up tiles
 function CasinoFloor() {
-  const woodTexture = useMemo(() => {
-    const loader = new THREE.TextureLoader();
-    const texture = loader.load('/textures/wood.jpg');
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
-    texture.repeat.set(20, 20);
-    return texture;
-  }, []);
+  const floorRef = useRef<THREE.Mesh>(null);
+  
+  useFrame((state) => {
+    if (floorRef.current) {
+      const time = state.clock.elapsedTime;
+      const material = floorRef.current.material as THREE.MeshStandardMaterial;
+      // Pulse the emissive intensity for LED effect
+      material.emissiveIntensity = 0.3 + Math.sin(time * 2) * 0.1;
+    }
+  });
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
-      <planeGeometry args={[100, 100]} />
-      <meshStandardMaterial
-        map={woodTexture}
-        roughness={0.8}
-        metalness={0.1}
-        color="#8B4513"
-      />
-    </mesh>
+    <group>
+      {/* Main floor base */}
+      <mesh 
+        ref={floorRef}
+        rotation={[-Math.PI / 2, 0, 0]} 
+        position={[0, -0.1, 0]} 
+        receiveShadow
+      >
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial
+          color="#000020"
+          emissive="#0040ff"
+          emissiveIntensity={0.3}
+          roughness={0.1}
+          metalness={0.9}
+        />
+      </mesh>
+
+      {/* LED tile grid pattern */}
+      {Array.from({ length: 20 }, (_, x) =>
+        Array.from({ length: 20 }, (_, z) => (
+          <mesh
+            key={`${x}-${z}`}
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[(x - 10) * 5, -0.05, (z - 10) * 5]}
+          >
+            <planeGeometry args={[4.8, 4.8]} />
+            <meshStandardMaterial
+              color="#001133"
+              emissive={`hsl(${(x + z) * 18 % 360}, 70%, 40%)`}
+              emissiveIntensity={0.2 + Math.sin((x + z) * 0.5) * 0.1}
+              roughness={0.05}
+              metalness={0.95}
+              transparent
+              opacity={0.9}
+            />
+          </mesh>
+        ))
+      )}
+
+      {/* Glowing grid lines */}
+      {Array.from({ length: 21 }, (_, i) => (
+        <group key={`lines-${i}`}>
+          {/* Vertical lines */}
+          <mesh
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[(i - 10) * 5, -0.02, 0]}
+          >
+            <planeGeometry args={[0.1, 100]} />
+            <meshBasicMaterial
+              color="#00ffff"
+              transparent
+              opacity={0.6}
+            />
+          </mesh>
+          {/* Horizontal lines */}
+          <mesh
+            rotation={[-Math.PI / 2, 0, 0]}
+            position={[0, -0.02, (i - 10) * 5]}
+          >
+            <planeGeometry args={[100, 0.1]} />
+            <meshBasicMaterial
+              color="#00ffff"
+              transparent
+              opacity={0.6}
+            />
+          </mesh>
+        </group>
+      ))}
+    </group>
   );
 }
 
