@@ -134,32 +134,102 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
             <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
           </mesh>
           
-          {/* Left door opening */}
+          {/* Left hallway entrance - Fish Games */}
           {backLeftDoor && (
             <>
-              {/* Left wall section beside left door */}
+              {/* Left wall section beside hallway */}
               <mesh position={[-roomSize / 2 + doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
               </mesh>
-              {/* Left door frame - glowing purple */}
+              
+              {/* Hallway entrance frame - glowing cyan */}
               <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
                 <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
                 <meshStandardMaterial 
-                  color="#a855f7"
-                  emissive="#a855f7"
-                  emissiveIntensity={1}
+                  color="#06b6d4"
+                  emissive="#06b6d4"
+                  emissiveIntensity={1.5}
                 />
               </mesh>
-              {/* Left door label */}
+              
+              {/* Hallway corridor extending back */}
+              <group position={[-doorWidth / 2 - 1, 0, -roomSize / 2]}>
+                {/* Left hallway wall */}
+                <mesh position={[-doorWidth / 2, doorHeight / 2, -4]} castShadow receiveShadow>
+                  <boxGeometry args={[0.5, doorHeight, 8]} />
+                  <meshStandardMaterial 
+                    color="#1a1a2e"
+                    roughness={0.5}
+                    metalness={0.3}
+                  />
+                </mesh>
+                
+                {/* Right hallway wall */}
+                <mesh position={[doorWidth / 2, doorHeight / 2, -4]} castShadow receiveShadow>
+                  <boxGeometry args={[0.5, doorHeight, 8]} />
+                  <meshStandardMaterial 
+                    color="#1a1a2e"
+                    roughness={0.5}
+                    metalness={0.3}
+                  />
+                </mesh>
+                
+                {/* Hallway ceiling */}
+                <mesh position={[0, doorHeight, -4]} receiveShadow>
+                  <boxGeometry args={[doorWidth, 0.3, 8]} />
+                  <meshStandardMaterial 
+                    color="#0a0a1a"
+                    roughness={0.4}
+                    metalness={0.5}
+                  />
+                </mesh>
+                
+                {/* Hallway floor */}
+                <mesh position={[0, 0, -4]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
+                  <planeGeometry args={[doorWidth, 8]} />
+                  <meshStandardMaterial 
+                    color="#1a1a2e"
+                    roughness={0.3}
+                    metalness={0.6}
+                  />
+                </mesh>
+                
+                {/* Hallway ceiling lights */}
+                {[0, -2, -4, -6].map((z, i) => (
+                  <group key={i} position={[0, doorHeight - 0.2, z]}>
+                    <mesh>
+                      <boxGeometry args={[2, 0.1, 0.5]} />
+                      <meshStandardMaterial 
+                        color="#06b6d4"
+                        emissive="#06b6d4"
+                        emissiveIntensity={2}
+                      />
+                    </mesh>
+                    <pointLight color="#06b6d4" intensity={15} distance={8} />
+                  </group>
+                ))}
+                
+                {/* End of hallway - archway to fish room */}
+                <mesh position={[0, doorHeight / 2, -8]}>
+                  <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
+                  <meshStandardMaterial 
+                    color="#06b6d4"
+                    emissive="#06b6d4"
+                    emissiveIntensity={2}
+                  />
+                </mesh>
+              </group>
+              
+              {/* Hallway entrance label */}
               <Text
                 position={[-doorWidth / 2 - 1, doorHeight + 1, -roomSize / 2 + 1]}
                 fontSize={0.8}
-                color="#a855f7"
+                color="#06b6d4"
                 anchorX="center"
                 anchorY="middle"
               >
-                ← SLOTS
+                🎣 FISH GAMES
               </Text>
             </>
           )}
