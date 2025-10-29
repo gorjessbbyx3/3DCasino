@@ -1088,7 +1088,7 @@ function Scene() {
       
       {currentRoom === 'slots' && (
         <>
-          <RoomWalls backRightDoor={true} backSign="💎 JADE ROYALE 💎" />
+          <RoomWalls backRightDoor={true} backSign="JADE ROYALE" />
           <SlotMachineRoom />
         </>
       )}
