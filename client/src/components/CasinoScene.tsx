@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
+import React, { useRef, useState, useEffect, useMemo } from "react";
 import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
 import { Environment, Text, PointerLockControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -1309,19 +1309,12 @@ function CanvasWrapper() {
           scene.fog = new THREE.Fog('#000011', 30, 60);
         }}
       >
-        <Suspense fallback={
-          <mesh>
-            <boxGeometry args={[1, 1, 1]} />
-            <meshBasicMaterial color="white" />
-          </mesh>
-        }>
-          <Scene />
-          <Environment preset="night" background={false} />
-          <PointerLockControls 
-            maxPolarAngle={Math.PI / 2}
-            minPolarAngle={Math.PI / 2}
-          />
-        </Suspense>
+        <Scene />
+        <Environment preset="night" background={false} />
+        <PointerLockControls 
+          maxPolarAngle={Math.PI / 2}
+          minPolarAngle={Math.PI / 2}
+        />
       </Canvas>
     </RoomContext.Provider>
   );
