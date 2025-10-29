@@ -1,74 +1,31 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 interface AudioState {
-  backgroundMusic: HTMLAudioElement | null;
-  hitSound: HTMLAudioElement | null;
-  successSound: HTMLAudioElement | null;
-  isMuted: boolean;
-  
-  // Setter functions
-  setBackgroundMusic: (music: HTMLAudioElement) => void;
-  setHitSound: (sound: HTMLAudioElement) => void;
-  setSuccessSound: (sound: HTMLAudioElement) => void;
-  
-  // Control functions
-  toggleMute: () => void;
-  playHit: () => void;
-  playSuccess: () => void;
+  musicEnabled: boolean;
+  sfxEnabled: boolean;
+  musicVolume: number;
+  sfxVolume: number;
+  toggleMusic: () => void;
+  toggleSfx: () => void;
+  setMusicVolume: (volume: number) => void;
+  setSfxVolume: (volume: number) => void;
 }
 
-export const useAudio = create<AudioState>((set, get) => ({
-  backgroundMusic: null,
-  hitSound: null,
-  successSound: null,
-  isMuted: true, // Start muted by default
-  
-  setBackgroundMusic: (music) => set({ backgroundMusic: music }),
-  setHitSound: (sound) => set({ hitSound: sound }),
-  setSuccessSound: (sound) => set({ successSound: sound }),
-  
-  toggleMute: () => {
-    const { isMuted } = get();
-    const newMutedState = !isMuted;
-    
-    // Just update the muted state
-    set({ isMuted: newMutedState });
-    
-    // Log the change
-    console.log(`Sound ${newMutedState ? 'muted' : 'unmuted'}`);
-  },
-  
-  playHit: () => {
-    const { hitSound, isMuted } = get();
-    if (hitSound) {
-      // If sound is muted, don't play anything
-      if (isMuted) {
-        console.log("Hit sound skipped (muted)");
-        return;
-      }
-      
-      // Clone the sound to allow overlapping playback
-      const soundClone = hitSound.cloneNode() as HTMLAudioElement;
-      soundClone.volume = 0.3;
-      soundClone.play().catch(error => {
-        console.log("Hit sound play prevented:", error);
-      });
+export const useAudio = create<AudioState>()(
+  persist(
+    (set) => ({
+      musicEnabled: true,
+      sfxEnabled: true,
+      musicVolume: 0.3,
+      sfxVolume: 0.5,
+      toggleMusic: () => set((state) => ({ musicEnabled: !state.musicEnabled })),
+      toggleSfx: () => set((state) => ({ sfxEnabled: !state.sfxEnabled })),
+      setMusicVolume: (volume: number) => set({ musicVolume: volume }),
+      setSfxVolume: (volume: number) => set({ sfxVolume: volume }),
+    }),
+    {
+      name: "audio-settings",
     }
-  },
-  
-  playSuccess: () => {
-    const { successSound, isMuted } = get();
-    if (successSound) {
-      // If sound is muted, don't play anything
-      if (isMuted) {
-        console.log("Success sound skipped (muted)");
-        return;
-      }
-      
-      successSound.currentTime = 0;
-      successSound.play().catch(error => {
-        console.log("Success sound play prevented:", error);
-      });
-    }
-  }
-}));
+  )
+);

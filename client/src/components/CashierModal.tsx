@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useUser } from "@/lib/stores/useUser";
 import { Coins, TrendingUp, TrendingDown, History, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { toast } from "sonner";
+import { playSound } from "@/components/AudioManager";
 
 interface Transaction {
   id: number;
@@ -83,6 +84,7 @@ export function CashierModal() {
       }
 
       setUser(data.user);
+      playSound("success");
       toast.success(`Deposit successful! $${amountNum.toLocaleString()} added to your balance`);
       setMode("menu");
       setAmount("");
@@ -115,6 +117,7 @@ export function CashierModal() {
       }
 
       setUser(data.user);
+      playSound("success");
       toast.success(`Withdrawal successful! $${amountNum.toLocaleString()} withdrawn`);
       setMode("menu");
       setAmount("");

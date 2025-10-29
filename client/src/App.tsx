@@ -3,6 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import { CasinoScene } from "./components/CasinoScene";
 import { AuthModal } from "./components/AuthModal";
 import { CashierModal } from "./components/CashierModal";
+import { AudioManager } from "./components/AudioManager";
+import { AudioControls } from "./components/AudioControls";
 import { useUser } from "./lib/stores/useUser";
 import { Coins, LogOut } from "lucide-react";
 import { Button } from "./components/ui/button";
@@ -87,6 +89,8 @@ function App() {
       <CasinoScene />
       <AuthModal />
       <CashierModal />
+      <AudioManager />
+      <AudioControls />
       <Toaster position="top-right" richColors />
 
       <div className="absolute bottom-6 left-0 right-0 z-10 text-center">
