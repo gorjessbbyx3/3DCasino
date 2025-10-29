@@ -7,43 +7,60 @@ import { useUser } from "@/lib/stores/useUser";
 function CasinoFloor() {
   return (
     <group>
-      {/* Main carpet floor */}
+      {/* Main polished floor - luxury underground VIP */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[80, 80]} />
         <meshStandardMaterial
-          color="#1a0f0f"
-          roughness={0.8}
-          metalness={0.1}
-        />
-      </mesh>
-
-      {/* Casino center logo */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
-        <circleGeometry args={[5, 32]} />
-        <meshStandardMaterial
-          color="#10b981"
+          color="#0a0a15"
           roughness={0.2}
-          metalness={0.8}
-          emissive="#0a5d3a"
-          emissiveIntensity={0.2}
+          metalness={0.9}
+          envMapIntensity={1.5}
         />
       </mesh>
 
-      {/* Walkway markers */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -15]} receiveShadow>
-        <planeGeometry args={[60, 4]} />
+      {/* Neon cyan center design */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <circleGeometry args={[6, 64]} />
         <meshStandardMaterial
-          color="#ffd700"
-          opacity={0.3}
-          transparent
+          color="#00ffff"
+          roughness={0.1}
+          metalness={0.95}
+          emissive="#00d4ff"
+          emissiveIntensity={0.8}
+        />
+      </mesh>
+
+      {/* Inner neon ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
+        <ringGeometry args={[4, 4.5, 64]} />
+        <meshStandardMaterial
+          color="#8b5cf6"
+          roughness={0.1}
+          metalness={0.95}
+          emissive="#7c3aed"
+          emissiveIntensity={1}
+        />
+      </mesh>
+
+      {/* Purple neon walkway accents */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -15]} receiveShadow>
+        <planeGeometry args={[60, 0.3]} />
+        <meshStandardMaterial
+          color="#a855f7"
+          roughness={0.1}
+          metalness={0.9}
+          emissive="#9333ea"
+          emissiveIntensity={2}
         />
       </mesh>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 15]} receiveShadow>
-        <planeGeometry args={[40, 4]} />
+        <planeGeometry args={[40, 0.3]} />
         <meshStandardMaterial
-          color="#ffd700"
-          opacity={0.3}
-          transparent
+          color="#06b6d4"
+          roughness={0.1}
+          metalness={0.9}
+          emissive="#0891b2"
+          emissiveIntensity={2}
         />
       </mesh>
     </group>
@@ -56,9 +73,10 @@ function CasinoWalls() {
   const roomSize = 40;
 
   const wallMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: "#2a1810",
-    roughness: 0.6,
-    metalness: 0.1,
+    color: "#0f0520",
+    roughness: 0.3,
+    metalness: 0.7,
+    envMapIntensity: 1.2,
   }), []);
 
   const walls = useMemo(() => [
@@ -77,24 +95,59 @@ function CasinoWalls() {
         </mesh>
       ))}
 
-      {/* Ceiling */}
+      {/* Ceiling - dark luxury */}
       <mesh position={[0, wallHeight, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial
-          color="#1a0f0a"
+          color="#050510"
+          roughness={0.2}
+          metalness={0.8}
           side={THREE.DoubleSide}
         />
       </mesh>
 
-      {/* Casino entrance sign */}
+      {/* Neon ceiling strips */}
+      <mesh position={[-10, wallHeight - 0.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.5, roomSize]} />
+        <meshStandardMaterial
+          color="#06b6d4"
+          emissive="#0891b2"
+          emissiveIntensity={3}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+      <mesh position={[10, wallHeight - 0.1, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[0.5, roomSize]} />
+        <meshStandardMaterial
+          color="#a855f7"
+          emissive="#9333ea"
+          emissiveIntensity={3}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+
+      {/* Neon casino sign */}
       <Text
         position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}
-        fontSize={2}
-        color="#ffd700"
+        fontSize={2.5}
+        color="#00ffff"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.1}
+        outlineColor="#0891b2"
+      >
+        💎 JADE ROYALE 💎
+      </Text>
+      <Text
+        position={[0, wallHeight - 3.5, -roomSize / 2 + 0.6]}
+        fontSize={1}
+        color="#a855f7"
         anchorX="center"
         anchorY="middle"
       >
-        JADE ROYALE CASINO
+        VIP UNDERGROUND CASINO
       </Text>
     </group>
   );
@@ -327,7 +380,7 @@ function CasinoGames() {
           scale={2}
           onClick={() => handleSlotMachineClick(i + 1)}
           label={`Slot Machine ${i + 1}`}
-          glowColor="#ffd700"
+          glowColor="#a855f7"
         />
       ))}
 
@@ -341,7 +394,7 @@ function CasinoGames() {
           scale={2.5}
           onClick={handleGameClick}
           label={`Fish Hunter Table ${i + 1}`}
-          glowColor="#00bfff"
+          glowColor="#06b6d4"
         />
       ))}
 
@@ -353,7 +406,7 @@ function CasinoGames() {
         scale={3}
         onClick={handleCashierClick}
         label="Cashier Booth"
-        glowColor="#10b981"
+        glowColor="#00ffff"
       />
 
       {/* Pirate Captain (Pitbull Dog) */}
@@ -364,7 +417,7 @@ function CasinoGames() {
         scale={2}
         onClick={handleCashierClick}
         label="Captain Pitbull - Cashier"
-        glowColor="#ff6b35"
+        glowColor="#00ffff"
       />
     </>
   );
@@ -373,13 +426,14 @@ function CasinoGames() {
 function CasinoLighting() {
   return (
     <>
-      {/* Ambient lighting */}
-      <ambientLight intensity={0.3} color="#fff8dc" />
+      {/* Low ambient for moody underground VIP feel */}
+      <ambientLight intensity={0.15} color="#0a0a20" />
 
-      {/* Main overhead lighting */}
+      {/* Main soft overhead with cyan tint */}
       <directionalLight
         position={[10, 20, 10]}
-        intensity={1}
+        intensity={0.4}
+        color="#4dd4ff"
         castShadow
         shadow-camera-far={50}
         shadow-camera-left={-40}
@@ -390,47 +444,55 @@ function CasinoLighting() {
         shadow-mapSize-height={2048}
       />
 
-      {/* Slot machine area lighting */}
+      {/* Slot machine area - neon purple */}
       <spotLight
         position={[0, 15, -14]}
         target-position={[0, 0, -14]}
-        angle={0.8}
-        penumbra={0.5}
-        intensity={50}
-        color="#ffd700"
+        angle={0.9}
+        penumbra={0.6}
+        intensity={80}
+        color="#a855f7"
         castShadow
       />
 
-      {/* Fish table area lighting */}
+      {/* Fish table area - electric cyan */}
       <spotLight
         position={[0, 15, 12]}
         target-position={[0, 0, 12]}
-        angle={0.8}
-        penumbra={0.5}
-        intensity={50}
-        color="#00bfff"
+        angle={0.9}
+        penumbra={0.6}
+        intensity={80}
+        color="#06b6d4"
         castShadow
       />
 
-      {/* Cashier booth dramatic lighting */}
+      {/* Cashier booth - cyan accent */}
       <spotLight
         position={[0, 18, -20]}
         target-position={[0, 0, -24]}
-        angle={0.4}
-        penumbra={0.3}
-        intensity={80}
-        color="#10b981"
+        angle={0.5}
+        penumbra={0.4}
+        intensity={100}
+        color="#00ffff"
         castShadow
       />
 
-      {/* Corner accent lights */}
-      <pointLight position={[-15, 8, -15]} intensity={20} color="#ff6b6b" />
-      <pointLight position={[15, 8, -15]} intensity={20} color="#4ecdc4" />
-      <pointLight position={[-15, 8, 15]} intensity={20} color="#ffe66d" />
-      <pointLight position={[15, 8, 15]} intensity={20} color="#a8e6cf" />
+      {/* Neon corner accents - blue/purple/cyan theme */}
+      <pointLight position={[-15, 3, -15]} intensity={40} color="#8b5cf6" />
+      <pointLight position={[15, 3, -15]} intensity={40} color="#06b6d4" />
+      <pointLight position={[-15, 3, 15]} intensity={40} color="#00ffff" />
+      <pointLight position={[15, 3, 15]} intensity={40} color="#a855f7" />
 
-      {/* Center floor accent */}
-      <pointLight position={[0, 5, 0]} intensity={25} color="#10b981" />
+      {/* Center floor glow - cyan */}
+      <pointLight position={[0, 2, 0]} intensity={60} color="#00d4ff" />
+
+      {/* Atmospheric rim lights */}
+      <pointLight position={[-20, 6, 0]} intensity={30} color="#4c1d95" />
+      <pointLight position={[20, 6, 0]} intensity={30} color="#0e7490" />
+
+      {/* Ceiling neon strips glow */}
+      <pointLight position={[-10, 11, 0]} intensity={35} color="#06b6d4" />
+      <pointLight position={[10, 11, 0]} intensity={35} color="#9333ea" />
     </>
   );
 }
@@ -640,12 +702,12 @@ export function CasinoScene() {
         powerPreference: "high-performance"
       }}
     >
-      <color attach="background" args={["#0f0f0f"]} />
-      <fog attach="fog" args={["#1a1a1a", 20, 50]} />
+      <color attach="background" args={["#050510"]} />
+      <fog attach="fog" args={["#0a0a20", 25, 60]} />
 
       <Environment
         background={false}
-        environmentIntensity={0.2}
+        environmentIntensity={0.5}
         preset="night"
       />
 
