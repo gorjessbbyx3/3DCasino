@@ -490,7 +490,7 @@ function CashierWindow() {
   };
 
   return (
-    <group position={[-10, 0, -16.5]}>
+    <group position={[-10, 3, -16.5]}>
       {/* Cashier booth frame */}
       <mesh 
         position={[0, 2, 0]} 
@@ -533,7 +533,7 @@ function CashierWindow() {
         outlineWidth={0.05}
         outlineColor="#0891b2"
       >
-        💰 CASHIER 💰
+        CASHIER
       </Text>
 
       {/* Glow effect when hovered */}
