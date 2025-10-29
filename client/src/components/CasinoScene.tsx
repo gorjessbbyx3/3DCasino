@@ -1263,23 +1263,17 @@ function Scene() {
 
   return (
     <>
-      <FirstPersonControls />
+      {/* Test cube to verify basic rendering still works */}
+      <mesh position={[0, 1, 0]}>
+        <boxGeometry args={[1, 1, 1]} />
+        <meshStandardMaterial color="red" />
+      </mesh>
+      
+      {/* Basic lighting */}
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[5, 10, 5]} intensity={1} />
+      
       <RoomLighting roomType={currentRoom} />
-      <CasinoFloor />
-
-      {currentRoom === 'slots' && (
-        <>
-          <RoomWalls backRightDoor={true} backSign="JADE ROYALE" />
-          <SlotMachineRoom />
-        </>
-      )}
-
-      {currentRoom === 'fish' && (
-        <>
-          <RoomWalls backLeftDoor={true} backSign="🎣 FISH GAMES 🎣" />
-          <FishGameRoom />
-        </>
-      )}
     </>
   );
 }
