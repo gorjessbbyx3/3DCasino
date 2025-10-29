@@ -46,16 +46,16 @@ function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-6 backdrop-blur-sm">
+      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/95 via-purple-900/30 to-transparent p-6 backdrop-blur-md border-b border-emerald-500/20">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-300 via-emerald-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-lg animate-pulse">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-300 via-yellow-400 to-purple-400 bg-clip-text text-transparent drop-shadow-2xl animate-neon">
               💎 Jade Royale
             </h1>
             {user && (
-              <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-900/40 to-emerald-800/40 px-6 py-3 rounded-xl border border-emerald-400/50 backdrop-blur-md shadow-lg shadow-emerald-500/20">
-                <Coins className="w-6 h-6 text-yellow-300 animate-bounce" />
-                <span className="text-emerald-300 font-bold text-lg tracking-wide">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-900/60 to-yellow-900/40 px-6 py-3 rounded-xl border border-yellow-400/60 backdrop-blur-md shadow-xl shadow-emerald-500/30 animate-glow">
+                <Coins className="w-6 h-6 text-yellow-300 animate-bounce animate-sparkle" />
+                <span className="text-yellow-200 font-bold text-lg tracking-wide animate-shimmer">
                   ${user.balance.toLocaleString()}
                 </span>
               </div>
@@ -109,14 +109,14 @@ function App() {
       <Toaster position="top-right" richColors />
 
       <div className="absolute bottom-6 left-0 right-0 z-10 text-center">
-        <div className="inline-flex items-center gap-4 bg-gradient-to-r from-black/80 via-black/70 to-black/80 px-8 py-4 rounded-2xl border border-gray-500/30 backdrop-blur-md shadow-2xl">
-          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-          <p className="text-gray-200 text-base font-medium">
+        <div className="inline-flex items-center gap-4 bg-gradient-to-r from-purple-900/80 via-black/90 to-blue-900/80 px-8 py-4 rounded-2xl border border-purple-400/40 backdrop-blur-md shadow-2xl animate-float">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse animate-sparkle"></div>
+          <p className="text-purple-200 text-base font-medium bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent">
             {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) 
               ? "👆 Touch left side to move • Touch right side to look • Tap games to play" 
               : "⌨️ WASD to move • 🖱️ Mouse to look • 🎮 Click on games to play"}
           </p>
-          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse animate-sparkle"></div>
         </div>
       </div>
     </div>

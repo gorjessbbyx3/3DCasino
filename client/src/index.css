@@ -8,13 +8,22 @@
   }
 
   body {
-    @apply font-sans antialiased bg-gradient-to-br from-gray-900 via-black to-gray-900 text-foreground;
+    @apply font-sans antialiased text-foreground;
     margin: 0;
     padding: 0;
     overflow: hidden;
     width: 100vw;
     height: 100vh;
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #000011 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 20s ease infinite;
     background-attachment: fixed;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   /* Custom scrollbar */
@@ -37,18 +46,47 @@
 
   /* Enhanced animations */
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    25% { transform: translateY(-5px) rotate(0.5deg); }
+    50% { transform: translateY(-10px) rotate(0deg); }
+    75% { transform: translateY(-5px) rotate(-0.5deg); }
   }
 
   @keyframes glow {
-    0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
-    50% { box-shadow: 0 0 30px rgba(16, 185, 129, 0.6); }
+    0%, 100% { 
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3),
+                  0 0 40px rgba(16, 185, 129, 0.1),
+                  inset 0 0 20px rgba(16, 185, 129, 0.05);
+    }
+    50% { 
+      box-shadow: 0 0 30px rgba(16, 185, 129, 0.6),
+                  0 0 60px rgba(16, 185, 129, 0.2),
+                  inset 0 0 30px rgba(16, 185, 129, 0.1);
+    }
   }
 
   @keyframes shimmer {
     0% { background-position: -1000px 0; }
     100% { background-position: 1000px 0; }
+  }
+
+  @keyframes neonPulse {
+    0%, 100% { 
+      text-shadow: 0 0 5px currentColor,
+                   0 0 10px currentColor,
+                   0 0 15px currentColor;
+    }
+    50% { 
+      text-shadow: 0 0 10px currentColor,
+                   0 0 20px currentColor,
+                   0 0 30px currentColor,
+                   0 0 40px currentColor;
+    }
+  }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
   }
 
   .animate-float {
@@ -60,9 +98,17 @@
   }
 
   .animate-shimmer {
-    background: linear-gradient(90deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+    background: linear-gradient(90deg, transparent 30%, rgba(255, 215, 0, 0.2) 50%, transparent 70%);
     background-size: 1000px 100%;
     animation: shimmer 2s infinite;
+  }
+
+  .animate-neon {
+    animation: neonPulse 2s ease-in-out infinite;
+  }
+
+  .animate-sparkle {
+    animation: sparkle 1.5s ease-in-out infinite;
   }
 }
 
