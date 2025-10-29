@@ -1100,49 +1100,49 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
   if (roomType === 'slots') {
     return (
       <>
-        <ambientLight intensity={0.15} color="#1a1a2e" />
+        <ambientLight intensity={0.8} color="#4a4a6e" />
         <spotLight
           position={[0, 10, 0]}
           angle={Math.PI / 2.5}
           penumbra={0.5}
-          intensity={0.8}
+          intensity={1.5}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           color="#ffffff"
         />
         {/* Purple lights for slot machines */}
-        <pointLight position={[-14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[-14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[-14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-14, 4, -10]} intensity={4} color="#a855f7" distance={15} />
+        <pointLight position={[-14, 4, 0]} intensity={4} color="#a855f7" distance={15} />
+        <pointLight position={[-14, 4, 10]} intensity={4} color="#a855f7" distance={15} />
+        <pointLight position={[14, 4, -10]} intensity={4} color="#a855f7" distance={15} />
+        <pointLight position={[14, 4, 0]} intensity={4} color="#a855f7" distance={15} />
+        <pointLight position={[14, 4, 10]} intensity={4} color="#a855f7" distance={15} />
         {/* Cyan light for cashier window on back wall */}
-        <pointLight position={[-10, 4, -16]} intensity={5} color="#00ffff" distance={12} />
+        <pointLight position={[-10, 4, -16]} intensity={6} color="#00ffff" distance={15} />
       </>
     );
   } else if (roomType === 'fish') {
     return (
       <>
-        <ambientLight intensity={0.15} color="#1a1a2e" />
+        <ambientLight intensity={0.8} color="#4a4a6e" />
         <spotLight
           position={[0, 10, 0]}
           angle={Math.PI / 2.5}
           penumbra={0.5}
-          intensity={0.8}
+          intensity={1.5}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           color="#ffffff"
         />
         {/* Cyan lights for fish tables */}
-        <pointLight position={[-12, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
-        <pointLight position={[0, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
-        <pointLight position={[12, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
-        <pointLight position={[-12, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
-        <pointLight position={[0, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
-        <pointLight position={[12, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[-12, 4, -8]} intensity={4} color="#06b6d4" distance={15} />
+        <pointLight position={[0, 4, -8]} intensity={4} color="#06b6d4" distance={15} />
+        <pointLight position={[12, 4, -8]} intensity={4} color="#06b6d4" distance={15} />
+        <pointLight position={[-12, 4, 8]} intensity={4} color="#06b6d4" distance={15} />
+        <pointLight position={[0, 4, 8]} intensity={4} color="#06b6d4" distance={15} />
+        <pointLight position={[12, 4, 8]} intensity={4} color="#06b6d4" distance={15} />
       </>
     );
   }
@@ -1305,8 +1305,8 @@ function CanvasWrapper() {
         onCreated={({ gl, scene }) => {
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
-          gl.setClearColor('#000011');
-          scene.fog = new THREE.Fog('#000011', 30, 60);
+          gl.setClearColor('#1a1a3e');
+          scene.fog = new THREE.Fog('#1a1a3e', 40, 70);
         }}
       >
         <Scene />
