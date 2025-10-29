@@ -15,22 +15,24 @@ const openSlotMachineModal = (machineNumber: number) => {
   window.dispatchEvent(event);
 };
 
-// Enhanced Floor with reflective surface
+// Enhanced Floor with wooden plank texture
 function CasinoFloor() {
+  const woodTexture = useMemo(() => {
+    const loader = new THREE.TextureLoader();
+    const texture = loader.load('/textures/wood.jpg');
+    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    texture.repeat.set(20, 20);
+    return texture;
+  }, []);
+
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.1, 0]} receiveShadow>
       <planeGeometry args={[100, 100]} />
-      <MeshReflectorMaterial
-        blur={[300, 100]}
-        resolution={2048}
-        mixBlur={1}
-        mixStrength={40}
-        roughness={1}
-        depthScale={1.2}
-        minDepthThreshold={0.4}
-        maxDepthThreshold={1.4}
-        color="#050505"
-        metalness={0.5}
+      <meshStandardMaterial
+        map={woodTexture}
+        roughness={0.8}
+        metalness={0.1}
+        color="#8B4513"
       />
     </mesh>
   );
