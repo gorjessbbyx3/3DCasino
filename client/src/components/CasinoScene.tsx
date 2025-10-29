@@ -568,6 +568,44 @@ function GameObject({
             />
           </mesh>
           
+          {/* Game logo frame above screen */}
+          <group position={[0, 3.25, 0.7]}>
+            {/* Golden decorative frame */}
+            <mesh castShadow>
+              <boxGeometry args={[1.4, 0.5, 0.08]} />
+              <meshStandardMaterial 
+                color="#d4af37"
+                metalness={1}
+                roughness={0.1}
+                emissive="#d4af37"
+                emissiveIntensity={0.3}
+              />
+            </mesh>
+            
+            {/* Game logo image */}
+            <mesh position={[0, 0, 0.05]}>
+              <planeGeometry args={[1.3, 0.4]} />
+              <meshStandardMaterial 
+                map={useTexture("/game-logo.png")}
+                transparent={true}
+              />
+            </mesh>
+            
+            {/* Frame border lights */}
+            {[
+              [-0.7, 0.25], [0.7, 0.25], [-0.7, -0.25], [0.7, -0.25]
+            ].map((pos, i) => (
+              <mesh key={i} position={[pos[0], pos[1], 0.08]} castShadow>
+                <sphereGeometry args={[0.03, 8, 8]} />
+                <meshStandardMaterial
+                  color="#ffd700"
+                  emissive="#ffd700"
+                  emissiveIntensity={2}
+                />
+              </mesh>
+            ))}
+          </group>
+          
           {/* LED strip lights around screen - premium marquee effect */}
           {Array.from({ length: 16 }).map((_, i) => {
             const angle = (i / 16) * Math.PI * 2;
