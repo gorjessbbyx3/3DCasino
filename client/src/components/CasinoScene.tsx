@@ -1263,6 +1263,12 @@ function Scene() {
 
   return (
     <>
+      {/* Test cube to verify rendering */}
+      <mesh position={[0, 2, 0]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="red" emissive="red" emissiveIntensity={1} />
+      </mesh>
+      
       <FirstPersonControls />
       <RoomLighting roomType={currentRoom} />
       <CasinoFloor />
