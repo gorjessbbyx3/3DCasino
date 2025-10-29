@@ -1,0 +1,152 @@
+# Jade Royale Casino
+
+## Overview
+
+Jade Royale Casino is a 3D online casino platform featuring an immersive 3D casino floor with interactive slot machines and gaming experiences. The application combines a modern React frontend with Three.js 3D rendering and an Express backend with PostgreSQL database storage.
+
+The platform provides user authentication, virtual currency management, slot machine games, and comprehensive player statistics tracking. Users navigate a visually rich 3D casino environment where they can interact with different game stations.
+
+## User Preferences
+
+Preferred communication style: Simple, everyday language.
+
+## System Architecture
+
+### Frontend Architecture
+
+**Technology Stack:**
+- React 18 with TypeScript for UI components
+- Three.js via @react-three/fiber for 3D rendering
+- @react-three/drei for 3D utilities and controls
+- @react-three/postprocessing for visual effects
+- Vite as build tool and development server
+- TailwindCSS for styling
+- Radix UI components for accessible UI primitives
+
+**State Management:**
+- Zustand for client-side state management
+- Multiple stores for different concerns:
+  - `useUser`: Authentication and user profile state
+  - `useAudio`: Audio settings (music/SFX toggles, volume)
+  - `useGame`: Game phase management (ready/playing/ended)
+- TanStack Query (React Query) for server state synchronization
+
+**3D Scene Architecture:**
+- Canvas-based 3D rendering using react-three-fiber
+- First-person navigation with pointer lock controls
+- Room-based scene organization (slots, cashier, fish tables)
+- Interactive 3D objects triggering modal dialogs
+- GLSL shader support for advanced visual effects
+
+**Component Structure:**
+- Modal-based interactions for games and transactions:
+  - `AuthModal`: User login/registration
+  - `CashierModal`: Deposits, withdrawals, transaction history
+  - `SlotMachineModal`: Slot machine gameplay interface
+  - `StatsModal`: Player statistics and analytics
+- `CasinoScene`: Main 3D environment renderer
+- `AudioManager`: Background music and SFX playback
+- Custom event system for cross-component communication
+
+### Backend Architecture
+
+**Technology Stack:**
+- Node.js with Express for HTTP server
+- TypeScript with ESM modules
+- Express-session for session-based authentication
+- bcryptjs for password hashing
+
+**API Design:**
+- RESTful endpoints under `/api` prefix
+- Session-based authentication (cookies)
+- JSON request/response format
+- Error handling middleware with status codes
+
+**Key Routes:**
+- `POST /api/auth/register`: Create new user account
+- `POST /api/auth/login`: Authenticate user
+- `POST /api/auth/logout`: End user session
+- `GET /api/auth/me`: Get current user profile
+- `POST /api/transactions`: Create transaction
+- `GET /api/transactions`: Retrieve user transaction history
+- `GET /api/stats`: Get player game statistics
+- `POST /api/slot-machine/spin`: Execute slot machine game logic
+
+**Data Access Layer:**
+- `DatabaseStorage` class implementing `IStorage` interface
+- Abstraction layer for database operations
+- Transaction management for balance updates
+- Game statistics aggregation
+
+### Data Storage
+
+**Database:**
+- PostgreSQL via Neon serverless driver
+- Drizzle ORM for type-safe database access
+- WebSocket connection for serverless compatibility
+
+**Schema Design:**
+- `users` table: User credentials and balance
+  - id (serial primary key)
+  - username (unique text)
+  - password (hashed text)
+  - balance (integer, default 1000)
+
+- `transactions` table: Financial and game activity log
+  - id (serial primary key)
+  - userId (foreign key to users)
+  - type (text: 'deposit', 'withdraw', 'bet', 'win')
+  - amount (integer)
+  - balanceBefore (integer)
+  - balanceAfter (integer)
+  - description (optional text)
+  - createdAt (timestamp)
+
+**Data Validation:**
+- Zod schemas for runtime validation
+- Type inference from Drizzle schemas
+- Client and server-side validation
+
+### Authentication & Authorization
+
+**Authentication Flow:**
+- Session-based authentication using express-session
+- Session stored in memory (configurable for production)
+- HTTP-only cookies for session tokens
+- Password hashing with bcrypt (10 rounds)
+
+**Session Configuration:**
+- 7-day session expiration
+- Secure cookies in production
+- Custom session secret via environment variable
+
+**Authorization:**
+- Middleware checks session for protected routes
+- User ID stored in session upon login
+- Balance and transaction queries scoped to authenticated user
+
+### External Dependencies
+
+**Database Service:**
+- Neon PostgreSQL serverless database
+- Connection via DATABASE_URL environment variable
+- WebSocket-based connection pooling
+
+**Third-Party Libraries:**
+- Radix UI: Accessible component primitives
+- Three.js ecosystem: 3D rendering and controls
+- Fontsource: Self-hosted Inter font
+- Lucide React: Icon library
+- Sonner: Toast notifications
+- class-variance-authority: Component variant utilities
+
+**Development Tools:**
+- Drizzle Kit: Database migrations and schema management
+- tsx: TypeScript execution for development
+- esbuild: Production server bundling
+- PostCSS with Autoprefixer: CSS processing
+
+**Audio Assets:**
+- Background music (MP3 format)
+- Sound effects for game interactions
+- Browser Audio API for playback control
