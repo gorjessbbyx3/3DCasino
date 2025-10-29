@@ -47,7 +47,7 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
 
   return (
     <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={position} receiveShadow>
-      <planeGeometry args={[2.8, 2.8]} />
+      <planeGeometry args={[4.8, 4.8]} />
       <meshStandardMaterial
         color="#1a1a2e"
         emissive="#ff0000"
@@ -63,7 +63,7 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
 function CasinoFloor({ roomSize = 50 }: { roomSize?: number }) {
   const tiles = useMemo(() => {
     const tileArray = [];
-    const tileSize = 3;
+    const tileSize = 5; // Larger tiles to reduce count
     const tilesPerSide = Math.floor(roomSize / tileSize);
     
     for (let x = 0; x < tilesPerSide; x++) {
@@ -834,7 +834,10 @@ function CanvasWrapper() {
         <Suspense fallback={null}>
           <Scene />
           <Environment preset="night" background={false} />
-          <PointerLockControls />
+          <PointerLockControls 
+            maxPolarAngle={Math.PI / 2}
+            minPolarAngle={Math.PI / 2}
+          />
         </Suspense>
       </Canvas>
     </RoomContext.Provider>
