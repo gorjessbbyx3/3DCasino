@@ -4,14 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useUser } from "@/lib/stores/useUser";
-import { Coins, TrendingUp, TrendingDown, History } from "lucide-react";
+import { Coins, TrendingUp, TrendingDown, History, ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 import { toast } from "sonner";
+
+interface Transaction {
+  id: number;
+  userId: number;
+  type: string;
+  amount: number;
+  balanceBefore: number;
+  balanceAfter: number;
+  description: string | null;
+  createdAt: string;
+}
 
 export function CashierModal() {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<"menu" | "deposit" | "withdraw">("menu");
+  const [mode, setMode] = useState<"menu" | "deposit" | "withdraw" | "history">("menu");
   const [amount, setAmount] = useState("");
   const [loading, setLoading] = useState(false);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [loadingTransactions, setLoadingTransactions] = useState(false);
   const { user, setUser } = useUser();
 
   useEffect(() => {
@@ -24,6 +37,29 @@ export function CashierModal() {
     window.addEventListener("openCashier", handleOpenCashier);
     return () => window.removeEventListener("openCashier", handleOpenCashier);
   }, []);
+
+  const fetchTransactions = async () => {
+    setLoadingTransactions(true);
+    try {
+      const response = await fetch("/api/transactions?limit=20", {
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch transactions:", error);
+    } finally {
+      setLoadingTransactions(false);
+    }
+  };
+
+  useEffect(() => {
+    if (open && mode === "history") {
+      fetchTransactions();
+    }
+  }, [open, mode]);
 
   const handleDeposit = async () => {
     const amountNum = parseInt(amount);
@@ -113,23 +149,34 @@ export function CashierModal() {
           </div>
 
           {mode === "menu" && (
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold py-6 shadow-lg shadow-emerald-500/20 flex flex-col items-center gap-2"
-                onClick={() => setMode("deposit")}
-              >
-                <TrendingUp className="w-6 h-6" />
-                <span>Deposit</span>
-              </Button>
+            <>
+              <div className="grid grid-cols-2 gap-4">
+                <Button
+                  className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold py-6 shadow-lg shadow-emerald-500/20 flex flex-col items-center gap-2"
+                  onClick={() => setMode("deposit")}
+                >
+                  <TrendingUp className="w-6 h-6" />
+                  <span>Deposit</span>
+                </Button>
+
+                <Button
+                  className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold py-6 shadow-lg shadow-purple-500/20 flex flex-col items-center gap-2"
+                  onClick={() => setMode("withdraw")}
+                >
+                  <TrendingDown className="w-6 h-6" />
+                  <span>Withdraw</span>
+                </Button>
+              </div>
 
               <Button
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold py-6 shadow-lg shadow-purple-500/20 flex flex-col items-center gap-2"
-                onClick={() => setMode("withdraw")}
+                variant="outline"
+                className="w-full border-blue-500/30 text-blue-400 hover:bg-blue-500/20 flex items-center justify-center gap-2 py-4"
+                onClick={() => setMode("history")}
               >
-                <TrendingDown className="w-6 h-6" />
-                <span>Withdraw</span>
+                <History className="w-5 h-5" />
+                <span>Transaction History</span>
               </Button>
-            </div>
+            </>
           )}
 
           {mode === "deposit" && (
@@ -227,11 +274,77 @@ export function CashierModal() {
             </div>
           )}
 
+          {mode === "history" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-300">Recent Transactions</h3>
+                <Button
+                  onClick={() => setMode("menu")}
+                  variant="outline"
+                  size="sm"
+                  className="border-gray-600"
+                >
+                  Back
+                </Button>
+              </div>
+              
+              {loadingTransactions ? (
+                <div className="text-center text-gray-400 py-8">Loading...</div>
+              ) : transactions.length === 0 ? (
+                <div className="text-center text-gray-400 py-8">No transactions yet</div>
+              ) : (
+                <div className="max-h-96 overflow-y-auto space-y-2">
+                  {transactions.map((txn) => (
+                    <div
+                      key={txn.id}
+                      className="bg-gray-800/50 p-3 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          {txn.type === "deposit" ? (
+                            <ArrowUpCircle className="w-5 h-5 text-emerald-400" />
+                          ) : txn.type === "withdraw" ? (
+                            <ArrowDownCircle className="w-5 h-5 text-purple-400" />
+                          ) : txn.type === "win" ? (
+                            <TrendingUp className="w-5 h-5 text-yellow-400" />
+                          ) : (
+                            <TrendingDown className="w-5 h-5 text-red-400" />
+                          )}
+                          <div>
+                            <div className="text-sm font-medium text-gray-200 capitalize">{txn.type}</div>
+                            <div className="text-xs text-gray-500">
+                              {new Date(txn.createdAt).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className={`text-lg font-bold ${
+                            txn.type === "deposit" || txn.type === "win" ? "text-emerald-400" : "text-purple-400"
+                          }`}>
+                            {txn.type === "deposit" || txn.type === "win" ? "+" : "-"}
+                            ${txn.amount.toLocaleString()}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Balance: ${txn.balanceAfter.toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                      {txn.description && (
+                        <div className="mt-2 text-xs text-gray-400 italic">{txn.description}</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="mt-4 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
             <p className="text-sm text-gray-400 italic text-center">
               {mode === "menu" && '"Ahoy there! Captain Rex at yer service. Ready to make some waves with yer chips?" 🏴‍☠️'}
               {mode === "deposit" && '"Puttin\' some gold in the chest, eh? Wise choice, matey!"'}
               {mode === "withdraw" && '"Cashin\' out yer treasure? Fair winds to ye!"'}
+              {mode === "history" && '"Let me show ye the logbook of yer treasure moves, matey!"'}
             </p>
           </div>
         </div>
