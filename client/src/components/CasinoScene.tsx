@@ -339,6 +339,19 @@ function GameObject({
 }: GameObjectProps) {
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
+  const coinsRef = useRef<Array<{ offset: [number, number, number], speed: number, angle: number, startTime: number }>>([]);
+  
+  // Initialize coins for slot machine hover effect
+  React.useEffect(() => {
+    if (modelPath.includes('slot-machine')) {
+      coinsRef.current = Array.from({ length: 8 }, (_, i) => ({
+        offset: [0, 0, 0] as [number, number, number],
+        speed: 2 + Math.random() * 2,
+        angle: (i / 8) * Math.PI * 2,
+        startTime: 0
+      }));
+    }
+  }, [modelPath]);
 
   const createPlaceholder = () => {
     if (modelPath.includes('slot-machine')) {
@@ -584,15 +597,30 @@ function GameObject({
   };
 
   useFrame((state) => {
-    if (meshRef.current && hovered) {
-      // Gentle floating animation when hovered
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.15;
-      // Subtle rotation animation
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.05;
-    } else if (meshRef.current) {
-      // Return to original position smoothly
-      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, position[1], 0.1);
-      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, rotation[1], 0.1);
+    // Animate flying coins for slot machines when hovered
+    if (modelPath.includes('slot-machine') && hovered) {
+      coinsRef.current.forEach((coin) => {
+        if (coin.startTime === 0) {
+          coin.startTime = state.clock.elapsedTime;
+        }
+        const elapsed = state.clock.elapsedTime - coin.startTime;
+        const distance = elapsed * coin.speed;
+        
+        coin.offset[0] = Math.cos(coin.angle) * distance;
+        coin.offset[1] = 2 + Math.sin(elapsed * 3) * 0.5 - elapsed * 0.5;
+        coin.offset[2] = Math.sin(coin.angle) * distance;
+        
+        // Reset coin if it's too far
+        if (distance > 3) {
+          coin.startTime = state.clock.elapsedTime;
+        }
+      });
+    } else if (modelPath.includes('slot-machine') && !hovered) {
+      // Reset all coins
+      coinsRef.current.forEach((coin) => {
+        coin.startTime = 0;
+        coin.offset = [0, 0, 0];
+      });
     }
   });
 
@@ -601,7 +629,7 @@ function GameObject({
       ref={meshRef}
       position={position}
       rotation={rotation}
-      scale={hovered ? scale * 1.08 : scale}
+      scale={scale}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();
@@ -618,28 +646,60 @@ function GameObject({
     >
       {createPlaceholder()}
 
-      {/* Enhanced glow effect with pulsing */}
-      {hovered && (
+      {/* Outline glow effect for slot machines when hovered */}
+      {hovered && modelPath.includes('slot-machine') && (
         <>
-          <pointLight
-            position={[0, 3, 0]}
-            color={glowColor}
-            intensity={20}
-            distance={10}
-          />
-          <pointLight
-            position={[0, 1, 1]}
-            color={glowColor}
-            intensity={15}
-            distance={6}
-          />
+          {/* Glowing outline around cabinet */}
+          <mesh position={[0, 1.8, 0]}>
+            <cylinderGeometry args={[0.75, 0.8, 3.7, 32]} />
+            <meshBasicMaterial 
+              color="#ffd700" 
+              transparent 
+              opacity={0.3}
+              wireframe={false}
+            />
+          </mesh>
+          
+          {/* Bright outer glow shell */}
+          <mesh position={[0, 1.8, 0]}>
+            <cylinderGeometry args={[0.8, 0.85, 3.8, 32]} />
+            <meshBasicMaterial 
+              color="#ffd700" 
+              transparent 
+              opacity={0.15}
+            />
+          </mesh>
+          
+          {/* Flying coins */}
+          {coinsRef.current.map((coin, i) => coin.startTime > 0 && (
+            <group key={i} position={coin.offset}>
+              {/* Gold coin */}
+              <mesh rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.15, 0.15, 0.05, 16]} />
+                <meshStandardMaterial 
+                  color="#ffd700"
+                  metalness={1}
+                  roughness={0.2}
+                  emissive="#ffd700"
+                  emissiveIntensity={0.5}
+                />
+              </mesh>
+              {/* Dollar sign on coin */}
+              <mesh position={[0, 0, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
+                <cylinderGeometry args={[0.08, 0.08, 0.01, 16]} />
+                <meshBasicMaterial 
+                  color="#ff8800"
+                />
+              </mesh>
+            </group>
+          ))}
         </>
       )}
 
       {/* Label */}
       {hovered && label && (
         <Text
-          position={[0, 4, 0]}
+          position={[0, modelPath.includes('slot-machine') ? 5 : 4, 0]}
           fontSize={0.8}
           color="#ffffff"
           anchorX="center"
