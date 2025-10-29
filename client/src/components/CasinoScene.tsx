@@ -13,7 +13,7 @@ const openSlotMachineModal = (machineNumber: number) => {
 };
 
 // Room state management
-type RoomType = 'slots' | 'cashier' | 'fish';
+type RoomType = 'slots' | 'fish';
 
 const useRoomState = () => {
   const [currentRoom, setCurrentRoom] = useState<RoomType>('slots');
@@ -142,12 +142,12 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
               </mesh>
-              {/* Left door frame - glowing cyan */}
+              {/* Left door frame - glowing purple */}
               <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
                 <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
                 <meshStandardMaterial 
-                  color="#00ffff"
-                  emissive="#00ffff"
+                  color="#a855f7"
+                  emissive="#a855f7"
                   emissiveIntensity={1}
                 />
               </mesh>
@@ -155,11 +155,11 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               <Text
                 position={[-doorWidth / 2 - 1, doorHeight + 1, -roomSize / 2 + 1]}
                 fontSize={0.8}
-                color="#00ffff"
+                color="#a855f7"
                 anchorX="center"
                 anchorY="middle"
               >
-                💰 CASHIER
+                ← SLOTS
               </Text>
             </>
           )}
@@ -172,12 +172,12 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
               </mesh>
-              {/* Right door frame - glowing purple */}
+              {/* Right door frame - glowing cyan */}
               <mesh position={[doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
                 <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
                 <meshStandardMaterial 
-                  color="#a855f7"
-                  emissive="#a855f7"
+                  color="#06b6d4"
+                  emissive="#06b6d4"
                   emissiveIntensity={1}
                 />
               </mesh>
@@ -185,7 +185,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               <Text
                 position={[doorWidth / 2 + 1, doorHeight + 1, -roomSize / 2 + 1]}
                 fontSize={0.8}
-                color="#a855f7"
+                color="#06b6d4"
                 anchorX="center"
                 anchorY="middle"
               >
@@ -475,7 +475,7 @@ function GameObject({
   );
 }
 
-// Slot Machine Room
+// Slot Machine Room with Cashier Window
 function SlotMachineRoom() {
   const { setShowAuthModal, user } = useUser();
 
@@ -487,24 +487,54 @@ function SlotMachineRoom() {
     }
   };
 
+  const handleCashierClick = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      openCashierModal();
+    }
+  };
+
   return (
     <group>
-      {/* 10 Slot Machines - 5 on each side wall, closer together */}
-      {/* Left wall slots */}
-      {Array.from({ length: 5 }, (_, i) => (
-        <GameObject
-          key={`slot-left-${i}`}
-          position={[-14, 0, (i - 2) * 5]}
-          rotation={[0, Math.PI / 2, 0]}
-          modelPath="slot-machine"
-          scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 1)}
-          label={`Slot Machine ${i + 1}`}
-          glowColor="#a855f7"
-        />
-      ))}
+      {/* Cashier Window on left wall */}
+      <GameObject
+        position={[-14, 0, -8]}
+        rotation={[0, Math.PI / 2, 0]}
+        modelPath="cashier-booth"
+        scale={1.5}
+        onClick={handleCashierClick}
+        label="💰 Cashier Window"
+        glowColor="#00ffff"
+      />
 
-      {/* Right wall slots */}
+      {/* Captain Pitbull at cashier window */}
+      <GameObject
+        position={[-11, 0, -8]}
+        rotation={[0, Math.PI / 2, 0]}
+        modelPath="pitbull-pirate"
+        scale={1.2}
+        glowColor="#00ffff"
+      />
+
+      {/* Left wall slots - 4 machines (skip middle position for cashier) */}
+      {Array.from({ length: 4 }, (_, i) => {
+        const adjustedI = i >= 2 ? i + 1 : i; // Skip middle position
+        return (
+          <GameObject
+            key={`slot-left-${i}`}
+            position={[-14, 0, (adjustedI - 2) * 5]}
+            rotation={[0, Math.PI / 2, 0]}
+            modelPath="slot-machine"
+            scale={2.5}
+            onClick={() => handleSlotMachineClick(i + 1)}
+            label={`Slot Machine ${i + 1}`}
+            glowColor="#a855f7"
+          />
+        );
+      })}
+
+      {/* Right wall slots - 5 machines */}
       {Array.from({ length: 5 }, (_, i) => (
         <GameObject
           key={`slot-right-${i}`}
@@ -512,36 +542,11 @@ function SlotMachineRoom() {
           rotation={[0, -Math.PI / 2, 0]}
           modelPath="slot-machine"
           scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 6)}
-          label={`Slot Machine ${i + 6}`}
+          onClick={() => handleSlotMachineClick(i + 5)}
+          label={`Slot Machine ${i + 5}`}
           glowColor="#a855f7"
         />
       ))}
-    </group>
-  );
-}
-
-// Cashier Room
-function CashierRoom() {
-  return (
-    <group>
-      {/* Cashier Booth centered */}
-      <GameObject
-        position={[0, 0, -10]}
-        modelPath="cashier-booth"
-        scale={1.5}
-        onClick={() => openCashierModal()}
-        label="💰 Cashier"
-        glowColor="#00ffff"
-      />
-
-      {/* Captain Pitbull at cashier */}
-      <GameObject
-        position={[0, 0, -7]}
-        modelPath="pitbull-pirate"
-        scale={1.2}
-        glowColor="#00ffff"
-      />
     </group>
   );
 }
@@ -603,21 +608,8 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
         <pointLight position={[14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
         <pointLight position={[14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
         <pointLight position={[14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
-      </>
-    );
-  } else if (roomType === 'cashier') {
-    return (
-      <>
-        <ambientLight intensity={0.2} color="#1a1a2e" />
-        <spotLight
-          position={[0, 10, 0]}
-          angle={Math.PI / 2.5}
-          penumbra={0.5}
-          intensity={1}
-          castShadow
-          color="#ffffff"
-        />
-        <pointLight position={[0, 6, -10]} intensity={5} color="#00ffff" distance={15} />
+        {/* Cyan light for cashier window */}
+        <pointLight position={[-14, 4, -8]} intensity={4} color="#00ffff" distance={10} />
       </>
     );
   } else if (roomType === 'fish') {
@@ -732,29 +724,18 @@ function FirstPersonControls() {
       camera.position.addScaledVector(right, speed);
     }
 
-    // Room transitions based on position - doors are on back wall
+    // Room transitions based on position - door on back wall
     if (currentRoom === 'slots') {
-      // Back left door to cashier (under sign)
-      if (camera.position.z < -16 && camera.position.x < -1) {
-        setCurrentRoom('cashier');
-        camera.position.set(0, 1.7, 14);
-      }
-      // Back right door to fish games (under sign)
-      if (camera.position.z < -16 && camera.position.x > 1) {
+      // Back door to fish games (under sign)
+      if (camera.position.z < -16) {
         setCurrentRoom('fish');
         camera.position.set(0, 1.7, 14);
-      }
-    } else if (currentRoom === 'cashier') {
-      // Exit back to slots from back wall
-      if (camera.position.z < -16) {
-        setCurrentRoom('slots');
-        camera.position.set(-4, 1.7, 14);
       }
     } else if (currentRoom === 'fish') {
       // Exit back to slots from back wall
       if (camera.position.z < -16) {
         setCurrentRoom('slots');
-        camera.position.set(4, 1.7, 14);
+        camera.position.set(0, 1.7, 14);
       }
     }
 
@@ -778,21 +759,14 @@ function Scene() {
       
       {currentRoom === 'slots' && (
         <>
-          <RoomWalls backLeftDoor={true} backRightDoor={true} backSign="💎 JADE ROYALE 💎" />
+          <RoomWalls backRightDoor={true} backSign="💎 JADE ROYALE 💎" />
           <SlotMachineRoom />
-        </>
-      )}
-      
-      {currentRoom === 'cashier' && (
-        <>
-          <RoomWalls backLeftDoor={true} backSign="💰 CASHIER 💰" />
-          <CashierRoom />
         </>
       )}
       
       {currentRoom === 'fish' && (
         <>
-          <RoomWalls backRightDoor={true} backSign="🎣 FISH GAMES 🎣" />
+          <RoomWalls backLeftDoor={true} backSign="🎣 FISH GAMES 🎣" />
           <FishGameRoom />
         </>
       )}
