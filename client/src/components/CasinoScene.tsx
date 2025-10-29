@@ -180,60 +180,104 @@ function GameObject({
     if (modelPath.includes('slot-machine')) {
       return (
         <group>
-          {/* Slot machine body */}
-          <mesh position={[0, 1, 0]}>
+          {/* Slot machine body - neon purple glow */}
+          <mesh position={[0, 1, 0]} castShadow receiveShadow>
             <boxGeometry args={[1, 2, 0.8]} />
-            <meshStandardMaterial color="#ff6b35" metalness={0.8} roughness={0.2} />
+            <meshStandardMaterial 
+              color="#1a0a2e" 
+              metalness={0.9} 
+              roughness={0.2}
+              emissive="#a855f7"
+              emissiveIntensity={0.5}
+            />
           </mesh>
-          {/* Screen */}
-          <mesh position={[0, 1.2, 0.41]}>
+          {/* Screen - bright purple glow */}
+          <mesh position={[0, 1.2, 0.41]} castShadow>
             <boxGeometry args={[0.8, 0.6, 0.1]} />
-            <meshStandardMaterial color="#000000" emissive="#ffd700" emissiveIntensity={0.3} />
+            <meshStandardMaterial 
+              color="#000000" 
+              emissive="#c084fc" 
+              emissiveIntensity={2}
+            />
           </mesh>
-          {/* Arm */}
-          <mesh position={[0.6, 1, 0]}>
+          {/* Arm - gold accent */}
+          <mesh position={[0.6, 1, 0]} castShadow>
             <cylinderGeometry args={[0.05, 0.05, 0.8]} />
-            <meshStandardMaterial color="#ffd700" metalness={1} roughness={0.1} />
+            <meshStandardMaterial 
+              color="#fbbf24" 
+              metalness={1} 
+              roughness={0.1}
+              emissive="#fbbf24"
+              emissiveIntensity={0.3}
+            />
           </mesh>
         </group>
       );
     } else if (modelPath.includes('fish-table')) {
       return (
         <group>
-          {/* Table surface */}
-          <mesh position={[0, 0.8, 0]}>
+          {/* Table surface - dark base */}
+          <mesh position={[0, 0.8, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[1.5, 1.5, 0.1]} />
-            <meshStandardMaterial color="#003d7a" metalness={0.2} roughness={0.8} />
+            <meshStandardMaterial 
+              color="#0a2540" 
+              metalness={0.8} 
+              roughness={0.3}
+            />
           </mesh>
-          {/* Screen */}
-          <mesh position={[0, 0.86, 0]}>
+          {/* Screen - cyan glow */}
+          <mesh position={[0, 0.86, 0]} castShadow>
             <cylinderGeometry args={[1.3, 1.3, 0.05]} />
-            <meshStandardMaterial color="#000040" emissive="#00bfff" emissiveIntensity={0.2} />
+            <meshStandardMaterial 
+              color="#000000" 
+              emissive="#06b6d4" 
+              emissiveIntensity={2}
+            />
           </mesh>
           {/* Base */}
-          <mesh position={[0, 0.4, 0]}>
+          <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.5, 0.8, 0.8]} />
-            <meshStandardMaterial color="#2a2a2a" />
+            <meshStandardMaterial 
+              color="#1a1a2e" 
+              metalness={0.7}
+              roughness={0.3}
+            />
           </mesh>
         </group>
       );
     } else if (modelPath.includes('cashier-booth')) {
       return (
         <group>
-          {/* Booth structure */}
-          <mesh position={[0, 1.5, 0]}>
+          {/* Booth structure - luxury dark */}
+          <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
             <boxGeometry args={[3, 3, 2]} />
-            <meshStandardMaterial color="#8b4513" />
+            <meshStandardMaterial 
+              color="#1a0f2e" 
+              metalness={0.6}
+              roughness={0.4}
+              emissive="#00ffff"
+              emissiveIntensity={0.1}
+            />
           </mesh>
-          {/* Window */}
-          <mesh position={[0, 2, 1.01]}>
+          {/* Window - cyan glow */}
+          <mesh position={[0, 2, 1.01]} castShadow>
             <boxGeometry args={[2, 1, 0.1]} />
-            <meshStandardMaterial color="#87ceeb" transparent opacity={0.7} />
+            <meshStandardMaterial 
+              color="#000000" 
+              emissive="#00ffff" 
+              emissiveIntensity={1.5}
+              transparent 
+              opacity={0.9} 
+            />
           </mesh>
-          {/* Sign */}
-          <mesh position={[0, 3.2, 1.01]}>
+          {/* Sign - bright cyan */}
+          <mesh position={[0, 3.2, 1.01]} castShadow>
             <boxGeometry args={[2.5, 0.5, 0.1]} />
-            <meshStandardMaterial color="#ffd700" />
+            <meshStandardMaterial 
+              color="#00ffff"
+              emissive="#00ffff"
+              emissiveIntensity={2}
+            />
           </mesh>
         </group>
       );
@@ -241,22 +285,34 @@ function GameObject({
       return (
         <group>
           {/* Body */}
-          <mesh position={[0, 1, 0]}>
+          <mesh position={[0, 1, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.3, 0.4, 1.5]} />
-            <meshStandardMaterial color="#8b4513" />
+            <meshStandardMaterial 
+              color="#6b4423"
+              metalness={0.3}
+              roughness={0.7}
+            />
           </mesh>
           {/* Head */}
-          <mesh position={[0, 2, 0]}>
+          <mesh position={[0, 2, 0]} castShadow>
             <sphereGeometry args={[0.4]} />
-            <meshStandardMaterial color="#d2691e" />
+            <meshStandardMaterial 
+              color="#d4a574"
+              metalness={0.2}
+              roughness={0.8}
+            />
           </mesh>
-          {/* Pirate hat */}
-          <mesh position={[0, 2.5, 0]}>
+          {/* Pirate hat - cyan accent */}
+          <mesh position={[0, 2.5, 0]} castShadow>
             <coneGeometry args={[0.5, 0.6]} />
-            <meshStandardMaterial color="#000000" />
+            <meshStandardMaterial 
+              color="#0a0a1a"
+              emissive="#00ffff"
+              emissiveIntensity={0.3}
+            />
           </mesh>
           {/* Eye patch */}
-          <mesh position={[0.2, 2.1, 0.35]}>
+          <mesh position={[0.2, 2.1, 0.35]} castShadow>
             <sphereGeometry args={[0.08]} />
             <meshStandardMaterial color="#000000" />
           </mesh>
