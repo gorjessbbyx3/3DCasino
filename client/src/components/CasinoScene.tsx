@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
 import { Environment, Text, PointerLockControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
@@ -475,6 +475,80 @@ function GameObject({
   );
 }
 
+// Cashier Window Component with Image
+function CashierWindow() {
+  const { setShowAuthModal, user } = useUser();
+  const [hovered, setHovered] = useState(false);
+  const texture = useLoader(THREE.TextureLoader, '/Copilot_20251028_193236_1761716033443.png');
+
+  const handleCashierClick = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      openCashierModal();
+    }
+  };
+
+  return (
+    <group position={[-10, 0, -16.5]}>
+      {/* Cashier booth frame */}
+      <mesh 
+        position={[0, 2, 0]} 
+        castShadow
+        onClick={handleCashierClick}
+        onPointerOver={() => {
+          setHovered(true);
+          document.body.style.cursor = "pointer";
+        }}
+        onPointerOut={() => {
+          setHovered(false);
+          document.body.style.cursor = "auto";
+        }}
+      >
+        <boxGeometry args={[6, 4, 0.5]} />
+        <meshStandardMaterial 
+          color="#1a0f2e" 
+          metalness={0.6}
+          roughness={0.4}
+        />
+      </mesh>
+
+      {/* Window with pitbull image */}
+      <mesh position={[0, 2, 0.26]} castShadow>
+        <planeGeometry args={[5.5, 3.5]} />
+        <meshStandardMaterial 
+          map={texture}
+          emissive="#ffffff"
+          emissiveIntensity={hovered ? 0.3 : 0.1}
+        />
+      </mesh>
+
+      {/* Glowing CASHIER sign above */}
+      <Text
+        position={[0, 4.5, 0.3]}
+        fontSize={0.6}
+        color="#00ffff"
+        anchorX="center"
+        anchorY="middle"
+        outlineWidth={0.05}
+        outlineColor="#0891b2"
+      >
+        💰 CASHIER 💰
+      </Text>
+
+      {/* Glow effect when hovered */}
+      {hovered && (
+        <pointLight
+          position={[0, 2, 1]}
+          color="#00ffff"
+          intensity={10}
+          distance={8}
+        />
+      )}
+    </group>
+  );
+}
+
 // Slot Machine Room with Cashier Window
 function SlotMachineRoom() {
   const { setShowAuthModal, user } = useUser();
@@ -487,52 +561,24 @@ function SlotMachineRoom() {
     }
   };
 
-  const handleCashierClick = () => {
-    if (!user) {
-      setShowAuthModal(true);
-    } else {
-      openCashierModal();
-    }
-  };
-
   return (
     <group>
-      {/* Cashier Window on left wall */}
-      <GameObject
-        position={[-14, 0, -8]}
-        rotation={[0, Math.PI / 2, 0]}
-        modelPath="cashier-booth"
-        scale={1.5}
-        onClick={handleCashierClick}
-        label="💰 Cashier Window"
-        glowColor="#00ffff"
-      />
+      {/* Cashier Window on back wall, left of Fish Games door */}
+      <CashierWindow />
 
-      {/* Captain Pitbull at cashier window */}
-      <GameObject
-        position={[-11, 0, -8]}
-        rotation={[0, Math.PI / 2, 0]}
-        modelPath="pitbull-pirate"
-        scale={1.2}
-        glowColor="#00ffff"
-      />
-
-      {/* Left wall slots - 4 machines (skip middle position for cashier) */}
-      {Array.from({ length: 4 }, (_, i) => {
-        const adjustedI = i >= 2 ? i + 1 : i; // Skip middle position
-        return (
-          <GameObject
-            key={`slot-left-${i}`}
-            position={[-14, 0, (adjustedI - 2) * 5]}
-            rotation={[0, Math.PI / 2, 0]}
-            modelPath="slot-machine"
-            scale={2.5}
-            onClick={() => handleSlotMachineClick(i + 1)}
-            label={`Slot Machine ${i + 1}`}
-            glowColor="#a855f7"
-          />
-        );
-      })}
+      {/* Left wall slots - 5 machines */}
+      {Array.from({ length: 5 }, (_, i) => (
+        <GameObject
+          key={`slot-left-${i}`}
+          position={[-14, 0, (i - 2) * 5]}
+          rotation={[0, Math.PI / 2, 0]}
+          modelPath="slot-machine"
+          scale={2.5}
+          onClick={() => handleSlotMachineClick(i + 1)}
+          label={`Slot Machine ${i + 1}`}
+          glowColor="#a855f7"
+        />
+      ))}
 
       {/* Right wall slots - 5 machines */}
       {Array.from({ length: 5 }, (_, i) => (
@@ -542,8 +588,8 @@ function SlotMachineRoom() {
           rotation={[0, -Math.PI / 2, 0]}
           modelPath="slot-machine"
           scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 5)}
-          label={`Slot Machine ${i + 5}`}
+          onClick={() => handleSlotMachineClick(i + 6)}
+          label={`Slot Machine ${i + 6}`}
           glowColor="#a855f7"
         />
       ))}
@@ -608,8 +654,8 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
         <pointLight position={[14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
         <pointLight position={[14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
         <pointLight position={[14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
-        {/* Cyan light for cashier window */}
-        <pointLight position={[-14, 4, -8]} intensity={4} color="#00ffff" distance={10} />
+        {/* Cyan light for cashier window on back wall */}
+        <pointLight position={[-10, 4, -16]} intensity={5} color="#00ffff" distance={12} />
       </>
     );
   } else if (roomType === 'fish') {
