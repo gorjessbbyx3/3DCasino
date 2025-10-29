@@ -1314,5 +1314,21 @@ function CanvasWrapper() {
 }
 
 export function CasinoScene() {
-  return <CanvasWrapper />;
+  console.log("CasinoScene component rendering");
+  
+  return (
+    <div style={{ width: '100%', height: '100%', background: '#0a0a1e' }}>
+      <Canvas
+        camera={{ position: [0, 0, 5], fov: 75 }}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <ambientLight intensity={1} />
+        <pointLight position={[10, 10, 10]} />
+        <mesh>
+          <boxGeometry args={[2, 2, 2]} />
+          <meshStandardMaterial color="hotpink" />
+        </mesh>
+      </Canvas>
+    </div>
+  );
 }
