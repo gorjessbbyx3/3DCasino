@@ -15,21 +15,24 @@ import { Toaster } from "sonner";
 import "@fontsource/inter";
 
 function App() {
-  const { user, setUser } = useUser();
+  const { user, setUser, setLoading } = useUser();
 
-  const { data: userData, isError } = useQuery({
+  const { data: userData, isLoading, isError } = useQuery({
     queryKey: ["/api/auth/me"],
     retry: false,
     refetchOnMount: true,
   });
 
   useEffect(() => {
-    if (userData && !isError) {
-      setUser(userData as any);
-    } else {
-      setUser(null);
+    if (!isLoading) {
+      if (userData && !isError) {
+        setUser(userData as any);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
     }
-  }, [userData, isError, setUser]);
+  }, [userData, isLoading, isError, setUser, setLoading]);
 
   const handleLogout = async () => {
     try {

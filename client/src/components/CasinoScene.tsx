@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useMemo } from "react";
+import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
 import { Environment, Text, PointerLockControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
@@ -506,6 +506,10 @@ function GameObject({
   const [hovered, setHovered] = useState(false);
   const coinsRef = useRef<Array<{ offset: [number, number, number], speed: number, angle: number, startTime: number }>>([]);
 
+  // Load game logo and screen textures for slot machines (always load to avoid conditional hook)
+  const gameLogoTexture = useTexture("/game-logo.png");
+  const screenGameTexture = useTexture("/screen-game.png");
+
   // Initialize coins for slot machine hover effect
   React.useEffect(() => {
     if (modelPath.includes('slot-machine')) {
@@ -534,11 +538,11 @@ function GameObject({
             />
           </mesh>
 
-          {/* Premium large screen - ultra bright display */}
+          {/* Premium large screen - ultra bright display with game image */}
           <mesh position={[0, 2.2, 0.66]} castShadow>
             <boxGeometry args={[1.2, 1.6, 0.08]} />
             <meshStandardMaterial 
-              color="#000000"
+              map={screenGameTexture}
               emissive={machineColor}
               emissiveIntensity={hovered ? 0.5 : 0.3}
             />
@@ -570,13 +574,12 @@ function GameObject({
               />
             </mesh>
 
-            {/* Game logo area - simplified */}
+            {/* Game logo image */}
             <mesh position={[0, 0, 0.05]}>
               <planeGeometry args={[1.3, 0.4]} />
               <meshStandardMaterial 
-                color="#d4af37"
-                emissive="#ffd700"
-                emissiveIntensity={0.5}
+                map={gameLogoTexture}
+                transparent={true}
               />
             </mesh>
 
@@ -918,10 +921,11 @@ function GameObject({
   );
 }
 
-// Cashier Window Component
+// Cashier Window Component with Image
 function CashierWindow() {
   const { setShowAuthModal, user } = useUser();
   const [hovered, setHovered] = useState(false);
+  const texture = useLoader(THREE.TextureLoader, '/Copilot_20251028_193236_1761716033443.png');
 
   const handleCashierClick = () => {
     if (!user) {
@@ -955,12 +959,12 @@ function CashierWindow() {
         />
       </mesh>
 
-      {/* Cashier window display */}
+      {/* Window with pitbull image */}
       <mesh position={[0, 2, 0.26]} castShadow>
         <planeGeometry args={[5.5, 3.5]} />
         <meshStandardMaterial 
-          color="#1a0f2e"
-          emissive="#00ffff"
+          map={texture}
+          emissive="#ffffff"
           emissiveIntensity={hovered ? 0.3 : 0.1}
         />
       </mesh>
@@ -1100,49 +1104,49 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
   if (roomType === 'slots') {
     return (
       <>
-        <ambientLight intensity={0.8} color="#4a4a6e" />
+        <ambientLight intensity={0.15} color="#1a1a2e" />
         <spotLight
           position={[0, 10, 0]}
           angle={Math.PI / 2.5}
           penumbra={0.5}
-          intensity={1.5}
+          intensity={0.8}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           color="#ffffff"
         />
         {/* Purple lights for slot machines */}
-        <pointLight position={[-14, 4, -10]} intensity={4} color="#a855f7" distance={15} />
-        <pointLight position={[-14, 4, 0]} intensity={4} color="#a855f7" distance={15} />
-        <pointLight position={[-14, 4, 10]} intensity={4} color="#a855f7" distance={15} />
-        <pointLight position={[14, 4, -10]} intensity={4} color="#a855f7" distance={15} />
-        <pointLight position={[14, 4, 0]} intensity={4} color="#a855f7" distance={15} />
-        <pointLight position={[14, 4, 10]} intensity={4} color="#a855f7" distance={15} />
+        <pointLight position={[-14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
         {/* Cyan light for cashier window on back wall */}
-        <pointLight position={[-10, 4, -16]} intensity={6} color="#00ffff" distance={15} />
+        <pointLight position={[-10, 4, -16]} intensity={5} color="#00ffff" distance={12} />
       </>
     );
   } else if (roomType === 'fish') {
     return (
       <>
-        <ambientLight intensity={0.8} color="#4a4a6e" />
+        <ambientLight intensity={0.15} color="#1a1a2e" />
         <spotLight
           position={[0, 10, 0]}
           angle={Math.PI / 2.5}
           penumbra={0.5}
-          intensity={1.5}
+          intensity={0.8}
           castShadow
           shadow-mapSize-width={2048}
           shadow-mapSize-height={2048}
           color="#ffffff"
         />
         {/* Cyan lights for fish tables */}
-        <pointLight position={[-12, 4, -8]} intensity={4} color="#06b6d4" distance={15} />
-        <pointLight position={[0, 4, -8]} intensity={4} color="#06b6d4" distance={15} />
-        <pointLight position={[12, 4, -8]} intensity={4} color="#06b6d4" distance={15} />
-        <pointLight position={[-12, 4, 8]} intensity={4} color="#06b6d4" distance={15} />
-        <pointLight position={[0, 4, 8]} intensity={4} color="#06b6d4" distance={15} />
-        <pointLight position={[12, 4, 8]} intensity={4} color="#06b6d4" distance={15} />
+        <pointLight position={[-12, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[0, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[12, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[-12, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[0, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[12, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
       </>
     );
   }
@@ -1263,17 +1267,23 @@ function Scene() {
 
   return (
     <>
-      {/* Test cube to verify basic rendering still works */}
-      <mesh position={[0, 1, 0]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color="red" />
-      </mesh>
-      
-      {/* Basic lighting */}
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[5, 10, 5]} intensity={1} />
-      
+      <FirstPersonControls />
       <RoomLighting roomType={currentRoom} />
+      <CasinoFloor />
+
+      {currentRoom === 'slots' && (
+        <>
+          <RoomWalls backRightDoor={true} backSign="JADE ROYALE" />
+          <SlotMachineRoom />
+        </>
+      )}
+
+      {currentRoom === 'fish' && (
+        <>
+          <RoomWalls backLeftDoor={true} backSign="🎣 FISH GAMES 🎣" />
+          <FishGameRoom />
+        </>
+      )}
     </>
   );
 }
@@ -1299,36 +1309,28 @@ function CanvasWrapper() {
         onCreated={({ gl, scene }) => {
           gl.shadowMap.enabled = true;
           gl.shadowMap.type = THREE.PCFSoftShadowMap;
-          gl.setClearColor('#0a0a1e');
-          scene.fog = new THREE.Fog('#0a0a1e', 30, 60);
+          gl.setClearColor('#000011');
+          scene.fog = new THREE.Fog('#000011', 30, 60);
         }}
       >
-        <Scene />
-        <PointerLockControls 
-          maxPolarAngle={Math.PI - 0.05}
-          minPolarAngle={0.05}
-        />
+        <Suspense fallback={
+          <mesh>
+            <boxGeometry args={[1, 1, 1]} />
+            <meshBasicMaterial color="white" />
+          </mesh>
+        }>
+          <Scene />
+          <Environment preset="night" background={false} />
+          <PointerLockControls 
+            maxPolarAngle={Math.PI / 2}
+            minPolarAngle={Math.PI / 2}
+          />
+        </Suspense>
       </Canvas>
     </RoomContext.Provider>
   );
 }
 
 export function CasinoScene() {
-  console.log("CasinoScene component rendering");
-  
-  return (
-    <div style={{ width: '100%', height: '100%', background: '#0a0a1e' }}>
-      <Canvas
-        camera={{ position: [0, 0, 5], fov: 75 }}
-        style={{ width: '100%', height: '100%' }}
-      >
-        <ambientLight intensity={1} />
-        <pointLight position={[10, 10, 10]} />
-        <mesh>
-          <boxGeometry args={[2, 2, 2]} />
-          <meshStandardMaterial color="hotpink" />
-        </mesh>
-      </Canvas>
-    </div>
-  );
+  return <CanvasWrapper />;
 }
