@@ -506,10 +506,6 @@ function GameObject({
   const [hovered, setHovered] = useState(false);
   const coinsRef = useRef<Array<{ offset: [number, number, number], speed: number, angle: number, startTime: number }>>([]);
 
-  // Load game logo and screen textures for slot machines (always load to avoid conditional hook)
-  const gameLogoTexture = useTexture("/game-logo.png");
-  const screenGameTexture = useTexture("/screen-game.png");
-
   // Initialize coins for slot machine hover effect
   React.useEffect(() => {
     if (modelPath.includes('slot-machine')) {
@@ -538,11 +534,11 @@ function GameObject({
             />
           </mesh>
 
-          {/* Premium large screen - ultra bright display with game image */}
+          {/* Premium large screen - ultra bright display */}
           <mesh position={[0, 2.2, 0.66]} castShadow>
             <boxGeometry args={[1.2, 1.6, 0.08]} />
             <meshStandardMaterial 
-              map={screenGameTexture}
+              color="#000000"
               emissive={machineColor}
               emissiveIntensity={hovered ? 0.5 : 0.3}
             />
@@ -574,12 +570,13 @@ function GameObject({
               />
             </mesh>
 
-            {/* Game logo image */}
+            {/* Game logo area - simplified */}
             <mesh position={[0, 0, 0.05]}>
               <planeGeometry args={[1.3, 0.4]} />
               <meshStandardMaterial 
-                map={gameLogoTexture}
-                transparent={true}
+                color="#d4af37"
+                emissive="#ffd700"
+                emissiveIntensity={0.5}
               />
             </mesh>
 
@@ -921,11 +918,10 @@ function GameObject({
   );
 }
 
-// Cashier Window Component with Image
+// Cashier Window Component
 function CashierWindow() {
   const { setShowAuthModal, user } = useUser();
   const [hovered, setHovered] = useState(false);
-  const texture = useLoader(THREE.TextureLoader, '/Copilot_20251028_193236_1761716033443.png');
 
   const handleCashierClick = () => {
     if (!user) {
@@ -959,12 +955,12 @@ function CashierWindow() {
         />
       </mesh>
 
-      {/* Window with pitbull image */}
+      {/* Cashier window display */}
       <mesh position={[0, 2, 0.26]} castShadow>
         <planeGeometry args={[5.5, 3.5]} />
         <meshStandardMaterial 
-          map={texture}
-          emissive="#ffffff"
+          color="#1a0f2e"
+          emissive="#00ffff"
           emissiveIntensity={hovered ? 0.3 : 0.1}
         />
       </mesh>
