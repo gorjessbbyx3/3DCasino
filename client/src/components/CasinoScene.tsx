@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
-import { Environment, Text, PointerLockControls } from "@react-three/drei";
+import { Environment, Text, PointerLockControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
 
@@ -113,7 +113,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
   backRightDoor?: boolean;
   backSign?: string;
 }) {
-  const wallHeight = 12;
+  const wallHeight = 16;
   const doorWidth = 6;
   const doorHeight = 5;
   
@@ -201,16 +201,24 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         </mesh>
       )}
 
-      {/* Left Wall - always solid */}
+      {/* Left Wall - with casino background */}
       <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
-        <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+        <meshStandardMaterial 
+          map={useTexture("/casino-bg.jpg")}
+          roughness={0.4}
+          metalness={0.2}
+        />
       </mesh>
 
-      {/* Right Wall - always solid */}
+      {/* Right Wall - with casino background */}
       <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
-        <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+        <meshStandardMaterial 
+          map={useTexture("/casino-bg.jpg")}
+          roughness={0.4}
+          metalness={0.2}
+        />
       </mesh>
 
       {/* Back wall sign */}
@@ -704,7 +712,7 @@ function SlotMachineRoom() {
   return (
     <group>
       {/* Starry Ceiling */}
-      <StarryCeiling roomSize={35} height={6} />
+      <StarryCeiling roomSize={35} height={16} />
       
       {/* Cashier Window on back wall, left of Fish Games door */}
       <CashierWindow />
@@ -755,7 +763,7 @@ function FishGameRoom() {
   return (
     <group>
       {/* Starry Ceiling */}
-      <StarryCeiling roomSize={35} height={6} />
+      <StarryCeiling roomSize={35} height={16} />
       
       {/* 6 Rectangular Fish Tables in two rows */}
       {Array.from({ length: 6 }, (_, i) => (
