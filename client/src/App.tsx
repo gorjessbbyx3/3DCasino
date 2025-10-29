@@ -46,51 +46,59 @@ function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/95 via-purple-900/30 to-transparent p-6 backdrop-blur-md border-b border-emerald-500/20">
+      <div className="absolute top-0 left-0 right-0 z-10 glass-morphism p-6 border-b border-emerald-500/30 animate-border-glow">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-300 via-yellow-400 to-purple-400 bg-clip-text text-transparent drop-shadow-2xl animate-neon">
+          <div className="flex items-center gap-6">
+            <h1 className="text-5xl font-bold text-gradient-casino drop-shadow-2xl animate-text-glow tracking-tight">
               💎 Jade Royale
             </h1>
             {user && (
-              <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-900/60 to-yellow-900/40 px-6 py-3 rounded-xl border border-yellow-400/60 backdrop-blur-md shadow-xl shadow-emerald-500/30 animate-glow">
-                <Coins className="w-6 h-6 text-yellow-300 animate-bounce animate-sparkle" />
-                <span className="text-yellow-200 font-bold text-lg tracking-wide animate-shimmer">
-                  ${user.balance.toLocaleString()}
-                </span>
+              <div className="flex items-center gap-4 glass-morphism-light px-8 py-4 rounded-2xl border-2 border-yellow-400/70 shadow-2xl shadow-emerald-500/40 animate-glow">
+                <div className="relative">
+                  <Coins className="w-7 h-7 text-yellow-300 animate-bounce" />
+                  <div className="absolute inset-0 animate-ripple bg-yellow-400/30 rounded-full"></div>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs text-yellow-300/80 font-medium tracking-wider">BALANCE</span>
+                  <span className="text-gradient-gold font-bold text-xl tracking-wide animate-shimmer">
+                    ${user.balance.toLocaleString()}
+                  </span>
+                </div>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-5">
             {user ? (
               <>
                 <Button
                   onClick={openStats}
                   variant="outline"
                   size="default"
-                  className="border-blue-500/50 hover:bg-blue-900/30 hover:border-blue-400 text-blue-200 hover:text-blue-100 transition-all duration-300 shadow-lg hover:shadow-blue-500/20"
+                  className="glass-morphism-light border-2 border-blue-400/60 hover:border-blue-300 text-blue-200 hover:text-blue-100 transition-all duration-500 shadow-xl hover:shadow-blue-500/40 animate-border-glow group"
                 >
-                  <BarChart3 className="w-4 h-4 mr-2" />
+                  <BarChart3 className="w-5 h-5 mr-2 group-hover:animate-bounce" />
                   Stats
                 </Button>
-                <div className="text-right">
-                  <div className="text-gray-300 text-sm">Welcome back,</div>
-                  <div className="text-emerald-300 font-bold text-lg tracking-wide">{user.username}</div>
+                <div className="glass-morphism-light px-4 py-3 rounded-xl border border-emerald-400/30">
+                  <div className="text-emerald-300/80 text-sm font-medium tracking-wide">Welcome back,</div>
+                  <div className="text-gradient-emerald font-bold text-lg tracking-wide animate-text-glow">{user.username}</div>
                 </div>
                 <Button
                   onClick={handleLogout}
                   variant="outline"
                   size="default"
-                  className="border-red-500/50 hover:bg-red-900/30 hover:border-red-400 text-red-200 hover:text-red-100 transition-all duration-300 shadow-lg hover:shadow-red-500/20"
+                  className="glass-morphism-light border-2 border-red-400/60 hover:border-red-300 text-red-200 hover:text-red-100 transition-all duration-500 shadow-xl hover:shadow-red-500/40 animate-border-glow group"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-5 h-5 mr-2 group-hover:animate-bounce" />
                   Logout
                 </Button>
               </>
             ) : (
-              <div className="text-gray-300 text-base bg-black/40 px-4 py-2 rounded-lg border border-gray-600/30 backdrop-blur-sm">
-                ✨ Click on any game or the cashier to get started
+              <div className="glass-morphism px-6 py-3 rounded-2xl border border-emerald-400/40 animate-glow">
+                <span className="text-emerald-200 text-base font-medium animate-shimmer">
+                  ✨ Click on any game or the cashier to get started
+                </span>
               </div>
             )}
           </div>
@@ -108,15 +116,21 @@ function App() {
       <AudioControls />
       <Toaster position="top-right" richColors />
 
-      <div className="absolute bottom-6 left-0 right-0 z-10 text-center">
-        <div className="inline-flex items-center gap-4 bg-gradient-to-r from-purple-900/80 via-black/90 to-blue-900/80 px-8 py-4 rounded-2xl border border-purple-400/40 backdrop-blur-md shadow-2xl animate-float">
-          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse animate-sparkle"></div>
-          <p className="text-purple-200 text-base font-medium bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent">
+      <div className="absolute bottom-8 left-0 right-0 z-10 text-center">
+        <div className="inline-flex items-center gap-6 glass-morphism px-10 py-5 rounded-3xl border-2 border-purple-400/50 shadow-2xl shadow-purple-500/30 animate-float animate-border-glow">
+          <div className="relative">
+            <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 w-3 h-3 bg-emerald-400/50 rounded-full animate-sparkle"></div>
+          </div>
+          <p className="text-gradient-casino text-lg font-semibold tracking-wide animate-text-glow">
             {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) 
               ? "👆 Touch left side to move • Touch right side to look • Tap games to play" 
               : "⌨️ WASD to move • 🖱️ Mouse to look • 🎮 Click on games to play"}
           </p>
-          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse animate-sparkle"></div>
+          <div className="relative">
+            <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
+            <div className="absolute inset-0 w-3 h-3 bg-yellow-400/50 rounded-full animate-sparkle"></div>
+          </div>
         </div>
       </div>
     </div>
