@@ -170,6 +170,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/games/slot/spin", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const { bet, machineNumber } = req.body;
+      const betNum = parseInt(bet);
+      const machineNum = parseInt(machineNumber) || 1;
+      
+      if (isNaN(betNum) || betNum <= 0) {
+        return res.status(400).json({ message: "Invalid bet amount" });
+      }
+
+      const result = await storage.slotMachineSpin(userId, betNum, machineNum);
+      res.json({
+        user: {
+          id: result.user.id,
+          username: result.user.username,
+          balance: result.user.balance,
+        },
+        symbols: result.symbols,
+        winAmount: result.winAmount,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Spin failed" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

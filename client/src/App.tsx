@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CasinoScene } from "./components/CasinoScene";
 import { AuthModal } from "./components/AuthModal";
 import { CashierModal } from "./components/CashierModal";
+import { SlotMachineModal } from "./components/SlotMachineModal";
 import { AudioManager } from "./components/AudioManager";
 import { AudioControls } from "./components/AudioControls";
 import { useUser } from "./lib/stores/useUser";
@@ -89,6 +90,9 @@ function App() {
       <CasinoScene />
       <AuthModal />
       <CashierModal />
+      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+        <SlotMachineModal key={num} machineNumber={num} />
+      ))}
       <AudioManager />
       <AudioControls />
       <Toaster position="top-right" richColors />

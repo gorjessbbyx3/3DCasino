@@ -22,6 +22,7 @@ export interface IStorage {
   getUserTransactions(userId: number, limit?: number): Promise<Transaction[]>;
   deposit(userId: number, amount: number, description?: string): Promise<{ user: User; transaction: Transaction }>;
   withdraw(userId: number, amount: number, description?: string): Promise<{ user: User; transaction: Transaction }>;
+  slotMachineSpin(userId: number, bet: number, machineNumber: number): Promise<{ user: User; symbols: string[]; winAmount: number }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -113,6 +114,71 @@ export class DatabaseStorage implements IStorage {
 
     const updatedUser = await this.getUser(userId);
     return { user: updatedUser!, transaction };
+  }
+
+  async slotMachineSpin(userId: number, bet: number, machineNumber: number): Promise<{ user: User; symbols: string[]; winAmount: number }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (bet <= 0) {
+      throw new Error("Bet amount must be positive");
+    }
+
+    if (user.balance < bet) {
+      throw new Error("Insufficient balance");
+    }
+
+    const SYMBOLS = ["🍒", "🍋", "🍊", "🍇", "💎", "⭐", "7️⃣"];
+    const symbols: string[] = [
+      SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+      SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+      SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]
+    ];
+
+    let winMultiplier = 0;
+    if (symbols[0] === symbols[1] && symbols[1] === symbols[2]) {
+      if (symbols[0] === "7️⃣") winMultiplier = 100;
+      else if (symbols[0] === "💎") winMultiplier = 50;
+      else if (symbols[0] === "⭐") winMultiplier = 25;
+      else if (symbols[0] === "🍇") winMultiplier = 15;
+      else if (symbols[0] === "🍊") winMultiplier = 10;
+      else if (symbols[0] === "🍋") winMultiplier = 8;
+      else if (symbols[0] === "🍒") winMultiplier = 5;
+    } else if (symbols[0] === symbols[1] || symbols[1] === symbols[2] || symbols[0] === symbols[2]) {
+      winMultiplier = 2;
+    }
+
+    const winAmount = bet * winMultiplier;
+    let balanceAfterBet = user.balance - bet;
+
+    await this.createTransaction({
+      userId,
+      type: "bet",
+      amount: bet,
+      balanceBefore: user.balance,
+      balanceAfter: balanceAfterBet,
+      description: `Slot Machine #${machineNumber} - Spin`,
+    });
+
+    if (winAmount > 0) {
+      const finalBalance = balanceAfterBet + winAmount;
+      await this.createTransaction({
+        userId,
+        type: "win",
+        amount: winAmount,
+        balanceBefore: balanceAfterBet,
+        balanceAfter: finalBalance,
+        description: `Slot Machine #${machineNumber} - Win (${symbols.join(" ")})`,
+      });
+      await this.updateUserBalance(userId, finalBalance);
+    } else {
+      await this.updateUserBalance(userId, balanceAfterBet);
+    }
+
+    const updatedUser = await this.getUser(userId);
+    return { user: updatedUser!, symbols, winAmount };
   }
 }
 

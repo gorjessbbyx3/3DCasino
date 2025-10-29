@@ -272,6 +272,16 @@ function GameObject({
 function CasinoGames() {
   const { setShowAuthModal, user } = useUser();
 
+  const handleSlotMachineClick = (machineNumber: number) => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("openSlotMachine", { detail: { machineNumber } })
+      );
+    }
+  };
+
   const handleGameClick = () => {
     if (!user) {
       setShowAuthModal(true);
@@ -315,7 +325,7 @@ function CasinoGames() {
           rotation={[0, 0, 0]}
           modelPath="/models/slot-machine.glb"
           scale={2}
-          onClick={handleGameClick}
+          onClick={() => handleSlotMachineClick(i + 1)}
           label={`Slot Machine ${i + 1}`}
           glowColor="#ffd700"
         />
