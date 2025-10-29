@@ -221,19 +221,57 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         />
       </mesh>
 
-      {/* Back wall sign */}
+      {/* Back wall sign - Broadway/Hollywood style */}
       {backSign && (
-        <Text
-          position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}
-          fontSize={2}
-          color="#00ffff"
-          anchorX="center"
-          anchorY="middle"
-          outlineWidth={0.1}
-          outlineColor="#0891b2"
-        >
-          {backSign}
-        </Text>
+        <group position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}>
+          {/* Main sign text - green with white glow */}
+          <Text
+            position={[0, 0, 0]}
+            fontSize={2.5}
+            color="#00ff00"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.25}
+            outlineColor="#ffffff"
+            letterSpacing={0.1}
+          >
+            {backSign}
+          </Text>
+          
+          {/* Outer glow effect using point lights */}
+          <pointLight position={[0, 0, 1]} color="#ffffff" intensity={50} distance={15} />
+          <pointLight position={[-5, 0, 1]} color="#00ff00" intensity={30} distance={10} />
+          <pointLight position={[5, 0, 1]} color="#00ff00" intensity={30} distance={10} />
+          
+          {/* Marquee bulbs around the sign */}
+          {Array.from({ length: 40 }).map((_, i) => {
+            const angle = (i / 40) * Math.PI * 2;
+            const radiusX = 12;
+            const radiusY = 2.5;
+            const x = Math.cos(angle) * radiusX;
+            const y = Math.sin(angle) * radiusY;
+            return (
+              <mesh key={i} position={[x, y, 0.1]}>
+                <sphereGeometry args={[0.15, 8, 8]} />
+                <meshStandardMaterial
+                  color="#ffffff"
+                  emissive="#ffffff"
+                  emissiveIntensity={2 + Math.sin(Date.now() * 0.003 + i * 0.5) * 1.5}
+                />
+              </mesh>
+            );
+          })}
+          
+          {/* Background panel for the sign */}
+          <mesh position={[0, 0, -0.2]}>
+            <boxGeometry args={[25, 5.5, 0.3]} />
+            <meshStandardMaterial 
+              color="#1a1a1a"
+              metalness={0.8}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
       )}
     </group>
   );
