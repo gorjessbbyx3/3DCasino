@@ -147,6 +147,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
   const wallHeight = 16;
   const doorWidth = 6;
   const doorHeight = 5;
+  const casinoBgTexture = useTexture("/casino-bg.jpg");
 
   return (
     <group>
@@ -362,7 +363,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
       <mesh position={[0, wallHeight / 2, roomSize / 2]} receiveShadow>
         <boxGeometry args={[roomSize, wallHeight, 1]} />
         <meshStandardMaterial 
-          map={useTexture("/casino-bg.jpg")}
+          map={casinoBgTexture}
           roughness={0.4}
           metalness={0.2}
         />
