@@ -12,10 +12,22 @@ const openSlotMachineModal = (machineNumber: number) => {
   window.dispatchEvent(new CustomEvent('openSlotMachineModal', { detail: { machineNumber } }));
 };
 
+// Room state management
+type RoomType = 'slots' | 'cashier' | 'fish';
+
+const useRoomState = () => {
+  const [currentRoom, setCurrentRoom] = useState<RoomType>('slots');
+  return { currentRoom, setCurrentRoom };
+};
+
+// Create a context for room state
+const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom: (room: RoomType) => void }>({
+  currentRoom: 'slots',
+  setCurrentRoom: () => {}
+});
+
 // VIP Underground Casino Floor
-function CasinoFloor() {
-  const roomSize = 80;
-  
+function CasinoFloor({ roomSize = 50 }: { roomSize?: number }) {
   return (
     <group>
       {/* Main polished dark floor */}
@@ -35,7 +47,7 @@ function CasinoFloor() {
 
       {/* Center floor design - cyan circle with purple ring */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-        <ringGeometry args={[8, 12, 64]} />
+        <ringGeometry args={[4, 6, 64]} />
         <meshStandardMaterial
           color="#a855f7"
           emissive="#a855f7"
@@ -46,7 +58,7 @@ function CasinoFloor() {
       </mesh>
       
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-        <circleGeometry args={[8, 64]} />
+        <circleGeometry args={[4, 64]} />
         <meshStandardMaterial
           color="#00ffff"
           emissive="#00ffff"
@@ -55,33 +67,20 @@ function CasinoFloor() {
           metalness={0.8}
         />
       </mesh>
-
-      {/* Neon walkway strips */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -20]} receiveShadow>
-        <planeGeometry args={[40, 2]} />
-        <meshStandardMaterial
-          color="#a855f7"
-          emissive="#a855f7"
-          emissiveIntensity={0.4}
-        />
-      </mesh>
-      
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 10]} receiveShadow>
-        <planeGeometry args={[40, 2]} />
-        <meshStandardMaterial
-          color="#06b6d4"
-          emissive="#06b6d4"
-          emissiveIntensity={0.4}
-        />
-      </mesh>
     </group>
   );
 }
 
-// Dark luxury walls
-function CasinoWalls() {
-  const roomSize = 80;
-  const wallHeight = 15;
+// Room walls with doorways
+function RoomWalls({ roomSize = 50, leftDoor = false, rightDoor = false, backSign = "" }: { 
+  roomSize?: number; 
+  leftDoor?: boolean; 
+  rightDoor?: boolean;
+  backSign?: string;
+}) {
+  const wallHeight = 12;
+  const doorWidth = 6;
+  const doorHeight = 5;
   
   return (
     <group>
@@ -95,28 +94,98 @@ function CasinoWalls() {
         />
       </mesh>
 
-      {/* Left Wall */}
-      <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
-        <boxGeometry args={[1, wallHeight, roomSize]} />
-        <meshStandardMaterial 
-          color="#0f0f1a" 
-          roughness={0.6}
-          metalness={0.4}
-        />
-      </mesh>
+      {/* Left Wall with optional door */}
+      {leftDoor ? (
+        <>
+          {/* Wall above door */}
+          <mesh position={[-roomSize / 2, wallHeight - doorHeight / 2 - 0.5, 0]} receiveShadow>
+            <boxGeometry args={[1, wallHeight - doorHeight - 1, roomSize]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          {/* Wall sections beside door */}
+          <mesh position={[-roomSize / 2, doorHeight / 2, -roomSize / 2 + doorWidth / 2 + (roomSize - doorWidth) / 4]} receiveShadow>
+            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          <mesh position={[-roomSize / 2, doorHeight / 2, roomSize / 2 - doorWidth / 2 - (roomSize - doorWidth) / 4]} receiveShadow>
+            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          {/* Door frame - glowing cyan */}
+          <mesh position={[-roomSize / 2 + 0.5, doorHeight / 2, 0]}>
+            <boxGeometry args={[0.3, doorHeight + 1, doorWidth + 1]} />
+            <meshStandardMaterial 
+              color="#00ffff"
+              emissive="#00ffff"
+              emissiveIntensity={1}
+            />
+          </mesh>
+          {/* Door label */}
+          <Text
+            position={[-roomSize / 2 + 1, doorHeight + 1, 0]}
+            fontSize={1}
+            color="#00ffff"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, Math.PI / 2, 0]}
+          >
+            💰 CASHIER
+          </Text>
+        </>
+      ) : (
+        <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
+          <boxGeometry args={[1, wallHeight, roomSize]} />
+          <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+        </mesh>
+      )}
 
-      {/* Right Wall */}
-      <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
-        <boxGeometry args={[1, wallHeight, roomSize]} />
-        <meshStandardMaterial 
-          color="#0f0f1a" 
-          roughness={0.6}
-          metalness={0.4}
-        />
-      </mesh>
+      {/* Right Wall with optional door */}
+      {rightDoor ? (
+        <>
+          {/* Wall above door */}
+          <mesh position={[roomSize / 2, wallHeight - doorHeight / 2 - 0.5, 0]} receiveShadow>
+            <boxGeometry args={[1, wallHeight - doorHeight - 1, roomSize]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          {/* Wall sections beside door */}
+          <mesh position={[roomSize / 2, doorHeight / 2, -roomSize / 2 + doorWidth / 2 + (roomSize - doorWidth) / 4]} receiveShadow>
+            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          <mesh position={[roomSize / 2, doorHeight / 2, roomSize / 2 - doorWidth / 2 - (roomSize - doorWidth) / 4]} receiveShadow>
+            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          {/* Door frame - glowing purple */}
+          <mesh position={[roomSize / 2 - 0.5, doorHeight / 2, 0]}>
+            <boxGeometry args={[0.3, doorHeight + 1, doorWidth + 1]} />
+            <meshStandardMaterial 
+              color="#a855f7"
+              emissive="#a855f7"
+              emissiveIntensity={1}
+            />
+          </mesh>
+          {/* Door label */}
+          <Text
+            position={[roomSize / 2 - 1, doorHeight + 1, 0]}
+            fontSize={1}
+            color="#a855f7"
+            anchorX="center"
+            anchorY="middle"
+            rotation={[0, -Math.PI / 2, 0]}
+          >
+            🎣 FISH GAMES
+          </Text>
+        </>
+      ) : (
+        <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
+          <boxGeometry args={[1, wallHeight, roomSize]} />
+          <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+        </mesh>
+      )}
 
       {/* Ceiling neon strips */}
-      <mesh position={[-15, wallHeight - 1, 0]}>
+      <mesh position={[-10, wallHeight - 1, 0]}>
         <boxGeometry args={[0.5, 0.2, roomSize]} />
         <meshStandardMaterial
           color="#00ffff"
@@ -125,7 +194,7 @@ function CasinoWalls() {
         />
       </mesh>
       
-      <mesh position={[15, wallHeight - 1, 0]}>
+      <mesh position={[10, wallHeight - 1, 0]}>
         <boxGeometry args={[0.5, 0.2, roomSize]} />
         <meshStandardMaterial
           color="#a855f7"
@@ -134,27 +203,20 @@ function CasinoWalls() {
         />
       </mesh>
 
-      {/* Casino name sign */}
-      <Text
-        position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}
-        fontSize={2.5}
-        color="#00ffff"
-        anchorX="center"
-        anchorY="middle"
-        outlineWidth={0.1}
-        outlineColor="#0891b2"
-      >
-        💎 JADE ROYALE 💎
-      </Text>
-      <Text
-        position={[0, wallHeight - 3.5, -roomSize / 2 + 0.6]}
-        fontSize={1}
-        color="#a855f7"
-        anchorX="center"
-        anchorY="middle"
-      >
-        VIP UNDERGROUND CASINO
-      </Text>
+      {/* Back wall sign */}
+      {backSign && (
+        <Text
+          position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}
+          fontSize={2}
+          color="#00ffff"
+          anchorX="center"
+          anchorY="middle"
+          outlineWidth={0.1}
+          outlineColor="#0891b2"
+        >
+          {backSign}
+        </Text>
+      )}
     </group>
   );
 }
@@ -224,7 +286,7 @@ function GameObject({
         <group>
           {/* Rectangular table surface */}
           <mesh position={[0, 0.8, 0]} castShadow receiveShadow>
-            <boxGeometry args={[3, 0.1, 2]} />
+            <boxGeometry args={[4, 0.1, 2.5]} />
             <meshStandardMaterial 
               color="#0a2540" 
               metalness={0.8} 
@@ -233,7 +295,7 @@ function GameObject({
           </mesh>
           {/* Screen - cyan glow rectangular */}
           <mesh position={[0, 0.86, 0]} castShadow>
-            <boxGeometry args={[2.8, 0.05, 1.8]} />
+            <boxGeometry args={[3.8, 0.05, 2.3]} />
             <meshStandardMaterial 
               color="#000000" 
               emissive="#06b6d4" 
@@ -242,7 +304,7 @@ function GameObject({
           </mesh>
           {/* Rectangular base */}
           <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
-            <boxGeometry args={[2, 0.8, 1.5]} />
+            <boxGeometry args={[3, 0.8, 2]} />
             <meshStandardMaterial 
               color="#1a1a2e" 
               metalness={0.7}
@@ -256,7 +318,7 @@ function GameObject({
         <group>
           {/* Booth structure - luxury dark */}
           <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
-            <boxGeometry args={[3, 3, 2]} />
+            <boxGeometry args={[4, 3, 2.5]} />
             <meshStandardMaterial 
               color="#1a0f2e" 
               metalness={0.6}
@@ -266,8 +328,8 @@ function GameObject({
             />
           </mesh>
           {/* Window - cyan glow */}
-          <mesh position={[0, 2, 1.01]} castShadow>
-            <boxGeometry args={[2, 1, 0.1]} />
+          <mesh position={[0, 2, 1.26]} castShadow>
+            <boxGeometry args={[3, 1.5, 0.1]} />
             <meshStandardMaterial 
               color="#000000" 
               emissive="#00ffff" 
@@ -277,8 +339,8 @@ function GameObject({
             />
           </mesh>
           {/* Sign - bright cyan */}
-          <mesh position={[0, 3.2, 1.01]} castShadow>
-            <boxGeometry args={[2.5, 0.5, 0.1]} />
+          <mesh position={[0, 3.5, 1.26]} castShadow>
+            <boxGeometry args={[3.5, 0.6, 0.1]} />
             <meshStandardMaterial 
               color="#00ffff"
               emissive="#00ffff"
@@ -384,18 +446,80 @@ function GameObject({
   );
 }
 
-function CasinoGames() {
+// Slot Machine Room
+function SlotMachineRoom() {
   const { setShowAuthModal, user } = useUser();
 
   const handleSlotMachineClick = (machineNumber: number) => {
     if (!user) {
       setShowAuthModal(true);
     } else {
-      window.dispatchEvent(
-        new CustomEvent("openSlotMachine", { detail: { machineNumber } })
-      );
+      openSlotMachineModal(machineNumber);
     }
   };
+
+  return (
+    <group>
+      {/* 10 Slot Machines - 5 on each side wall */}
+      {/* Left wall slots */}
+      {Array.from({ length: 5 }, (_, i) => (
+        <GameObject
+          key={`slot-left-${i}`}
+          position={[-22, 0, (i - 2) * 8]}
+          rotation={[0, Math.PI / 2, 0]}
+          modelPath="slot-machine"
+          scale={2.5}
+          onClick={() => handleSlotMachineClick(i + 1)}
+          label={`Slot Machine ${i + 1}`}
+          glowColor="#a855f7"
+        />
+      ))}
+
+      {/* Right wall slots */}
+      {Array.from({ length: 5 }, (_, i) => (
+        <GameObject
+          key={`slot-right-${i}`}
+          position={[22, 0, (i - 2) * 8]}
+          rotation={[0, -Math.PI / 2, 0]}
+          modelPath="slot-machine"
+          scale={2.5}
+          onClick={() => handleSlotMachineClick(i + 6)}
+          label={`Slot Machine ${i + 6}`}
+          glowColor="#a855f7"
+        />
+      ))}
+    </group>
+  );
+}
+
+// Cashier Room
+function CashierRoom() {
+  return (
+    <group>
+      {/* Cashier Booth centered */}
+      <GameObject
+        position={[0, 0, -10]}
+        modelPath="cashier-booth"
+        scale={1.5}
+        onClick={() => openCashierModal()}
+        label="💰 Cashier"
+        glowColor="#00ffff"
+      />
+
+      {/* Captain Pitbull at cashier */}
+      <GameObject
+        position={[0, 0, -7]}
+        modelPath="pitbull-pirate"
+        scale={1.2}
+        glowColor="#00ffff"
+      />
+    </group>
+  );
+}
+
+// Fish Game Room
+function FishGameRoom() {
+  const { setShowAuthModal, user } = useUser();
 
   const handleGameClick = () => {
     if (!user) {
@@ -405,118 +529,99 @@ function CasinoGames() {
     }
   };
 
-  const handleCashierClick = () => {
-    if (!user) {
-      setShowAuthModal(true);
-    } else {
-      const event = new CustomEvent("openCashier");
-      window.dispatchEvent(event);
-    }
-  };
-
   return (
-    <>
-      {/* 10 Slot Machines lined up along the back wall - BIGGER */}
-      {Array.from({ length: 10 }, (_, i) => (
-        <GameObject
-          key={`slot-${i}`}
-          position={[
-            (i - 4.5) * 7,
-            0,
-            -37
-          ]}
-          modelPath="slot-machine"
-          scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 1)}
-          label={`Slot Machine ${i + 1}`}
-          glowColor="#a855f7"
-        />
-      ))}
-
-      {/* 6 Rectangular Fish Tables in center area */}
+    <group>
+      {/* 6 Rectangular Fish Tables in two rows */}
       {Array.from({ length: 6 }, (_, i) => (
         <GameObject
           key={`fish-${i}`}
           position={[
-            ((i % 3) - 1) * 10,
+            ((i % 3) - 1) * 12,
             0,
-            Math.floor(i / 3) === 0 ? -5 : 15
+            Math.floor(i / 3) === 0 ? -8 : 8
           ]}
           modelPath="fish-table"
-          scale={1.5}
+          scale={1.8}
           onClick={handleGameClick}
           label={`Fish Table ${i + 1}`}
           glowColor="#06b6d4"
         />
       ))}
-
-      {/* Cashier Booth */}
-      <GameObject
-        position={[0, 0, 35]}
-        modelPath="cashier-booth"
-        scale={1}
-        onClick={() => openCashierModal()}
-        label="💰 Cashier"
-        glowColor="#00ffff"
-      />
-
-      {/* Captain Pitbull at cashier */}
-      <GameObject
-        position={[0, 0, 33]}
-        modelPath="pitbull-pirate"
-        scale={1}
-        glowColor="#00ffff"
-      />
-    </>
+    </group>
   );
 }
 
-// VIP Underground lighting - moody and exclusive
-function SceneLighting() {
-  return (
-    <>
-      {/* Low ambient for underground feel */}
-      <ambientLight intensity={0.15} color="#1a1a2e" />
-
-      {/* Main overhead spotlight */}
-      <spotLight
-        position={[0, 12, 0]}
-        angle={Math.PI / 2.5}
-        penumbra={0.5}
-        intensity={0.8}
-        castShadow
-        shadow-mapSize-width={2048}
-        shadow-mapSize-height={2048}
-        color="#ffffff"
-      />
-
-      {/* Purple zone lights for slot machines */}
-      <pointLight position={[-12, 4, -15]} intensity={2} color="#a855f7" distance={15} />
-      <pointLight position={[12, 4, -15]} intensity={2} color="#a855f7" distance={15} />
-      <pointLight position={[-12, 4, 5]} intensity={2} color="#a855f7" distance={15} />
-      <pointLight position={[12, 4, 5]} intensity={2} color="#a855f7" distance={15} />
-
-      {/* Cyan zone lights for fish tables */}
-      <pointLight position={[-8, 4, -30]} intensity={2.5} color="#06b6d4" distance={15} />
-      <pointLight position={[8, 4, -30]} intensity={2.5} color="#06b6d4" distance={15} />
-      <pointLight position={[-8, 4, 20]} intensity={2.5} color="#06b6d4" distance={15} />
-      <pointLight position={[8, 4, 20]} intensity={2.5} color="#06b6d4" distance={15} />
-
-      {/* Bright cyan accent for cashier */}
-      <pointLight position={[0, 6, 35]} intensity={4} color="#00ffff" distance={12} />
-
-      {/* Corner accent lights */}
-      <pointLight position={[-30, 3, -30]} intensity={1} color="#a855f7" distance={20} />
-      <pointLight position={[30, 3, -30]} intensity={1} color="#06b6d4" distance={20} />
-      <pointLight position={[-30, 3, 30]} intensity={1} color="#06b6d4" distance={20} />
-      <pointLight position={[30, 3, 30]} intensity={1} color="#a855f7" distance={20} />
-    </>
-  );
+// Room lighting based on room type
+function RoomLighting({ roomType }: { roomType: RoomType }) {
+  if (roomType === 'slots') {
+    return (
+      <>
+        <ambientLight intensity={0.15} color="#1a1a2e" />
+        <spotLight
+          position={[0, 10, 0]}
+          angle={Math.PI / 2.5}
+          penumbra={0.5}
+          intensity={0.8}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          color="#ffffff"
+        />
+        {/* Purple lights for slot machines */}
+        <pointLight position={[-22, 4, -10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-22, 4, 0]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-22, 4, 10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[22, 4, -10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[22, 4, 0]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[22, 4, 10]} intensity={3} color="#a855f7" distance={12} />
+      </>
+    );
+  } else if (roomType === 'cashier') {
+    return (
+      <>
+        <ambientLight intensity={0.2} color="#1a1a2e" />
+        <spotLight
+          position={[0, 10, 0]}
+          angle={Math.PI / 2.5}
+          penumbra={0.5}
+          intensity={1}
+          castShadow
+          color="#ffffff"
+        />
+        <pointLight position={[0, 6, -10]} intensity={5} color="#00ffff" distance={15} />
+      </>
+    );
+  } else if (roomType === 'fish') {
+    return (
+      <>
+        <ambientLight intensity={0.15} color="#1a1a2e" />
+        <spotLight
+          position={[0, 10, 0]}
+          angle={Math.PI / 2.5}
+          penumbra={0.5}
+          intensity={0.8}
+          castShadow
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          color="#ffffff"
+        />
+        {/* Cyan lights for fish tables */}
+        <pointLight position={[-12, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[0, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[12, 4, -8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[-12, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[0, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
+        <pointLight position={[12, 4, 8]} intensity={3} color="#06b6d4" distance={12} />
+      </>
+    );
+  }
+  return null;
 }
 
-// First-person WASD movement controls
+// First-person WASD movement controls with room transitions
 function FirstPersonControls() {
   const { camera } = useThree();
+  const { currentRoom, setCurrentRoom } = React.useContext(RoomContext);
   const [moveForward, setMoveForward] = useState(false);
   const [moveBackward, setMoveBackward] = useState(false);
   const [moveLeft, setMoveLeft] = useState(false);
@@ -598,9 +703,35 @@ function FirstPersonControls() {
       camera.position.addScaledVector(right, speed);
     }
 
-    // Keep camera within casino bounds
-    camera.position.x = Math.max(-35, Math.min(35, camera.position.x));
-    camera.position.z = Math.max(-35, Math.min(35, camera.position.z));
+    // Room transitions based on position
+    if (currentRoom === 'slots') {
+      // Left door to cashier
+      if (camera.position.x < -22 && Math.abs(camera.position.z) < 3) {
+        setCurrentRoom('cashier');
+        camera.position.set(20, 1.7, 0);
+      }
+      // Right door to fish games
+      if (camera.position.x > 22 && Math.abs(camera.position.z) < 3) {
+        setCurrentRoom('fish');
+        camera.position.set(-20, 1.7, 0);
+      }
+    } else if (currentRoom === 'cashier') {
+      // Exit back to slots
+      if (camera.position.x > 22 && Math.abs(camera.position.z) < 3) {
+        setCurrentRoom('slots');
+        camera.position.set(-20, 1.7, 0);
+      }
+    } else if (currentRoom === 'fish') {
+      // Exit back to slots
+      if (camera.position.x < -22 && Math.abs(camera.position.z) < 3) {
+        setCurrentRoom('slots');
+        camera.position.set(20, 1.7, 0);
+      }
+    }
+
+    // Keep camera within current room bounds
+    camera.position.x = Math.max(-23, Math.min(23, camera.position.x));
+    camera.position.z = Math.max(-23, Math.min(23, camera.position.z));
     camera.position.y = 1.7; // Eye level
   });
 
@@ -608,45 +739,70 @@ function FirstPersonControls() {
 }
 
 function Scene() {
+  const { currentRoom } = React.useContext(RoomContext);
+
   return (
     <>
       <FirstPersonControls />
-      <SceneLighting />
+      <RoomLighting roomType={currentRoom} />
       <CasinoFloor />
-      <CasinoWalls />
-      <CasinoGames />
+      
+      {currentRoom === 'slots' && (
+        <>
+          <RoomWalls leftDoor={true} rightDoor={true} backSign="💎 JADE ROYALE 💎" />
+          <SlotMachineRoom />
+        </>
+      )}
+      
+      {currentRoom === 'cashier' && (
+        <>
+          <RoomWalls rightDoor={true} backSign="💰 CASHIER 💰" />
+          <CashierRoom />
+        </>
+      )}
+      
+      {currentRoom === 'fish' && (
+        <>
+          <RoomWalls leftDoor={true} backSign="🎣 FISH GAMES 🎣" />
+          <FishGameRoom />
+        </>
+      )}
     </>
   );
 }
 
 function CanvasWrapper() {
+  const roomState = useRoomState();
+
   return (
-    <Canvas
-      shadows
-      camera={{ 
-        position: [0, 1.7, 25], 
-        fov: 75,
-        near: 0.1,
-        far: 1000
-      }}
-      gl={{ 
-        antialias: true, 
-        alpha: false,
-        powerPreference: "high-performance"
-      }}
-      onCreated={({ gl, scene }) => {
-        gl.shadowMap.enabled = true;
-        gl.shadowMap.type = THREE.PCFSoftShadowMap;
-        gl.setClearColor('#000011');
-        scene.fog = new THREE.Fog('#000011', 40, 100);
-      }}
-    >
-      <Suspense fallback={null}>
-        <Scene />
-        <Environment preset="night" background={false} />
-        <PointerLockControls />
-      </Suspense>
-    </Canvas>
+    <RoomContext.Provider value={roomState}>
+      <Canvas
+        shadows
+        camera={{ 
+          position: [0, 1.7, 20], 
+          fov: 75,
+          near: 0.1,
+          far: 1000
+        }}
+        gl={{ 
+          antialias: true, 
+          alpha: false,
+          powerPreference: "high-performance"
+        }}
+        onCreated={({ gl, scene }) => {
+          gl.shadowMap.enabled = true;
+          gl.shadowMap.type = THREE.PCFSoftShadowMap;
+          gl.setClearColor('#000011');
+          scene.fog = new THREE.Fog('#000011', 30, 60);
+        }}
+      >
+        <Suspense fallback={null}>
+          <Scene />
+          <Environment preset="night" background={false} />
+          <PointerLockControls />
+        </Suspense>
+      </Canvas>
+    </RoomContext.Provider>
   );
 }
 
