@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, Environment, OrbitControls } from "@react-three/drei";
+import { useGLTF, Environment, OrbitControls, Text } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
 
@@ -9,36 +9,41 @@ function CasinoFloor() {
     <group>
       {/* Main carpet floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
-        <planeGeometry args={[100, 100]} />
+        <planeGeometry args={[80, 80]} />
         <meshStandardMaterial
-          color="#2a0f0f"
+          color="#1a0f0f"
           roughness={0.8}
           metalness={0.1}
-          normalScale={[0.5, 0.5]}
         />
       </mesh>
 
-      {/* Decorative border */}
+      {/* Casino center logo */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
-        <ringGeometry args={[45, 48, 64]} />
-        <meshStandardMaterial
-          color="#ffd700"
-          roughness={0.3}
-          metalness={0.7}
-          emissive="#332200"
-          emissiveIntensity={0.1}
-        />
-      </mesh>
-
-      {/* Center medallion */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
-        <circleGeometry args={[8, 32]} />
+        <circleGeometry args={[5, 32]} />
         <meshStandardMaterial
           color="#10b981"
           roughness={0.2}
           metalness={0.8}
           emissive="#0a5d3a"
-          emissiveIntensity={0.3}
+          emissiveIntensity={0.2}
+        />
+      </mesh>
+
+      {/* Walkway markers */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, -15]} receiveShadow>
+        <planeGeometry args={[60, 4]} />
+        <meshStandardMaterial
+          color="#ffd700"
+          opacity={0.3}
+          transparent
+        />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 15]} receiveShadow>
+        <planeGeometry args={[40, 4]} />
+        <meshStandardMaterial
+          color="#ffd700"
+          opacity={0.3}
+          transparent
         />
       </mesh>
     </group>
@@ -46,16 +51,15 @@ function CasinoFloor() {
 }
 
 function CasinoWalls() {
-  const wallHeight = 10;
+  const wallHeight = 12;
   const wallThickness = 0.5;
-  const roomSize = 50;
+  const roomSize = 40;
 
-  const wallMaterial = new THREE.MeshStandardMaterial({
-    color: "#1a0f0a",
-    roughness: 0.4,
-    metalness: 0.2,
-    normalScale: new THREE.Vector2(0.3, 0.3)
-  });
+  const wallMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: "#2a1810",
+    roughness: 0.6,
+    metalness: 0.1,
+  }), []);
 
   const walls = [
     { position: [0, wallHeight / 2, -roomSize / 2], dimensions: [roomSize, wallHeight, wallThickness] },
@@ -66,58 +70,32 @@ function CasinoWalls() {
 
   return (
     <group>
-      {/* Main walls with pillars */}
       {walls.map((wall, i) => (
-        <group key={i}>
-          <mesh position={wall.position as [number, number, number]} receiveShadow castShadow>
-            <boxGeometry args={wall.dimensions as [number, number, number]} />
-            <primitive object={wallMaterial.clone()} />
-          </mesh>
-
-          {/* Decorative trim */}
-          <mesh position={[
-            wall.position[0],
-            wallHeight - 0.5,
-            wall.position[2]
-          ]} receiveShadow>
-            <boxGeometry args={[
-              wall.dimensions[0] * 1.02,
-              0.3,
-              wall.dimensions[2] * 1.02
-            ]} />
-            <meshStandardMaterial
-              color="#ffd700"
-              roughness={0.2}
-              metalness={0.8}
-              emissive="#332200"
-              emissiveIntensity={0.1}
-            />
-          </mesh>
-        </group>
+        <mesh key={i} position={wall.position as [number, number, number]} receiveShadow castShadow>
+          <boxGeometry args={wall.dimensions as [number, number, number]} />
+          <primitive object={wallMaterial.clone()} />
+        </mesh>
       ))}
 
-      {/* Ornate ceiling */}
+      {/* Ceiling */}
       <mesh position={[0, wallHeight, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial
-          color="#0a0505"
+          color="#1a0f0a"
           side={THREE.DoubleSide}
-          roughness={0.8}
-          metalness={0.1}
         />
       </mesh>
 
-      {/* Chandelier */}
-      <mesh position={[0, wallHeight - 1, 0]} castShadow>
-        <sphereGeometry args={[1.5, 16, 8]} />
-        <meshStandardMaterial
-          color="#ffd700"
-          roughness={0.1}
-          metalness={0.9}
-          emissive="#ffaa00"
-          emissiveIntensity={0.3}
-        />
-      </mesh>
+      {/* Casino entrance sign */}
+      <Text
+        position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}
+        fontSize={2}
+        color="#ffd700"
+        anchorX="center"
+        anchorY="middle"
+      >
+        JADE ROYALE CASINO
+      </Text>
     </group>
   );
 }
@@ -129,9 +107,18 @@ interface GameObjectProps {
   scale?: number;
   onClick?: () => void;
   label?: string;
+  glowColor?: string;
 }
 
-function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, onClick, label }: GameObjectProps) {
+function GameObject({
+  position,
+  rotation = [0, 0, 0],
+  modelPath,
+  scale = 1,
+  onClick,
+  label,
+  glowColor = "#10b981"
+}: GameObjectProps) {
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
 
@@ -139,14 +126,8 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
   const clonedScene = useMemo(() => scene.clone(), [scene]);
 
   useFrame((state) => {
-    if (meshRef.current) {
-      if (hovered) {
-        meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 3) * 0.1;
-        meshRef.current.rotation.y += 0.01;
-      } else {
-        meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, position[1], 0.1);
-        meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, rotation[1], 0.1);
-      }
+    if (meshRef.current && hovered) {
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
     }
   });
 
@@ -155,12 +136,10 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
       ref={meshRef}
       position={position}
       rotation={rotation}
-      scale={hovered ? scale * 1.05 : scale}
+      scale={hovered ? scale * 1.1 : scale}
       onClick={(e) => {
         e.stopPropagation();
-        if (onClick) {
-          onClick();
-        }
+        onClick?.();
       }}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -174,42 +153,35 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
     >
       <primitive object={clonedScene} />
 
-      {/* Glow effect when hovered */}
+      {/* Glow effect */}
       {hovered && (
         <pointLight
-          position={[0, 2, 0]}
-          color="#10b981"
-          intensity={20}
-          distance={10}
+          position={[0, 3, 0]}
+          color={glowColor}
+          intensity={15}
+          distance={8}
         />
       )}
 
-      {/* Enhanced label */}
+      {/* Label */}
       {hovered && label && (
-        <group position={[0, 3.5, 0]}>
-          <mesh>
-            <planeGeometry args={[3, 0.8]} />
-            <meshBasicMaterial
-              color="#000000"
-              opacity={0.8}
-              transparent
-            />
-          </mesh>
-          <mesh position={[0, 0, 0.01]}>
-            <planeGeometry args={[2.8, 0.6]} />
-            <meshBasicMaterial
-              color="#10b981"
-              opacity={0.9}
-              transparent
-            />
-          </mesh>
-        </group>
+        <Text
+          position={[0, 4, 0]}
+          fontSize={0.8}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          outlineColor="#000000"
+          outlineWidth={0.02}
+        >
+          {label}
+        </Text>
       )}
     </group>
   );
 }
 
-function CasinoObjects() {
+function CasinoGames() {
   const { setShowAuthModal, user } = useUser();
 
   const handleGameClick = () => {
@@ -229,163 +201,150 @@ function CasinoObjects() {
     }
   };
 
+  // 10 Slot machines arranged in two rows
   const slotPositions: [number, number, number][] = [
-    [-15, 0, -15], [-10, 0, -15], [-5, 0, -15],
-    [5, 0, -15], [10, 0, -15], [15, 0, -15],
-    [-15, 0, 15], [-5, 0, 15],
-    [5, 0, 15], [15, 0, 15]
+    // Front row (5 machines)
+    [-16, 0, -10], [-8, 0, -10], [0, 0, -10], [8, 0, -10], [16, 0, -10],
+    // Back row (5 machines)
+    [-16, 0, -18], [-8, 0, -18], [0, 0, -18], [8, 0, -18], [16, 0, -18]
   ];
 
+  // 6 Fish tables arranged in two rows
   const fishTablePositions: [number, number, number][] = [
-    [-10, 0, 0], [0, 0, 0], [10, 0, 0],
-    [-10, 0, 8], [0, 0, 8], [10, 0, 8]
+    // Front row (3 tables)
+    [-12, 0, 8], [0, 0, 8], [12, 0, 8],
+    // Back row (3 tables)
+    [-12, 0, 16], [0, 0, 16], [12, 0, 16]
   ];
 
   return (
     <>
+      {/* 10 Slot Machines */}
       {slotPositions.map((pos, i) => (
         <GameObject
           key={`slot-${i}`}
           position={pos}
-          rotation={[0, Math.PI, 0]}
+          rotation={[0, 0, 0]}
           modelPath="/models/slot-machine.glb"
+          scale={2}
           onClick={handleGameClick}
-          label="Slot Machine"
+          label={`Slot Machine ${i + 1}`}
+          glowColor="#ffd700"
         />
       ))}
 
+      {/* 6 Fish Table Games */}
       {fishTablePositions.map((pos, i) => (
         <GameObject
           key={`fish-${i}`}
           position={pos}
+          rotation={[0, 0, 0]}
           modelPath="/models/fish-table.glb"
+          scale={2.5}
           onClick={handleGameClick}
-          label="Fish Table"
+          label={`Fish Hunter Table ${i + 1}`}
+          glowColor="#00bfff"
         />
       ))}
 
+      {/* Cashier Booth */}
       <GameObject
-        position={[0, 0, -20]}
+        position={[0, 0, -25]}
+        rotation={[0, 0, 0]}
         modelPath="/models/cashier-booth.glb"
         scale={3}
         onClick={handleCashierClick}
-        label="Cashier"
+        label="Cashier Booth"
+        glowColor="#10b981"
       />
 
+      {/* Pirate Captain (Pitbull Dog) */}
       <GameObject
-        position={[0, 0, -20]}
+        position={[0, 0, -23]}
         rotation={[0, 0, 0]}
         modelPath="/models/pitbull-pirate.glb"
-        scale={1.5}
+        scale={2}
         onClick={handleCashierClick}
+        label="Captain Pitbull - Cashier"
+        glowColor="#ff6b35"
       />
     </>
   );
 }
 
-function Lighting() {
-  const lightRef = useRef<THREE.PointLight>(null);
-
-  useFrame((state) => {
-    if (lightRef.current) {
-      lightRef.current.intensity = 25 + Math.sin(state.clock.elapsedTime * 2) * 5;
-    }
-  });
-
+function CasinoLighting() {
   return (
     <>
-      {/* Ambient lighting with warmer tone */}
-      <ambientLight intensity={0.2} color="#fff8dc" />
+      {/* Ambient lighting */}
+      <ambientLight intensity={0.3} color="#fff8dc" />
 
-      {/* Main dramatic spotlight on cashier */}
-      <spotLight
-        position={[0, 12, -18]}
-        target-position={[0, 0, -20]}
-        angle={0.4}
-        penumbra={0.6}
-        intensity={80}
+      {/* Main overhead lighting */}
+      <directionalLight
+        position={[10, 20, 10]}
+        intensity={1}
         castShadow
-        color="#10b981"
+        shadow-camera-far={50}
+        shadow-camera-left={-40}
+        shadow-camera-right={40}
+        shadow-camera-top={40}
+        shadow-camera-bottom={-40}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
       />
 
-      {/* Corner accent lights with color variation */}
-      <pointLight position={[-20, 7, -20]} intensity={15} color="#ff6b6b" />
-      <pointLight position={[20, 7, -20]} intensity={15} color="#4ecdc4" />
-      <pointLight position={[-20, 7, 20]} intensity={15} color="#ffe66d" />
-      <pointLight position={[20, 7, 20]} intensity={15} color="#a8e6cf" />
-
       {/* Slot machine area lighting */}
       <spotLight
-        position={[-10, 8, -12]}
-        target-position={[-10, 0, -15]}
-        angle={0.6}
-        penumbra={0.4}
-        intensity={40}
-        color="#ffd700"
-        castShadow
-      />
-      <spotLight
-        position={[10, 8, -12]}
-        target-position={[10, 0, -15]}
-        angle={0.6}
-        penumbra={0.4}
-        intensity={40}
+        position={[0, 15, -14]}
+        target-position={[0, 0, -14]}
+        angle={0.8}
+        penumbra={0.5}
+        intensity={50}
         color="#ffd700"
         castShadow
       />
 
-      {/* Fish table lighting */}
+      {/* Fish table area lighting */}
       <spotLight
-        position={[0, 6, 5]}
-        target-position={[0, 0, 8]}
+        position={[0, 15, 12]}
+        target-position={[0, 0, 12]}
         angle={0.8}
-        penumbra={0.3}
-        intensity={35}
+        penumbra={0.5}
+        intensity={50}
         color="#00bfff"
         castShadow
       />
 
-      {/* Animated center light */}
-      <pointLight
-        ref={lightRef}
-        position={[0, 8, 0]}
-        intensity={25}
+      {/* Cashier booth dramatic lighting */}
+      <spotLight
+        position={[0, 18, -20]}
+        target-position={[0, 0, -24]}
+        angle={0.4}
+        penumbra={0.3}
+        intensity={80}
         color="#10b981"
         castShadow
       />
 
-      {/* Ceiling chandelier lights */}
-      <pointLight position={[0, 9, 0]} intensity={40} color="#ffd700" />
+      {/* Corner accent lights */}
+      <pointLight position={[-15, 8, -15]} intensity={20} color="#ff6b6b" />
+      <pointLight position={[15, 8, -15]} intensity={20} color="#4ecdc4" />
+      <pointLight position={[-15, 8, 15]} intensity={20} color="#ffe66d" />
+      <pointLight position={[15, 8, 15]} intensity={20} color="#a8e6cf" />
 
-      {/* Atmospheric fog effect using directional light */}
-      <directionalLight
-        position={[10, 10, 5]}
-        intensity={0.5}
-        color="#ffffff"
-        castShadow
-        shadow-camera-far={50}
-        shadow-camera-left={-25}
-        shadow-camera-right={25}
-        shadow-camera-top={25}
-        shadow-camera-bottom={-25}
-      />
+      {/* Center floor accent */}
+      <pointLight position={[0, 5, 0]} intensity={25} color="#10b981" />
     </>
   );
 }
 
-function PlayerControls() {
+function FirstPersonControls() {
   const { camera, gl } = useThree();
   const [movement, setMovement] = useState({ forward: 0, right: 0 });
-  const [rotation, setRotation] = useState({ yaw: 0, pitch: 0 });
   const velocity = useRef(new THREE.Vector3());
-  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-  const rotationRef = useRef({ yaw: 0, pitch: 0 });
+  const [mousePressed, setMousePressed] = useState(false);
+  const lastMousePosition = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
-    if (isMobile) return;
-
     const keys: Record<string, boolean> = {};
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -408,45 +367,49 @@ function PlayerControls() {
       setMovement({ forward, right });
     };
 
-    const handleMouseMove = (e: MouseEvent) => {
-      if (document.pointerLockElement === gl.domElement) {
-        const sensitivity = 0.002;
-        rotationRef.current = {
-          yaw: rotationRef.current.yaw - e.movementX * sensitivity,
-          pitch: Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotationRef.current.pitch - e.movementY * sensitivity))
-        };
-        setRotation(rotationRef.current);
-      }
+    const handleMouseDown = (e: MouseEvent) => {
+      setMousePressed(true);
+      lastMousePosition.current = { x: e.clientX, y: e.clientY };
     };
 
-    const handleClick = () => {
-      if (!document.pointerLockElement) {
-        gl.domElement.requestPointerLock();
+    const handleMouseUp = () => {
+      setMousePressed(false);
+    };
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (mousePressed) {
+        const deltaX = e.clientX - lastMousePosition.current.x;
+        const deltaY = e.clientY - lastMousePosition.current.y;
+
+        camera.rotation.y -= deltaX * 0.002;
+        camera.rotation.x -= deltaY * 0.002;
+        camera.rotation.x = Math.max(-Math.PI / 6, Math.min(Math.PI / 6, camera.rotation.x));
+
+        lastMousePosition.current = { x: e.clientX, y: e.clientY };
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
+    window.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mouseup', handleMouseUp);
     window.addEventListener('mousemove', handleMouseMove);
-    gl.domElement.addEventListener('click', handleClick);
 
     const interval = setInterval(updateMovement, 16);
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
+      window.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mouseup', handleMouseUp);
       window.removeEventListener('mousemove', handleMouseMove);
-      gl.domElement.removeEventListener('click', handleClick);
       clearInterval(interval);
-      if (document.pointerLockElement === gl.domElement) {
-        document.exitPointerLock();
-      }
     };
-  }, [gl, isMobile]);
+  }, [camera, mousePressed]);
 
   useFrame((state, delta) => {
-    const speed = 5;
-    const dampening = 0.9;
+    const speed = 8;
+    const dampening = 0.85;
 
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
     forward.y = 0;
@@ -465,108 +428,16 @@ function PlayerControls() {
     const newPosition = camera.position.clone();
     newPosition.add(velocity.current.clone().multiplyScalar(delta));
 
-    newPosition.y = 2;
-    const maxDistance = 45;
+    // Keep player at walking height
+    newPosition.y = 2.5;
+
+    // Boundary limits
+    const maxDistance = 35;
     newPosition.x = Math.max(-maxDistance, Math.min(maxDistance, newPosition.x));
     newPosition.z = Math.max(-maxDistance, Math.min(maxDistance, newPosition.z));
 
     camera.position.copy(newPosition);
-
-    camera.rotation.order = 'YXZ';
-    camera.rotation.y = rotation.yaw;
-    camera.rotation.x = rotation.pitch;
   });
-
-  if (isMobile) {
-    return <MobileJoystick onMove={setMovement} onRotate={setRotation} />;
-  }
-
-  return null;
-}
-
-function MobileJoystick({
-  onMove,
-  onRotate
-}: {
-  onMove: (m: { forward: number; right: number }) => void;
-  onRotate: (r: { yaw: number; pitch: number }) => void;
-}) {
-  const [lookTouch, setLookTouch] = useState<{ x: number; y: number } | null>(null);
-  const [moveTouch, setMoveTouch] = useState<{ id: number; x: number; y: number; startX: number; startY: number } | null>(null);
-  const rotationRef = useRef({ yaw: 0, pitch: 0 });
-
-  useEffect(() => {
-    const handleTouchStart = (e: TouchEvent) => {
-      Array.from(e.touches).forEach(touch => {
-        const x = touch.clientX;
-        const y = touch.clientY;
-
-        if (x < window.innerWidth / 2 && !moveTouch) {
-          setMoveTouch({ id: touch.identifier, x, y, startX: x, startY: y });
-        } else if (x >= window.innerWidth / 2 && !lookTouch) {
-          setLookTouch({ x, y });
-        }
-      });
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      Array.from(e.touches).forEach(touch => {
-        if (moveTouch && touch.identifier === moveTouch.id) {
-          const deltaX = touch.clientX - moveTouch.startX;
-          const deltaY = touch.clientY - moveTouch.startY;
-          const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-          const maxDistance = 50;
-          const clampedDistance = Math.min(distance, maxDistance);
-
-          if (distance > 0) {
-            const angle = Math.atan2(deltaY, deltaX);
-            const forward = -Math.sin(angle) * (clampedDistance / maxDistance);
-            const right = Math.cos(angle) * (clampedDistance / maxDistance);
-            onMove({ forward, right });
-          }
-
-          setMoveTouch(prev => prev ? { ...prev, x: touch.clientX, y: touch.clientY } : null);
-        } else if (lookTouch) {
-          const deltaX = touch.clientX - lookTouch.x;
-          const deltaY = touch.clientY - lookTouch.y;
-
-          rotationRef.current = {
-            yaw: rotationRef.current.yaw - deltaX * 0.003,
-            pitch: Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotationRef.current.pitch - deltaY * 0.003))
-          };
-
-          onRotate(rotationRef.current);
-          setLookTouch({ x: touch.clientX, y: touch.clientY });
-        }
-      });
-    };
-
-    const handleTouchEnd = (e: TouchEvent) => {
-      const remainingTouches = Array.from(e.touches).map(t => t.identifier);
-
-      if (moveTouch && !remainingTouches.includes(moveTouch.id)) {
-        setMoveTouch(null);
-        onMove({ forward: 0, right: 0 });
-      }
-
-      if (e.touches.length === 0) {
-        setLookTouch(null);
-      }
-    };
-
-    window.addEventListener('touchstart', handleTouchStart, { passive: false });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleTouchEnd);
-    window.addEventListener('touchcancel', handleTouchEnd);
-
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-      window.removeEventListener('touchcancel', handleTouchEnd);
-    };
-  }, [moveTouch, lookTouch, onMove, onRotate]);
 
   return null;
 }
@@ -576,94 +447,37 @@ export function CasinoScene() {
     <Canvas
       shadows={{ type: "PCFSoftShadowMap" }}
       camera={{
-        position: [0, 3, 25],
+        position: [0, 2.5, 30],
         fov: 75,
         near: 0.1,
         far: 1000
       }}
       gl={{
         antialias: true,
-        powerPreference: "high-performance",
-        alpha: false,
-        stencil: false,
-        depth: true
+        powerPreference: "high-performance"
       }}
     >
-      {/* Atmospheric background gradient */}
-      <color attach="background" args={["#0a0a0a"]} />
-      <fog attach="fog" args={["#1a1a1a", 30, 60]} />
+      <color attach="background" args={["#0f0f0f"]} />
+      <fog attach="fog" args={["#1a1a1a", 20, 50]} />
 
-      {/* Enhanced HDR environment */}
       <Environment
         background={false}
-        environmentIntensity={0.3}
+        environmentIntensity={0.2}
         preset="night"
       />
 
       <Suspense fallback={null}>
-        <Lighting />
+        <CasinoLighting />
         <CasinoFloor />
         <CasinoWalls />
-        <CasinoObjects />
-        <PlayerControls />
+        <CasinoGames />
+        <FirstPersonControls />
       </Suspense>
-
-      {/* Subtle particles for atmosphere */}
-      <Points limit={1000}>
-        <pointsMaterial
-          size={0.1}
-          sizeAttenuation
-          color="#ffffff"
-          transparent
-          opacity={0.3}
-          blending={THREE.AdditiveBlending}
-        />
-      </Points>
     </Canvas>
   );
 }
 
-function Points({ limit }: { limit: number }) {
-  const pointsRef = useRef<THREE.Points>(null);
-
-  const positions = useMemo(() => {
-    const positions = new Float32Array(limit * 3);
-    for (let i = 0; i < limit; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 100;
-      positions[i * 3 + 1] = Math.random() * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
-    }
-    return positions;
-  }, [limit]);
-
-  useFrame((state) => {
-    if (pointsRef.current) {
-      pointsRef.current.rotation.y += 0.0005;
-    }
-  });
-
-  return (
-    <points ref={pointsRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={positions.length / 3}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.1}
-        sizeAttenuation
-        color="#ffffff"
-        transparent
-        opacity={0.3}
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-}
-
+// Preload all models
 useGLTF.preload("/models/slot-machine.glb");
 useGLTF.preload("/models/fish-table.glb");
 useGLTF.preload("/models/cashier-booth.glb");
