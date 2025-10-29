@@ -1,449 +1,536 @@
-import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF, Environment, OrbitControls, Text, Float, Sparkles, MeshReflectorMaterial } from "@react-three/drei";
+import React, { useRef, useState, Suspense } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { Environment, OrbitControls, Text, Float } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
 
-// Modal openers
 const openCashierModal = () => {
-  const event = new CustomEvent('openCashierModal');
-  window.dispatchEvent(event);
+  window.dispatchEvent(new CustomEvent('openCashierModal'));
 };
 
 const openSlotMachineModal = (machineNumber: number) => {
-  const event = new CustomEvent('openSlotMachineModal', { detail: { machineNumber } });
-  window.dispatchEvent(event);
+  window.dispatchEvent(new CustomEvent('openSlotMachineModal', { detail: { machineNumber } }));
 };
 
-// Enhanced Floor with LED light-up tiles
+// VIP Underground Casino Floor
 function CasinoFloor() {
-  const floorRef = useRef<THREE.Mesh>(null);
+  const roomSize = 80;
   
-  useFrame((state) => {
-    if (floorRef.current) {
-      const time = state.clock.elapsedTime;
-      const material = floorRef.current.material as THREE.MeshStandardMaterial;
-      // Pulse the emissive intensity for LED effect
-      material.emissiveIntensity = 0.3 + Math.sin(time * 2) * 0.1;
-    }
-  });
-
   return (
     <group>
-      {/* Main floor base */}
+      {/* Main polished dark floor */}
       <mesh 
-        ref={floorRef}
         rotation={[-Math.PI / 2, 0, 0]} 
-        position={[0, -0.1, 0]} 
+        position={[0, 0, 0]} 
         receiveShadow
       >
-        <planeGeometry args={[100, 100]} />
+        <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial
-          color="#000020"
-          emissive="#0040ff"
-          emissiveIntensity={0.3}
+          color="#0a0a15"
           roughness={0.1}
           metalness={0.9}
+          envMapIntensity={1}
         />
       </mesh>
 
-      {/* LED tile grid pattern */}
-      {Array.from({ length: 20 }, (_, x) =>
-        Array.from({ length: 20 }, (_, z) => (
-          <mesh
-            key={`${x}-${z}`}
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[(x - 10) * 5, -0.05, (z - 10) * 5]}
-          >
-            <planeGeometry args={[4.8, 4.8]} />
-            <meshStandardMaterial
-              color="#001133"
-              emissive={`hsl(${(x + z) * 18 % 360}, 70%, 40%)`}
-              emissiveIntensity={0.2 + Math.sin((x + z) * 0.5) * 0.1}
-              roughness={0.05}
-              metalness={0.95}
-              transparent
-              opacity={0.9}
-            />
-          </mesh>
-        ))
-      )}
+      {/* Center floor design - cyan circle with purple ring */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
+        <ringGeometry args={[8, 12, 64]} />
+        <meshStandardMaterial
+          color="#a855f7"
+          emissive="#a855f7"
+          emissiveIntensity={0.5}
+          roughness={0.2}
+          metalness={0.8}
+        />
+      </mesh>
+      
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
+        <circleGeometry args={[8, 64]} />
+        <meshStandardMaterial
+          color="#00ffff"
+          emissive="#00ffff"
+          emissiveIntensity={0.3}
+          roughness={0.2}
+          metalness={0.8}
+        />
+      </mesh>
 
-      {/* Glowing grid lines */}
-      {Array.from({ length: 21 }, (_, i) => (
-        <group key={`lines-${i}`}>
-          {/* Vertical lines */}
-          <mesh
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[(i - 10) * 5, -0.02, 0]}
-          >
-            <planeGeometry args={[0.1, 100]} />
-            <meshBasicMaterial
-              color="#00ffff"
-              transparent
-              opacity={0.6}
-            />
-          </mesh>
-          {/* Horizontal lines */}
-          <mesh
-            rotation={[-Math.PI / 2, 0, 0]}
-            position={[0, -0.02, (i - 10) * 5]}
-          >
-            <planeGeometry args={[100, 0.1]} />
-            <meshBasicMaterial
-              color="#00ffff"
-              transparent
-              opacity={0.6}
-            />
-          </mesh>
-        </group>
-      ))}
+      {/* Neon walkway strips */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -20]} receiveShadow>
+        <planeGeometry args={[40, 2]} />
+        <meshStandardMaterial
+          color="#a855f7"
+          emissive="#a855f7"
+          emissiveIntensity={0.4}
+        />
+      </mesh>
+      
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 10]} receiveShadow>
+        <planeGeometry args={[40, 2]} />
+        <meshStandardMaterial
+          color="#06b6d4"
+          emissive="#06b6d4"
+          emissiveIntensity={0.4}
+        />
+      </mesh>
     </group>
   );
 }
 
-// Enhanced Walls with neon trim
+// Dark luxury walls
 function CasinoWalls() {
+  const roomSize = 80;
+  const wallHeight = 15;
+  
   return (
     <group>
       {/* Back Wall */}
-      <mesh position={[0, 5, -40]} castShadow receiveShadow>
-        <boxGeometry args={[80, 10, 1]} />
-        <meshStandardMaterial color="#1a1a2e" roughness={0.3} metalness={0.7} />
-      </mesh>
-
-      {/* Neon trim for back wall */}
-      <mesh position={[0, 9.5, -39.9]}>
-        <boxGeometry args={[80, 0.2, 0.1]} />
-        <meshBasicMaterial color="#00ff88" />
+      <mesh position={[0, wallHeight / 2, -roomSize / 2]} receiveShadow>
+        <boxGeometry args={[roomSize, wallHeight, 1]} />
+        <meshStandardMaterial 
+          color="#0f0f1a" 
+          roughness={0.6}
+          metalness={0.4}
+        />
       </mesh>
 
       {/* Left Wall */}
-      <mesh position={[-40, 5, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1, 10, 80]} />
-        <meshStandardMaterial color="#1a1a2e" roughness={0.3} metalness={0.7} />
+      <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
+        <boxGeometry args={[1, wallHeight, roomSize]} />
+        <meshStandardMaterial 
+          color="#0f0f1a" 
+          roughness={0.6}
+          metalness={0.4}
+        />
       </mesh>
 
       {/* Right Wall */}
-      <mesh position={[40, 5, 0]} castShadow receiveShadow>
-        <boxGeometry args={[1, 10, 80]} />
-        <meshStandardMaterial color="#1a1a2e" roughness={0.3} metalness={0.7} />
+      <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
+        <boxGeometry args={[1, wallHeight, roomSize]} />
+        <meshStandardMaterial 
+          color="#0f0f1a" 
+          roughness={0.6}
+          metalness={0.4}
+        />
       </mesh>
-    </group>
-  );
-}
 
-// Enhanced Slot Machine with glow effects
-function SlotMachine({ position, number, onClick }: { position: [number, number, number], number: number, onClick: () => void }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
+      {/* Ceiling neon strips */}
+      <mesh position={[-15, wallHeight - 1, 0]}>
+        <boxGeometry args={[0.5, 0.2, roomSize]} />
+        <meshStandardMaterial
+          color="#00ffff"
+          emissive="#00ffff"
+          emissiveIntensity={2}
+        />
+      </mesh>
+      
+      <mesh position={[15, wallHeight - 1, 0]}>
+        <boxGeometry args={[0.5, 0.2, roomSize]} />
+        <meshStandardMaterial
+          color="#a855f7"
+          emissive="#a855f7"
+          emissiveIntensity={2}
+        />
+      </mesh>
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.05;
-      if (hovered) {
-        meshRef.current.scale.setScalar(1.05 + Math.sin(state.clock.elapsedTime * 8) * 0.02);
-      } else {
-        meshRef.current.scale.lerp(new THREE.Vector3(1, 1, 1), 0.1);
-      }
-    }
-  });
-
-  return (
-    <group position={position}>
-      <Float speed={1} rotationIntensity={0.2} floatIntensity={0.3}>
-        <mesh
-          ref={meshRef}
-          onClick={onClick}
-          onPointerOver={() => setHovered(true)}
-          onPointerOut={() => setHovered(false)}
-          castShadow
-          receiveShadow
-        >
-          <boxGeometry args={[2, 3, 1.5]} />
-          <meshStandardMaterial 
-            color={hovered ? "#ffd700" : "#c41e3a"} 
-            roughness={0.1} 
-            metalness={0.8}
-            emissive={hovered ? "#ff4400" : "#220000"}
-            emissiveIntensity={hovered ? 0.3 : 0.1}
-          />
-        </mesh>
-
-        {/* Neon glow around slot machine */}
-        <mesh position={[0, 0, 0.76]}>
-          <boxGeometry args={[2.2, 3.2, 0.1]} />
-          <meshBasicMaterial 
-            color="#00ff88" 
-            transparent 
-            opacity={hovered ? 0.8 : 0.3}
-          />
-        </mesh>
-
-        {/* Sparkles around hovered machine */}
-        {hovered && <Sparkles count={50} scale={5} size={3} speed={0.8} color="#ffd700" />}
-      </Float>
-
-      {/* Floating number above machine */}
+      {/* Casino name sign */}
       <Text
-        position={[0, 2.5, 0]}
-        fontSize={0.8}
-        color="#ffffff"
+        position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}
+        fontSize={2.5}
+        color="#00ffff"
         anchorX="center"
         anchorY="middle"
-        font="/fonts/inter.json"
+        outlineWidth={0.1}
+        outlineColor="#0891b2"
       >
-        {number}
+        💎 JADE ROYALE 💎
+      </Text>
+      <Text
+        position={[0, wallHeight - 3.5, -roomSize / 2 + 0.6]}
+        fontSize={1}
+        color="#a855f7"
+        anchorX="center"
+        anchorY="middle"
+      >
+        VIP UNDERGROUND CASINO
       </Text>
     </group>
   );
 }
 
-// Enhanced Cashier Booth with premium materials
-function CashierBooth({ position, onClick }: { position: [number, number, number], onClick: () => void }) {
-  const meshRef = useRef<THREE.Mesh>(null);
+// Game object component
+interface GameObjectProps {
+  position: [number, number, number];
+  rotation?: [number, number, number];
+  modelPath: string;
+  scale?: number;
+  onClick?: () => void;
+  label?: string;
+  glowColor?: string;
+}
+
+function GameObject({
+  position,
+  rotation = [0, 0, 0],
+  modelPath,
+  scale = 1,
+  onClick,
+  label,
+  glowColor = "#10b981"
+}: GameObjectProps) {
+  const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
 
+  const createPlaceholder = () => {
+    if (modelPath.includes('slot-machine')) {
+      return (
+        <group>
+          {/* Slot machine body - neon purple glow */}
+          <mesh position={[0, 1, 0]} castShadow receiveShadow>
+            <boxGeometry args={[1, 2, 0.8]} />
+            <meshStandardMaterial 
+              color="#1a0a2e" 
+              metalness={0.9} 
+              roughness={0.2}
+              emissive="#a855f7"
+              emissiveIntensity={0.5}
+            />
+          </mesh>
+          {/* Screen - bright purple glow */}
+          <mesh position={[0, 1.2, 0.41]} castShadow>
+            <boxGeometry args={[0.8, 0.6, 0.1]} />
+            <meshStandardMaterial 
+              color="#000000" 
+              emissive="#c084fc" 
+              emissiveIntensity={2}
+            />
+          </mesh>
+          {/* Arm - gold accent */}
+          <mesh position={[0.6, 1, 0]} castShadow>
+            <cylinderGeometry args={[0.05, 0.05, 0.8]} />
+            <meshStandardMaterial 
+              color="#fbbf24" 
+              metalness={1} 
+              roughness={0.1}
+              emissive="#fbbf24"
+              emissiveIntensity={0.3}
+            />
+          </mesh>
+        </group>
+      );
+    } else if (modelPath.includes('fish-table')) {
+      return (
+        <group>
+          {/* Table surface - dark base */}
+          <mesh position={[0, 0.8, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[1.5, 1.5, 0.1]} />
+            <meshStandardMaterial 
+              color="#0a2540" 
+              metalness={0.8} 
+              roughness={0.3}
+            />
+          </mesh>
+          {/* Screen - cyan glow */}
+          <mesh position={[0, 0.86, 0]} castShadow>
+            <cylinderGeometry args={[1.3, 1.3, 0.05]} />
+            <meshStandardMaterial 
+              color="#000000" 
+              emissive="#06b6d4" 
+              emissiveIntensity={2}
+            />
+          </mesh>
+          {/* Base */}
+          <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.5, 0.8, 0.8]} />
+            <meshStandardMaterial 
+              color="#1a1a2e" 
+              metalness={0.7}
+              roughness={0.3}
+            />
+          </mesh>
+        </group>
+      );
+    } else if (modelPath.includes('cashier-booth')) {
+      return (
+        <group>
+          {/* Booth structure - luxury dark */}
+          <mesh position={[0, 1.5, 0]} castShadow receiveShadow>
+            <boxGeometry args={[3, 3, 2]} />
+            <meshStandardMaterial 
+              color="#1a0f2e" 
+              metalness={0.6}
+              roughness={0.4}
+              emissive="#00ffff"
+              emissiveIntensity={0.1}
+            />
+          </mesh>
+          {/* Window - cyan glow */}
+          <mesh position={[0, 2, 1.01]} castShadow>
+            <boxGeometry args={[2, 1, 0.1]} />
+            <meshStandardMaterial 
+              color="#000000" 
+              emissive="#00ffff" 
+              emissiveIntensity={1.5}
+              transparent 
+              opacity={0.9} 
+            />
+          </mesh>
+          {/* Sign - bright cyan */}
+          <mesh position={[0, 3.2, 1.01]} castShadow>
+            <boxGeometry args={[2.5, 0.5, 0.1]} />
+            <meshStandardMaterial 
+              color="#00ffff"
+              emissive="#00ffff"
+              emissiveIntensity={2}
+            />
+          </mesh>
+        </group>
+      );
+    } else if (modelPath.includes('pitbull-pirate')) {
+      return (
+        <group>
+          {/* Body */}
+          <mesh position={[0, 1, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.3, 0.4, 1.5]} />
+            <meshStandardMaterial 
+              color="#6b4423"
+              metalness={0.3}
+              roughness={0.7}
+            />
+          </mesh>
+          {/* Head */}
+          <mesh position={[0, 2, 0]} castShadow>
+            <sphereGeometry args={[0.4]} />
+            <meshStandardMaterial 
+              color="#d4a574"
+              metalness={0.2}
+              roughness={0.8}
+            />
+          </mesh>
+          {/* Pirate hat - cyan accent */}
+          <mesh position={[0, 2.5, 0]} castShadow>
+            <coneGeometry args={[0.5, 0.6]} />
+            <meshStandardMaterial 
+              color="#0a0a1a"
+              emissive="#00ffff"
+              emissiveIntensity={0.3}
+            />
+          </mesh>
+          {/* Eye patch */}
+          <mesh position={[0.2, 2.1, 0.35]} castShadow>
+            <sphereGeometry args={[0.08]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+        </group>
+      );
+    }
+    return null;
+  };
+
   useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.3) * 0.03;
+    if (meshRef.current && hovered) {
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
     }
   });
 
   return (
-    <group position={position}>
-      <Float speed={0.8} rotationIntensity={0.1} floatIntensity={0.2}>
-        <mesh
-          ref={meshRef}
-          onClick={onClick}
-          onPointerOver={() => setHovered(true)}
-          onPointerOut={() => setHovered(false)}
-          castShadow
-          receiveShadow
+    <group
+      ref={meshRef}
+      position={position}
+      rotation={rotation}
+      scale={hovered ? scale * 1.1 : scale}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick?.();
+      }}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        document.body.style.cursor = "auto";
+      }}
+    >
+      {createPlaceholder()}
+
+      {/* Glow effect */}
+      {hovered && (
+        <pointLight
+          position={[0, 3, 0]}
+          color={glowColor}
+          intensity={15}
+          distance={8}
+        />
+      )}
+
+      {/* Label */}
+      {hovered && label && (
+        <Text
+          position={[0, 4, 0]}
+          fontSize={0.8}
+          color="#ffffff"
+          anchorX="center"
+          anchorY="middle"
+          outlineColor="#000000"
+          outlineWidth={0.02}
         >
-          <boxGeometry args={[4, 2.5, 2]} />
-          <meshStandardMaterial 
-            color={hovered ? "#ffd700" : "#4a90e2"} 
-            roughness={0.1} 
-            metalness={0.9}
-            emissive={hovered ? "#ffaa00" : "#002244"}
-            emissiveIntensity={0.2}
-          />
-        </mesh>
-
-        {/* Premium glow effect */}
-        <mesh position={[0, 0, 1.1]}>
-          <boxGeometry args={[4.2, 2.7, 0.1]} />
-          <meshBasicMaterial 
-            color="#4a90e2" 
-            transparent 
-            opacity={hovered ? 0.6 : 0.2}
-          />
-        </mesh>
-      </Float>
-
-      <Text
-        position={[0, 2, 0]}
-        fontSize={0.6}
-        color="#ffffff"
-        anchorX="center"
-        anchorY="middle"
-        font="/fonts/inter.json"
-      >
-        💰 CASHIER 💰
-      </Text>
+          {label}
+        </Text>
+      )}
     </group>
   );
 }
 
-// Enhanced lighting setup
+function CasinoGames() {
+  const { setShowAuthModal, user } = useUser();
+
+  const handleSlotMachineClick = (machineNumber: number) => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      window.dispatchEvent(
+        new CustomEvent("openSlotMachine", { detail: { machineNumber } })
+      );
+    }
+  };
+
+  const handleGameClick = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      window.location.href = "/coming-soon";
+    }
+  };
+
+  const handleCashierClick = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      const event = new CustomEvent("openCashier");
+      window.dispatchEvent(event);
+    }
+  };
+
+  return (
+    <>
+      {/* 10 Slot Machines in two rows */}
+      {Array.from({ length: 10 }, (_, i) => (
+        <GameObject
+          key={`slot-${i}`}
+          position={[
+            ((i % 5) - 2) * 6,
+            0,
+            Math.floor(i / 5) === 0 ? -15 : 5
+          ]}
+          modelPath="slot-machine"
+          scale={1}
+          onClick={() => handleSlotMachineClick(i + 1)}
+          label={`Slot Machine ${i + 1}`}
+          glowColor="#a855f7"
+        />
+      ))}
+
+      {/* 6 Fish Tables in two rows */}
+      {Array.from({ length: 6 }, (_, i) => (
+        <GameObject
+          key={`fish-${i}`}
+          position={[
+            ((i % 3) - 1) * 8,
+            0,
+            Math.floor(i / 3) === 0 ? -30 : 20
+          ]}
+          modelPath="fish-table"
+          scale={1}
+          onClick={handleGameClick}
+          label={`Fish Table ${i + 1}`}
+          glowColor="#06b6d4"
+        />
+      ))}
+
+      {/* Cashier Booth */}
+      <GameObject
+        position={[0, 0, 35]}
+        modelPath="cashier-booth"
+        scale={1}
+        onClick={() => openCashierModal()}
+        label="💰 Cashier"
+        glowColor="#00ffff"
+      />
+
+      {/* Captain Pitbull at cashier */}
+      <GameObject
+        position={[0, 0, 33]}
+        modelPath="pitbull-pirate"
+        scale={1}
+        glowColor="#00ffff"
+      />
+    </>
+  );
+}
+
+// VIP Underground lighting - moody and exclusive
 function SceneLighting() {
   return (
     <>
-      {/* Main ambient light */}
-      <ambientLight intensity={0.3} color="#4a5568" />
+      {/* Low ambient for underground feel */}
+      <ambientLight intensity={0.15} color="#1a1a2e" />
 
-      {/* Key spotlight from above */}
+      {/* Main overhead spotlight */}
       <spotLight
-        position={[0, 20, 0]}
-        angle={Math.PI / 3}
-        penumbra={0.3}
-        intensity={1.5}
+        position={[0, 12, 0]}
+        angle={Math.PI / 2.5}
+        penumbra={0.5}
+        intensity={0.8}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         color="#ffffff"
       />
 
-      {/* Colored rim lights */}
-      <pointLight position={[-20, 10, -20]} intensity={0.8} color="#ff6b6b" />
-      <pointLight position={[20, 10, -20]} intensity={0.8} color="#4ecdc4" />
-      <pointLight position={[0, 10, 20]} intensity={0.8} color="#45b7d1" />
+      {/* Purple zone lights for slot machines */}
+      <pointLight position={[-12, 4, -15]} intensity={2} color="#a855f7" distance={15} />
+      <pointLight position={[12, 4, -15]} intensity={2} color="#a855f7" distance={15} />
+      <pointLight position={[-12, 4, 5]} intensity={2} color="#a855f7" distance={15} />
+      <pointLight position={[12, 4, 5]} intensity={2} color="#a855f7" distance={15} />
 
-      {/* Neon accent lights */}
-      <pointLight position={[-15, 5, -15]} intensity={1.2} color="#00ff88" />
-      <pointLight position={[15, 5, -15]} intensity={1.2} color="#ff0088" />
+      {/* Cyan zone lights for fish tables */}
+      <pointLight position={[-8, 4, -30]} intensity={2.5} color="#06b6d4" distance={15} />
+      <pointLight position={[8, 4, -30]} intensity={2.5} color="#06b6d4" distance={15} />
+      <pointLight position={[-8, 4, 20]} intensity={2.5} color="#06b6d4" distance={15} />
+      <pointLight position={[8, 4, 20]} intensity={2.5} color="#06b6d4" distance={15} />
+
+      {/* Bright cyan accent for cashier */}
+      <pointLight position={[0, 6, 35]} intensity={4} color="#00ffff" distance={12} />
+
+      {/* Corner accent lights */}
+      <pointLight position={[-30, 3, -30]} intensity={1} color="#a855f7" distance={20} />
+      <pointLight position={[30, 3, -30]} intensity={1} color="#06b6d4" distance={20} />
+      <pointLight position={[-30, 3, 30]} intensity={1} color="#06b6d4" distance={20} />
+      <pointLight position={[30, 3, 30]} intensity={1} color="#a855f7" distance={20} />
     </>
   );
 }
 
-// Enhanced particle system
-function CasinoParticles() {
-  const particlesRef = useRef<THREE.Points>(null);
-
-  const particleCount = 200;
-  const positions = useMemo(() => {
-    const positions = new Float32Array(particleCount * 3);
-    for (let i = 0; i < particleCount; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 80;
-      positions[i * 3 + 1] = Math.random() * 20;
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 80;
-    }
-    return positions;
-  }, []);
-
-  useFrame((state) => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y += 0.001;
-      const positions = particlesRef.current.geometry.attributes.position.array as Float32Array;
-
-      for (let i = 0; i < particleCount; i++) {
-        const y = i * 3 + 1;
-        positions[y] += Math.sin(state.clock.elapsedTime + i) * 0.01;
-      }
-
-      particlesRef.current.geometry.attributes.position.needsUpdate = true;
-    }
-  });
-
-  return (
-    <points ref={particlesRef}>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={particleCount}
-          array={positions}
-          itemSize={3}
-        />
-      </bufferGeometry>
-      <pointsMaterial
-        size={0.1}
-        color="#00ff88"
-        transparent
-        opacity={0.6}
-        sizeAttenuation
-        blending={THREE.AdditiveBlending}
-      />
-    </points>
-  );
-}
-
-// Player controls with mobile support
-function PlayerControls() {
-  const { camera, gl } = useThree();
-  const [keys, setKeys] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      setKeys(prev => new Set(prev).add(event.code));
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      setKeys(prev => {
-        const newKeys = new Set(prev);
-        newKeys.delete(event.code);
-        return newKeys;
-      });
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
-
-  useFrame((state, delta) => {
-    const speed = 10 * delta;
-
-    if (keys.has('KeyW') || keys.has('ArrowUp')) {
-      camera.position.z -= speed;
-    }
-    if (keys.has('KeyS') || keys.has('ArrowDown')) {
-      camera.position.z += speed;
-    }
-    if (keys.has('KeyA') || keys.has('ArrowLeft')) {
-      camera.position.x -= speed;
-    }
-    if (keys.has('KeyD') || keys.has('ArrowRight')) {
-      camera.position.x += speed;
-    }
-
-    // Constrain camera within casino bounds
-    camera.position.x = Math.max(-35, Math.min(35, camera.position.x));
-    camera.position.z = Math.max(-35, Math.min(35, camera.position.z));
-    camera.position.y = Math.max(2, Math.min(15, camera.position.y));
-  });
-
-  return null;
-}
-
-// Main scene component
 function Scene() {
   return (
     <>
-      <PlayerControls />
       <SceneLighting />
       <CasinoFloor />
       <CasinoWalls />
-      <CasinoParticles />
-
-      {/* Cashier Booth */}
-      <CashierBooth
-        position={[0, 1.25, -25]}
-        onClick={() => openCashierModal()}
-      />
-
-      {/* Slot Machines arranged in a casino layout */}
-      {Array.from({ length: 10 }, (_, i) => (
-        <SlotMachine
-          key={i + 1}
-          position={[
-            ((i % 5) - 2) * 8,
-            1.5,
-            Math.floor(i / 5) * 10 - 5
-          ]}
-          number={i + 1}
-          onClick={() => openSlotMachineModal(i + 1)}
-        />
-      ))}
-
-      {/* Welcome text floating above */}
-      <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.5}>
-        <Text
-          position={[0, 8, -15]}
-          fontSize={3}
-          color="#ffd700"
-          anchorX="center"
-          anchorY="middle"
-          font="/fonts/inter.json"
-        >
-          🎰 JADE ROYALE 🎰
-        </Text>
-      </Float>
+      <CasinoGames />
     </>
   );
 }
 
-// Canvas wrapper with enhanced settings
 function CanvasWrapper() {
   return (
     <Canvas
       shadows
       camera={{ 
-        position: [0, 5, 15], 
+        position: [0, 8, 40], 
         fov: 60,
         near: 0.1,
         far: 1000
@@ -457,7 +544,7 @@ function CanvasWrapper() {
         gl.shadowMap.enabled = true;
         gl.shadowMap.type = THREE.PCFSoftShadowMap;
         gl.setClearColor('#000011');
-        scene.fog = new THREE.Fog('#000011', 30, 80);
+        scene.fog = new THREE.Fog('#000011', 40, 100);
       }}
     >
       <Suspense fallback={null}>
@@ -467,9 +554,9 @@ function CanvasWrapper() {
           enablePan={true}
           enableZoom={true}
           enableRotate={true}
-          maxPolarAngle={Math.PI / 2}
-          minDistance={5}
-          maxDistance={50}
+          maxPolarAngle={Math.PI / 2.2}
+          minDistance={8}
+          maxDistance={60}
         />
       </Suspense>
     </Canvas>
