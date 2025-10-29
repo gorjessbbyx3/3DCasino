@@ -40,15 +40,15 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
       if (hovered) {
         // Yellow highlight when hovered
         material.emissive.setRGB(1, 1, 0);
-        material.emissiveIntensity = 1.2;
+        material.emissiveIntensity = 0.8;
       } else {
-        // RGB color cycling
+        // RGB color cycling - dimmed
         const r = Math.sin(time * 0.5) * 0.5 + 0.5;
         const g = Math.sin(time * 0.5 + 2) * 0.5 + 0.5;
         const b = Math.sin(time * 0.5 + 4) * 0.5 + 0.5;
         
         material.emissive.setRGB(r, g, b);
-        material.emissiveIntensity = 0.6 + Math.sin(time * 2) * 0.2;
+        material.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1;
       }
     }
   });
@@ -82,7 +82,7 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
       <meshStandardMaterial
         color="#1a1a2e"
         emissive="#ff0000"
-        emissiveIntensity={0.6}
+        emissiveIntensity={0.2}
         roughness={0.2}
         metalness={0.8}
       />
@@ -529,8 +529,9 @@ function GameObject({
   const [hovered, setHovered] = useState(false);
   const coinsRef = useRef<Array<{ offset: [number, number, number], speed: number, angle: number, startTime: number }>>([]);
   
-  // Load game logo texture for slot machines (always load to avoid conditional hook)
+  // Load game logo and screen textures for slot machines (always load to avoid conditional hook)
   const gameLogoTexture = useTexture("/game-logo.png");
+  const screenGameTexture = useTexture("/screen-game.png");
   
   // Initialize coins for slot machine hover effect
   React.useEffect(() => {
@@ -560,13 +561,13 @@ function GameObject({
             />
           </mesh>
           
-          {/* Premium large screen - ultra bright display */}
+          {/* Premium large screen - ultra bright display with game image */}
           <mesh position={[0, 2.2, 0.66]} castShadow>
             <boxGeometry args={[1.2, 1.6, 0.08]} />
             <meshStandardMaterial 
-              color="#000000" 
+              map={screenGameTexture}
               emissive={machineColor}
-              emissiveIntensity={hovered ? 4.5 : 3.2}
+              emissiveIntensity={hovered ? 0.5 : 0.3}
             />
           </mesh>
           
