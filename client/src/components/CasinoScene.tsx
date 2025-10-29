@@ -277,35 +277,75 @@ function GameObject({
     if (modelPath.includes('slot-machine')) {
       return (
         <group>
-          {/* Slot machine body - neon purple glow */}
+          {/* Slot machine body - neon purple glow with enhanced metallic finish */}
           <mesh position={[0, 1, 0]} castShadow receiveShadow>
-            <boxGeometry args={[1, 2, 0.8]} />
+            <boxGeometry args={[1.2, 2.2, 0.9]} />
             <meshStandardMaterial 
               color="#1a0a2e" 
-              metalness={0.9} 
-              roughness={0.2}
+              metalness={0.95} 
+              roughness={0.1}
               emissive="#a855f7"
-              emissiveIntensity={0.5}
+              emissiveIntensity={hovered ? 0.8 : 0.5}
             />
           </mesh>
-          {/* Screen - bright purple glow */}
-          <mesh position={[0, 1.2, 0.41]} castShadow>
-            <boxGeometry args={[0.8, 0.6, 0.1]} />
+          
+          {/* Larger Screen - bright purple glow with animation */}
+          <mesh position={[0, 1.3, 0.46]} castShadow>
+            <boxGeometry args={[1.1, 1.0, 0.12]} />
             <meshStandardMaterial 
               color="#000000" 
-              emissive="#c084fc" 
-              emissiveIntensity={2}
+              emissive={hovered ? "#e879f9" : "#c084fc"}
+              emissiveIntensity={hovered ? 3.5 : 2.5}
             />
           </mesh>
-          {/* Arm - gold accent */}
-          <mesh position={[0.6, 1, 0]} castShadow>
-            <cylinderGeometry args={[0.05, 0.05, 0.8]} />
+          
+          {/* Screen frame - gold trim */}
+          <mesh position={[0, 1.3, 0.47]} castShadow>
+            <boxGeometry args={[1.15, 1.05, 0.08]} />
             <meshStandardMaterial 
               color="#fbbf24" 
               metalness={1} 
               roughness={0.1}
               emissive="#fbbf24"
-              emissiveIntensity={0.3}
+              emissiveIntensity={hovered ? 0.6 : 0.3}
+            />
+          </mesh>
+          
+          {/* Decorative top crown */}
+          <mesh position={[0, 2.3, 0]} castShadow>
+            <cylinderGeometry args={[0.3, 0.4, 0.3, 6]} />
+            <meshStandardMaterial 
+              color="#fbbf24" 
+              metalness={1} 
+              roughness={0.1}
+              emissive="#fbbf24"
+              emissiveIntensity={hovered ? 0.8 : 0.4}
+            />
+          </mesh>
+          
+          {/* Arm - gold accent with hover animation */}
+          <mesh 
+            position={[0.65, hovered ? 1.2 : 1, 0]} 
+            rotation={[0, 0, hovered ? -0.3 : 0]}
+            castShadow
+          >
+            <cylinderGeometry args={[0.06, 0.06, 0.8]} />
+            <meshStandardMaterial 
+              color="#fbbf24" 
+              metalness={1} 
+              roughness={0.1}
+              emissive="#fbbf24"
+              emissiveIntensity={hovered ? 0.8 : 0.3}
+            />
+          </mesh>
+          
+          {/* Base pedestal */}
+          <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.5, 0.6, 0.4, 8]} />
+            <meshStandardMaterial 
+              color="#1a0a2e" 
+              metalness={0.9} 
+              roughness={0.2}
             />
           </mesh>
         </group>
@@ -421,7 +461,14 @@ function GameObject({
 
   useFrame((state) => {
     if (meshRef.current && hovered) {
-      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.1;
+      // Gentle floating animation when hovered
+      meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 2) * 0.15;
+      // Subtle rotation animation
+      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime) * 0.05;
+    } else if (meshRef.current) {
+      // Return to original position smoothly
+      meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, position[1], 0.1);
+      meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, rotation[1], 0.1);
     }
   });
 
@@ -430,7 +477,7 @@ function GameObject({
       ref={meshRef}
       position={position}
       rotation={rotation}
-      scale={hovered ? scale * 1.1 : scale}
+      scale={hovered ? scale * 1.08 : scale}
       onClick={(e) => {
         e.stopPropagation();
         onClick?.();
@@ -447,14 +494,22 @@ function GameObject({
     >
       {createPlaceholder()}
 
-      {/* Glow effect */}
+      {/* Enhanced glow effect with pulsing */}
       {hovered && (
-        <pointLight
-          position={[0, 3, 0]}
-          color={glowColor}
-          intensity={15}
-          distance={8}
-        />
+        <>
+          <pointLight
+            position={[0, 3, 0]}
+            color={glowColor}
+            intensity={20}
+            distance={10}
+          />
+          <pointLight
+            position={[0, 1, 1]}
+            color={glowColor}
+            intensity={15}
+            distance={6}
+          />
+        </>
       )}
 
       {/* Label */}
