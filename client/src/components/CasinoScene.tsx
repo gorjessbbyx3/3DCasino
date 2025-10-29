@@ -387,8 +387,7 @@ function CanvasWrapper() {
       gl={{ 
         antialias: true, 
         alpha: false,
-        powerPreference: "high-performance",
-        shadowMap: true
+        powerPreference: "high-performance"
       }}
       onCreated={({ gl, scene }) => {
         gl.shadowMap.enabled = true;
