@@ -1259,33 +1259,35 @@ function FirstPersonControls() {
 }
 
 function Scene() {
-  const { currentRoom } = React.useContext(RoomContext);
-
   return (
     <>
-      {/* Test cube to verify rendering */}
-      <mesh position={[0, 2, 0]}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshStandardMaterial color="red" emissive="red" emissiveIntensity={1} />
+      {/* Super bright ambient light */}
+      <ambientLight intensity={2} />
+      
+      {/* Directional light from above */}
+      <directionalLight position={[5, 10, 5]} intensity={3} />
+      
+      {/* Test cubes at different positions */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[3, 3, 3]} />
+        <meshStandardMaterial color="red" />
       </mesh>
       
-      <FirstPersonControls />
-      <RoomLighting roomType={currentRoom} />
-      <CasinoFloor />
-
-      {currentRoom === 'slots' && (
-        <>
-          <RoomWalls backRightDoor={true} backSign="JADE ROYALE" />
-          <SlotMachineRoom />
-        </>
-      )}
-
-      {currentRoom === 'fish' && (
-        <>
-          <RoomWalls backLeftDoor={true} backSign="🎣 FISH GAMES 🎣" />
-          <FishGameRoom />
-        </>
-      )}
+      <mesh position={[5, 0, 0]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="green" />
+      </mesh>
+      
+      <mesh position={[-5, 0, 0]}>
+        <boxGeometry args={[2, 2, 2]} />
+        <meshStandardMaterial color="blue" />
+      </mesh>
+      
+      {/* Floor plane */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2, 0]}>
+        <planeGeometry args={[50, 50]} />
+        <meshStandardMaterial color="white" />
+      </mesh>
     </>
   );
 }
@@ -1298,7 +1300,7 @@ function CanvasWrapper() {
       <Canvas
         shadows
         camera={{ 
-          position: [0, 1.7, 14], 
+          position: [0, 5, 20], 
           fov: 75,
           near: 0.1,
           far: 1000
@@ -1316,11 +1318,6 @@ function CanvasWrapper() {
         }}
       >
         <Scene />
-        <Environment preset="night" background={false} />
-        <PointerLockControls 
-          maxPolarAngle={Math.PI - 0.05}
-          minPolarAngle={0.05}
-        />
       </Canvas>
     </RoomContext.Provider>
   );
