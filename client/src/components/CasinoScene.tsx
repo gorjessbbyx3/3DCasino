@@ -107,10 +107,10 @@ function CasinoFloor({ roomSize = 35 }: { roomSize?: number }) {
 }
 
 // Room walls with doorways
-function RoomWalls({ roomSize = 35, leftDoor = false, rightDoor = false, backSign = "" }: { 
+function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false, backSign = "" }: { 
   roomSize?: number; 
-  leftDoor?: boolean; 
-  rightDoor?: boolean;
+  backLeftDoor?: boolean; 
+  backRightDoor?: boolean;
   backSign?: string;
 }) {
   const wallHeight = 12;
@@ -119,105 +119,99 @@ function RoomWalls({ roomSize = 35, leftDoor = false, rightDoor = false, backSig
   
   return (
     <group>
-      {/* Back Wall */}
-      <mesh position={[0, wallHeight / 2, -roomSize / 2]} receiveShadow>
-        <boxGeometry args={[roomSize, wallHeight, 1]} />
-        <meshStandardMaterial 
-          color="#0f0f1a" 
-          roughness={0.6}
-          metalness={0.4}
-        />
+      {/* Back Wall with optional doors underneath sign */}
+      {backLeftDoor || backRightDoor ? (
+        <>
+          {/* Wall above doors */}
+          <mesh position={[0, wallHeight - doorHeight / 2 - 0.5, -roomSize / 2]} receiveShadow>
+            <boxGeometry args={[roomSize, wallHeight - doorHeight - 1, 1]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          
+          {/* Center divider between doors */}
+          <mesh position={[0, doorHeight / 2, -roomSize / 2]} receiveShadow>
+            <boxGeometry args={[2, doorHeight, 1]} />
+            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+          </mesh>
+          
+          {/* Left door opening */}
+          {backLeftDoor && (
+            <>
+              {/* Left wall section beside left door */}
+              <mesh position={[-roomSize / 2 + doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
+                <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
+                <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+              </mesh>
+              {/* Left door frame - glowing cyan */}
+              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
+                <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
+                <meshStandardMaterial 
+                  color="#00ffff"
+                  emissive="#00ffff"
+                  emissiveIntensity={1}
+                />
+              </mesh>
+              {/* Left door label */}
+              <Text
+                position={[-doorWidth / 2 - 1, doorHeight + 1, -roomSize / 2 + 1]}
+                fontSize={0.8}
+                color="#00ffff"
+                anchorX="center"
+                anchorY="middle"
+              >
+                💰 CASHIER
+              </Text>
+            </>
+          )}
+          
+          {/* Right door opening */}
+          {backRightDoor && (
+            <>
+              {/* Right wall section beside right door */}
+              <mesh position={[roomSize / 2 - doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
+                <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
+                <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+              </mesh>
+              {/* Right door frame - glowing purple */}
+              <mesh position={[doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
+                <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
+                <meshStandardMaterial 
+                  color="#a855f7"
+                  emissive="#a855f7"
+                  emissiveIntensity={1}
+                />
+              </mesh>
+              {/* Right door label */}
+              <Text
+                position={[doorWidth / 2 + 1, doorHeight + 1, -roomSize / 2 + 1]}
+                fontSize={0.8}
+                color="#a855f7"
+                anchorX="center"
+                anchorY="middle"
+              >
+                🎣 FISH GAMES
+              </Text>
+            </>
+          )}
+        </>
+      ) : (
+        <mesh position={[0, wallHeight / 2, -roomSize / 2]} receiveShadow>
+          <boxGeometry args={[roomSize, wallHeight, 1]} />
+          <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+        </mesh>
+      )}
+
+      {/* Left Wall - always solid */}
+      <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
+        <boxGeometry args={[1, wallHeight, roomSize]} />
+        <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
       </mesh>
 
-      {/* Left Wall with optional door */}
-      {leftDoor ? (
-        <>
-          {/* Wall above door */}
-          <mesh position={[-roomSize / 2, wallHeight - doorHeight / 2 - 0.5, 0]} receiveShadow>
-            <boxGeometry args={[1, wallHeight - doorHeight - 1, roomSize]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-          </mesh>
-          {/* Wall sections beside door */}
-          <mesh position={[-roomSize / 2, doorHeight / 2, -roomSize / 2 + doorWidth / 2 + (roomSize - doorWidth) / 4]} receiveShadow>
-            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-          </mesh>
-          <mesh position={[-roomSize / 2, doorHeight / 2, roomSize / 2 - doorWidth / 2 - (roomSize - doorWidth) / 4]} receiveShadow>
-            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-          </mesh>
-          {/* Door frame - glowing cyan */}
-          <mesh position={[-roomSize / 2 + 0.5, doorHeight / 2, 0]}>
-            <boxGeometry args={[0.3, doorHeight + 1, doorWidth + 1]} />
-            <meshStandardMaterial 
-              color="#00ffff"
-              emissive="#00ffff"
-              emissiveIntensity={1}
-            />
-          </mesh>
-          {/* Door label */}
-          <Text
-            position={[-roomSize / 2 + 1, doorHeight + 1, 0]}
-            fontSize={1}
-            color="#00ffff"
-            anchorX="center"
-            anchorY="middle"
-            rotation={[0, Math.PI / 2, 0]}
-          >
-            💰 CASHIER
-          </Text>
-        </>
-      ) : (
-        <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
-          <boxGeometry args={[1, wallHeight, roomSize]} />
-          <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-        </mesh>
-      )}
-
-      {/* Right Wall with optional door */}
-      {rightDoor ? (
-        <>
-          {/* Wall above door */}
-          <mesh position={[roomSize / 2, wallHeight - doorHeight / 2 - 0.5, 0]} receiveShadow>
-            <boxGeometry args={[1, wallHeight - doorHeight - 1, roomSize]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-          </mesh>
-          {/* Wall sections beside door */}
-          <mesh position={[roomSize / 2, doorHeight / 2, -roomSize / 2 + doorWidth / 2 + (roomSize - doorWidth) / 4]} receiveShadow>
-            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-          </mesh>
-          <mesh position={[roomSize / 2, doorHeight / 2, roomSize / 2 - doorWidth / 2 - (roomSize - doorWidth) / 4]} receiveShadow>
-            <boxGeometry args={[1, doorHeight, (roomSize - doorWidth) / 2]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-          </mesh>
-          {/* Door frame - glowing purple */}
-          <mesh position={[roomSize / 2 - 0.5, doorHeight / 2, 0]}>
-            <boxGeometry args={[0.3, doorHeight + 1, doorWidth + 1]} />
-            <meshStandardMaterial 
-              color="#a855f7"
-              emissive="#a855f7"
-              emissiveIntensity={1}
-            />
-          </mesh>
-          {/* Door label */}
-          <Text
-            position={[roomSize / 2 - 1, doorHeight + 1, 0]}
-            fontSize={1}
-            color="#a855f7"
-            anchorX="center"
-            anchorY="middle"
-            rotation={[0, -Math.PI / 2, 0]}
-          >
-            🎣 FISH GAMES
-          </Text>
-        </>
-      ) : (
-        <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
-          <boxGeometry args={[1, wallHeight, roomSize]} />
-          <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
-        </mesh>
-      )}
+      {/* Right Wall - always solid */}
+      <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
+        <boxGeometry args={[1, wallHeight, roomSize]} />
+        <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+      </mesh>
 
       {/* Ceiling neon strips */}
       <mesh position={[-10, wallHeight - 1, 0]}>
@@ -738,29 +732,29 @@ function FirstPersonControls() {
       camera.position.addScaledVector(right, speed);
     }
 
-    // Room transitions based on position
+    // Room transitions based on position - doors are on back wall
     if (currentRoom === 'slots') {
-      // Left door to cashier
-      if (camera.position.x < -16 && Math.abs(camera.position.z) < 3) {
+      // Back left door to cashier (under sign)
+      if (camera.position.z < -16 && camera.position.x < -1) {
         setCurrentRoom('cashier');
-        camera.position.set(14, 1.7, 0);
+        camera.position.set(0, 1.7, 14);
       }
-      // Right door to fish games
-      if (camera.position.x > 16 && Math.abs(camera.position.z) < 3) {
+      // Back right door to fish games (under sign)
+      if (camera.position.z < -16 && camera.position.x > 1) {
         setCurrentRoom('fish');
-        camera.position.set(-14, 1.7, 0);
+        camera.position.set(0, 1.7, 14);
       }
     } else if (currentRoom === 'cashier') {
-      // Exit back to slots
-      if (camera.position.x > 16 && Math.abs(camera.position.z) < 3) {
+      // Exit back to slots from back wall
+      if (camera.position.z < -16) {
         setCurrentRoom('slots');
-        camera.position.set(-14, 1.7, 0);
+        camera.position.set(-4, 1.7, 14);
       }
     } else if (currentRoom === 'fish') {
-      // Exit back to slots
-      if (camera.position.x < -16 && Math.abs(camera.position.z) < 3) {
+      // Exit back to slots from back wall
+      if (camera.position.z < -16) {
         setCurrentRoom('slots');
-        camera.position.set(14, 1.7, 0);
+        camera.position.set(4, 1.7, 14);
       }
     }
 
@@ -784,21 +778,21 @@ function Scene() {
       
       {currentRoom === 'slots' && (
         <>
-          <RoomWalls leftDoor={true} rightDoor={true} backSign="💎 JADE ROYALE 💎" />
+          <RoomWalls backLeftDoor={true} backRightDoor={true} backSign="💎 JADE ROYALE 💎" />
           <SlotMachineRoom />
         </>
       )}
       
       {currentRoom === 'cashier' && (
         <>
-          <RoomWalls rightDoor={true} backSign="💰 CASHIER 💰" />
+          <RoomWalls backLeftDoor={true} backSign="💰 CASHIER 💰" />
           <CashierRoom />
         </>
       )}
       
       {currentRoom === 'fish' && (
         <>
-          <RoomWalls leftDoor={true} backSign="🎣 FISH GAMES 🎣" />
+          <RoomWalls backRightDoor={true} backSign="🎣 FISH GAMES 🎣" />
           <FishGameRoom />
         </>
       )}
