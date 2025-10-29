@@ -1312,8 +1312,8 @@ function CanvasWrapper() {
         <Scene />
         <Environment preset="night" background={false} />
         <PointerLockControls 
-          maxPolarAngle={Math.PI / 2}
-          minPolarAngle={Math.PI / 2}
+          maxPolarAngle={Math.PI - 0.05}
+          minPolarAngle={0.05}
         />
       </Canvas>
     </RoomContext.Provider>
