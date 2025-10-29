@@ -57,31 +57,33 @@ function CasinoWalls() {
     normalScale: new THREE.Vector2(0.3, 0.3)
   });
 
+  const walls = [
+    { position: [0, wallHeight / 2, -roomSize / 2], dimensions: [roomSize, wallHeight, wallThickness] },
+    { position: [0, wallHeight / 2, roomSize / 2], dimensions: [roomSize, wallHeight, wallThickness] },
+    { position: [-roomSize / 2, wallHeight / 2, 0], dimensions: [wallThickness, wallHeight, roomSize] },
+    { position: [roomSize / 2, wallHeight / 2, 0], dimensions: [wallThickness, wallHeight, roomSize] }
+  ];
+
   return (
     <group>
       {/* Main walls with pillars */}
-      {[
-        [0, wallHeight / 2, -roomSize / 2, [roomSize, wallHeight, wallThickness]],
-        [0, wallHeight / 2, roomSize / 2, [roomSize, wallHeight, wallThickness]],
-        [-roomSize / 2, wallHeight / 2, 0, [wallThickness, wallHeight, roomSize]],
-        [roomSize / 2, wallHeight / 2, 0, [wallThickness, wallHeight, roomSize]]
-      ].map((wall, i) => (
+      {walls.map((wall, i) => (
         <group key={i}>
-          <mesh position={wall[0] as [number, number, number]} receiveShadow castShadow>
-            <boxGeometry args={wall[1] as [number, number, number]} />
+          <mesh position={wall.position as [number, number, number]} receiveShadow castShadow>
+            <boxGeometry args={wall.dimensions as [number, number, number]} />
             <primitive object={wallMaterial.clone()} />
           </mesh>
 
           {/* Decorative trim */}
           <mesh position={[
-            (wall[0] as [number, number, number])[0],
+            wall.position[0],
             wallHeight - 0.5,
-            (wall[0] as [number, number, number])[2]
+            wall.position[2]
           ]} receiveShadow>
             <boxGeometry args={[
-              (wall[1] as [number, number, number])[0] * 1.02,
+              wall.dimensions[0] * 1.02,
               0.3,
-              (wall[1] as [number, number, number])[2] * 1.02
+              wall.dimensions[2] * 1.02
             ]} />
             <meshStandardMaterial
               color="#ffd700"
