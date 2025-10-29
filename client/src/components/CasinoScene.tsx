@@ -465,6 +465,7 @@ interface GameObjectProps {
   onClick?: () => void;
   label?: string;
   glowColor?: string;
+  machineColor?: string;
 }
 
 function GameObject({
@@ -474,7 +475,8 @@ function GameObject({
   scale = 1,
   onClick,
   label,
-  glowColor = "#10b981"
+  glowColor = "#10b981",
+  machineColor = "#6366f1"
 }: GameObjectProps) {
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -503,7 +505,7 @@ function GameObject({
               color="#0a0a1e" 
               metalness={0.98} 
               roughness={0.05}
-              emissive="#6366f1"
+              emissive={machineColor}
               emissiveIntensity={hovered ? 0.6 : 0.3}
             />
           </mesh>
@@ -513,7 +515,7 @@ function GameObject({
             <boxGeometry args={[1.2, 1.6, 0.08]} />
             <meshStandardMaterial 
               color="#000000" 
-              emissive={hovered ? "#a78bfa" : "#8b5cf6"}
+              emissive={machineColor}
               emissiveIntensity={hovered ? 4.5 : 3.2}
             />
           </mesh>
@@ -525,7 +527,7 @@ function GameObject({
               color="#1a1a2e" 
               metalness={1} 
               roughness={0.02}
-              emissive="#3b82f6"
+              emissive={machineColor}
               emissiveIntensity={hovered ? 0.8 : 0.4}
             />
           </mesh>
@@ -939,6 +941,20 @@ function SlotMachineRoom() {
     }
   };
 
+  // Different colors for each slot machine
+  const machineColors = [
+    "#6366f1", // Indigo
+    "#ec4899", // Pink
+    "#10b981", // Emerald
+    "#f59e0b", // Amber
+    "#06b6d4", // Cyan
+    "#8b5cf6", // Purple
+    "#ef4444", // Red
+    "#14b8a6", // Teal
+    "#f97316", // Orange
+    "#a855f7"  // Violet
+  ];
+
   return (
     <group>
       {/* Starry Ceiling */}
@@ -958,6 +974,7 @@ function SlotMachineRoom() {
           onClick={() => handleSlotMachineClick(i + 1)}
           label={`Slot Machine ${i + 1}`}
           glowColor="#a855f7"
+          machineColor={machineColors[i]}
         />
       ))}
 
@@ -972,6 +989,7 @@ function SlotMachineRoom() {
           onClick={() => handleSlotMachineClick(i + 6)}
           label={`Slot Machine ${i + 6}`}
           glowColor="#a855f7"
+          machineColor={machineColors[i + 5]}
         />
       ))}
     </group>
