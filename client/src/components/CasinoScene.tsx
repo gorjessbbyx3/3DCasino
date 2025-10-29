@@ -250,6 +250,84 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
   );
 }
 
+// Frame lights component for slot machines
+function FrameLights({ hovered }: { hovered: boolean }) {
+  const lightsRef = useRef<THREE.Group>(null);
+  
+  // Create light positions around the frame
+  const lightPositions = useMemo(() => {
+    const positions: [number, number, number][] = [];
+    const frameWidth = 1.15;
+    const frameHeight = 1.05;
+    const spacing = 0.15;
+    
+    // Top lights
+    for (let x = -frameWidth / 2; x <= frameWidth / 2; x += spacing) {
+      positions.push([x, 1.3 + frameHeight / 2, 0.52]);
+    }
+    
+    // Bottom lights
+    for (let x = -frameWidth / 2; x <= frameWidth / 2; x += spacing) {
+      positions.push([x, 1.3 - frameHeight / 2, 0.52]);
+    }
+    
+    // Left lights
+    for (let y = -frameHeight / 2 + spacing; y < frameHeight / 2; y += spacing) {
+      positions.push([-frameWidth / 2, 1.3 + y, 0.52]);
+    }
+    
+    // Right lights
+    for (let y = -frameHeight / 2 + spacing; y < frameHeight / 2; y += spacing) {
+      positions.push([frameWidth / 2, 1.3 + y, 0.52]);
+    }
+    
+    return positions;
+  }, []);
+  
+  useFrame((state) => {
+    if (lightsRef.current) {
+      const time = state.clock.elapsedTime;
+      lightsRef.current.children.forEach((light, index) => {
+        // Chase effect around the frame
+        const offset = (index / lightPositions.length) * Math.PI * 2;
+        const intensity = Math.sin(time * 3 + offset) * 0.5 + 0.5;
+        
+        if (light instanceof THREE.Mesh) {
+          const material = light.material as THREE.MeshStandardMaterial;
+          material.emissiveIntensity = hovered ? (1 + intensity) * 1.5 : 0.5 + intensity * 0.5;
+        }
+      });
+    }
+  });
+  
+  return (
+    <group ref={lightsRef}>
+      {lightPositions.map((pos, index) => (
+        <group key={index}>
+          {/* Light bulb */}
+          <mesh position={pos} castShadow>
+            <sphereGeometry args={[0.04, 8, 8]} />
+            <meshStandardMaterial
+              color="#fbbf24"
+              emissive="#fbbf24"
+              emissiveIntensity={1}
+              metalness={0.8}
+              roughness={0.2}
+            />
+          </mesh>
+          {/* Point light for glow */}
+          <pointLight
+            position={pos}
+            color="#fbbf24"
+            intensity={hovered ? 3 : 1.5}
+            distance={0.8}
+          />
+        </group>
+      ))}
+    </group>
+  );
+}
+
 // Game object component
 interface GameObjectProps {
   position: [number, number, number];
@@ -310,6 +388,25 @@ function GameObject({
               emissiveIntensity={hovered ? 0.6 : 0.3}
             />
           </mesh>
+          
+          {/* Frame accent lights - 4 corners for elegant look */}
+          {[
+            [-0.575, 1.825, 0.52], // Top left
+            [0.575, 1.825, 0.52],  // Top right
+            [-0.575, 0.775, 0.52], // Bottom left
+            [0.575, 0.775, 0.52],  // Bottom right
+          ].map((pos, i) => (
+            <mesh key={i} position={pos as [number, number, number]} castShadow>
+              <sphereGeometry args={[0.05, 8, 8]} />
+              <meshStandardMaterial
+                color="#fbbf24"
+                emissive="#fbbf24"
+                emissiveIntensity={hovered ? 4 : 2}
+                metalness={1}
+                roughness={0.05}
+              />
+            </mesh>
+          ))}
           
           {/* Decorative top crown */}
           <mesh position={[0, 2.3, 0]} castShadow>
