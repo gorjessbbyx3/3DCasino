@@ -1,4 +1,4 @@
-import { useRef, useState, useMemo, useEffect } from "react";
+import { useRef, useState, useEffect, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -28,17 +28,17 @@ function CasinoWalls() {
         <boxGeometry args={[roomSize, wallHeight, wallThickness]} />
         <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
       </mesh>
-      
+
       <mesh position={[0, wallHeight / 2, roomSize / 2]} receiveShadow>
         <boxGeometry args={[roomSize, wallHeight, wallThickness]} />
         <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
       </mesh>
-      
+
       <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[wallThickness, wallHeight, roomSize]} />
         <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
       </mesh>
-      
+
       <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[wallThickness, wallHeight, roomSize]} />
         <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
@@ -64,9 +64,9 @@ interface GameObjectProps {
 function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, onClick, label }: GameObjectProps) {
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
-  
+
   const { scene } = useGLTF(modelPath);
-  
+
   const clonedScene = useMemo(() => scene.clone(), [scene]);
 
   useFrame(() => {
@@ -186,7 +186,7 @@ function Lighting() {
   return (
     <>
       <ambientLight intensity={0.3} />
-      
+
       <spotLight
         position={[0, 10, -20]}
         angle={0.5}
@@ -200,7 +200,7 @@ function Lighting() {
       <pointLight position={[15, 5, -15]} intensity={20} color="#fbbf24" />
       <pointLight position={[-15, 5, 15]} intensity={20} color="#fbbf24" />
       <pointLight position={[15, 5, 15]} intensity={20} color="#fbbf24" />
-      
+
       <pointLight position={[0, 5, 0]} intensity={30} color="#10b981" />
     </>
   );
@@ -260,7 +260,7 @@ function PlayerControls() {
     window.addEventListener('keyup', handleKeyUp);
     window.addEventListener('mousemove', handleMouseMove);
     gl.domElement.addEventListener('click', handleClick);
-    
+
     const interval = setInterval(updateMovement, 16);
 
     return () => {
@@ -331,7 +331,7 @@ function MobileJoystick({
       Array.from(e.touches).forEach(touch => {
         const x = touch.clientX;
         const y = touch.clientY;
-        
+
         if (x < window.innerWidth / 2 && !moveTouch) {
           setMoveTouch({ id: touch.identifier, x, y, startX: x, startY: y });
         } else if (x >= window.innerWidth / 2 && !lookTouch) {
@@ -349,24 +349,24 @@ function MobileJoystick({
           const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
           const maxDistance = 50;
           const clampedDistance = Math.min(distance, maxDistance);
-          
+
           if (distance > 0) {
             const angle = Math.atan2(deltaY, deltaX);
             const forward = -Math.sin(angle) * (clampedDistance / maxDistance);
             const right = Math.cos(angle) * (clampedDistance / maxDistance);
             onMove({ forward, right });
           }
-          
+
           setMoveTouch(prev => prev ? { ...prev, x: touch.clientX, y: touch.clientY } : null);
         } else if (lookTouch) {
           const deltaX = touch.clientX - lookTouch.x;
           const deltaY = touch.clientY - lookTouch.y;
-          
+
           rotationRef.current = {
             yaw: rotationRef.current.yaw - deltaX * 0.003,
             pitch: Math.max(-Math.PI / 3, Math.min(Math.PI / 3, rotationRef.current.pitch - deltaY * 0.003))
           };
-          
+
           onRotate(rotationRef.current);
           setLookTouch({ x: touch.clientX, y: touch.clientY });
         }
@@ -375,12 +375,12 @@ function MobileJoystick({
 
     const handleTouchEnd = (e: TouchEvent) => {
       const remainingTouches = Array.from(e.touches).map(t => t.identifier);
-      
+
       if (moveTouch && !remainingTouches.includes(moveTouch.id)) {
         setMoveTouch(null);
         onMove({ forward: 0, right: 0 });
       }
-      
+
       if (e.touches.length === 0) {
         setLookTouch(null);
       }
@@ -410,7 +410,7 @@ export function CasinoScene() {
       gl={{ antialias: true, powerPreference: "high-performance" }}
     >
       <color attach="background" args={["#000000"]} />
-      
+
       <Lighting />
       <CasinoFloor />
       <CasinoWalls />
