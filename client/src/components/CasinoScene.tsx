@@ -29,24 +29,55 @@ const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom:
 // RGB LED Floor Tile
 function LEDTile({ position, delay = 0 }: { position: [number, number, number]; delay?: number }) {
   const meshRef = useRef<THREE.Mesh>(null);
+  const { camera } = useThree();
+  const [hovered, setHovered] = useState(false);
 
   useFrame((state) => {
     if (meshRef.current) {
       const time = state.clock.elapsedTime + delay;
       const material = meshRef.current.material as THREE.MeshStandardMaterial;
       
-      // RGB color cycling
-      const r = Math.sin(time * 0.5) * 0.5 + 0.5;
-      const g = Math.sin(time * 0.5 + 2) * 0.5 + 0.5;
-      const b = Math.sin(time * 0.5 + 4) * 0.5 + 0.5;
-      
-      material.emissive.setRGB(r, g, b);
-      material.emissiveIntensity = 0.6 + Math.sin(time * 2) * 0.2;
+      if (hovered) {
+        // Yellow highlight when hovered
+        material.emissive.setRGB(1, 1, 0);
+        material.emissiveIntensity = 1.2;
+      } else {
+        // RGB color cycling
+        const r = Math.sin(time * 0.5) * 0.5 + 0.5;
+        const g = Math.sin(time * 0.5 + 2) * 0.5 + 0.5;
+        const b = Math.sin(time * 0.5 + 4) * 0.5 + 0.5;
+        
+        material.emissive.setRGB(r, g, b);
+        material.emissiveIntensity = 0.6 + Math.sin(time * 2) * 0.2;
+      }
     }
   });
 
+  const handleClick = (e: any) => {
+    e.stopPropagation();
+    // Move camera to clicked tile position (keep eye level height)
+    camera.position.x = position[0];
+    camera.position.y = 1.7;
+    camera.position.z = position[2];
+  };
+
   return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={position} receiveShadow>
+    <mesh 
+      ref={meshRef} 
+      rotation={[-Math.PI / 2, 0, 0]} 
+      position={position} 
+      receiveShadow
+      onClick={handleClick}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        document.body.style.cursor = "auto";
+      }}
+    >
       <planeGeometry args={[4.8, 4.8]} />
       <meshStandardMaterial
         color="#1a1a2e"
