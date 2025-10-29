@@ -60,7 +60,7 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
 }
 
 // VIP Underground Casino Floor with RGB LED Tiles
-function CasinoFloor({ roomSize = 50 }: { roomSize?: number }) {
+function CasinoFloor({ roomSize = 35 }: { roomSize?: number }) {
   const tiles = useMemo(() => {
     const tileArray = [];
     const tileSize = 5; // Larger tiles to reduce count
@@ -107,7 +107,7 @@ function CasinoFloor({ roomSize = 50 }: { roomSize?: number }) {
 }
 
 // Room walls with doorways
-function RoomWalls({ roomSize = 50, leftDoor = false, rightDoor = false, backSign = "" }: { 
+function RoomWalls({ roomSize = 35, leftDoor = false, rightDoor = false, backSign = "" }: { 
   roomSize?: number; 
   leftDoor?: boolean; 
   rightDoor?: boolean;
@@ -495,12 +495,12 @@ function SlotMachineRoom() {
 
   return (
     <group>
-      {/* 10 Slot Machines - 5 on each side wall */}
+      {/* 10 Slot Machines - 5 on each side wall, closer together */}
       {/* Left wall slots */}
       {Array.from({ length: 5 }, (_, i) => (
         <GameObject
           key={`slot-left-${i}`}
-          position={[-22, 0, (i - 2) * 8]}
+          position={[-14, 0, (i - 2) * 5]}
           rotation={[0, Math.PI / 2, 0]}
           modelPath="slot-machine"
           scale={2.5}
@@ -514,7 +514,7 @@ function SlotMachineRoom() {
       {Array.from({ length: 5 }, (_, i) => (
         <GameObject
           key={`slot-right-${i}`}
-          position={[22, 0, (i - 2) * 8]}
+          position={[14, 0, (i - 2) * 5]}
           rotation={[0, -Math.PI / 2, 0]}
           modelPath="slot-machine"
           scale={2.5}
@@ -571,9 +571,9 @@ function FishGameRoom() {
         <GameObject
           key={`fish-${i}`}
           position={[
-            ((i % 3) - 1) * 12,
+            ((i % 3) - 1) * 8,
             0,
-            Math.floor(i / 3) === 0 ? -8 : 8
+            Math.floor(i / 3) === 0 ? -6 : 6
           ]}
           modelPath="fish-table"
           scale={1.8}
@@ -603,12 +603,12 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
           color="#ffffff"
         />
         {/* Purple lights for slot machines */}
-        <pointLight position={[-22, 4, -10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[-22, 4, 0]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[-22, 4, 10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[22, 4, -10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[22, 4, 0]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[22, 4, 10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
       </>
     );
   } else if (roomType === 'cashier') {
@@ -741,32 +741,32 @@ function FirstPersonControls() {
     // Room transitions based on position
     if (currentRoom === 'slots') {
       // Left door to cashier
-      if (camera.position.x < -22 && Math.abs(camera.position.z) < 3) {
+      if (camera.position.x < -16 && Math.abs(camera.position.z) < 3) {
         setCurrentRoom('cashier');
-        camera.position.set(20, 1.7, 0);
+        camera.position.set(14, 1.7, 0);
       }
       // Right door to fish games
-      if (camera.position.x > 22 && Math.abs(camera.position.z) < 3) {
+      if (camera.position.x > 16 && Math.abs(camera.position.z) < 3) {
         setCurrentRoom('fish');
-        camera.position.set(-20, 1.7, 0);
+        camera.position.set(-14, 1.7, 0);
       }
     } else if (currentRoom === 'cashier') {
       // Exit back to slots
-      if (camera.position.x > 22 && Math.abs(camera.position.z) < 3) {
+      if (camera.position.x > 16 && Math.abs(camera.position.z) < 3) {
         setCurrentRoom('slots');
-        camera.position.set(-20, 1.7, 0);
+        camera.position.set(-14, 1.7, 0);
       }
     } else if (currentRoom === 'fish') {
       // Exit back to slots
-      if (camera.position.x < -22 && Math.abs(camera.position.z) < 3) {
+      if (camera.position.x < -16 && Math.abs(camera.position.z) < 3) {
         setCurrentRoom('slots');
-        camera.position.set(20, 1.7, 0);
+        camera.position.set(14, 1.7, 0);
       }
     }
 
     // Keep camera within current room bounds
-    camera.position.x = Math.max(-23, Math.min(23, camera.position.x));
-    camera.position.z = Math.max(-23, Math.min(23, camera.position.z));
+    camera.position.x = Math.max(-16.5, Math.min(16.5, camera.position.x));
+    camera.position.z = Math.max(-16.5, Math.min(16.5, camera.position.z));
     camera.position.y = 1.7; // Eye level
   });
 
@@ -814,7 +814,7 @@ function CanvasWrapper() {
       <Canvas
         shadows
         camera={{ 
-          position: [0, 1.7, 20], 
+          position: [0, 1.7, 14], 
           fov: 75,
           near: 0.1,
           far: 1000
