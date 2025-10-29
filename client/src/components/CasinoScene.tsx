@@ -1,52 +1,120 @@
 import { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
+import { useGLTF, Environment, OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
 
 function CasinoFloor() {
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
-      <planeGeometry args={[100, 100]} />
-      <meshStandardMaterial 
-        color="#1a0f0a"
-        roughness={0.3}
-        metalness={0.1}
-      />
-    </mesh>
+    <group>
+      {/* Main carpet floor */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
+        <planeGeometry args={[100, 100]} />
+        <meshStandardMaterial 
+          color="#2a0f0f"
+          roughness={0.8}
+          metalness={0.1}
+          normalScale={[0.5, 0.5]}
+        />
+      </mesh>
+      
+      {/* Decorative border */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
+        <ringGeometry args={[45, 48, 64]} />
+        <meshStandardMaterial 
+          color="#ffd700"
+          roughness={0.3}
+          metalness={0.7}
+          emissive="#332200"
+          emissiveIntensity={0.1}
+        />
+      </mesh>
+
+      {/* Center medallion */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
+        <circleGeometry args={[8, 32]} />
+        <meshStandardMaterial 
+          color="#10b981"
+          roughness={0.2}
+          metalness={0.8}
+          emissive="#0a5d3a"
+          emissiveIntensity={0.3}
+        />
+      </mesh>
+    </group>
   );
 }
 
 function CasinoWalls() {
-  const wallHeight = 8;
+  const wallHeight = 10;
   const wallThickness = 0.5;
   const roomSize = 50;
 
+  const wallMaterial = new THREE.MeshStandardMaterial({
+    color: "#1a0f0a",
+    roughness: 0.4,
+    metalness: 0.2,
+    normalScale: new THREE.Vector2(0.3, 0.3)
+  });
+
   return (
     <group>
-      <mesh position={[0, wallHeight / 2, -roomSize / 2]} receiveShadow>
-        <boxGeometry args={[roomSize, wallHeight, wallThickness]} />
-        <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
-      </mesh>
+      {/* Main walls with pillars */}
+      {[
+        [0, wallHeight / 2, -roomSize / 2, [roomSize, wallHeight, wallThickness]],
+        [0, wallHeight / 2, roomSize / 2, [roomSize, wallHeight, wallThickness]],
+        [-roomSize / 2, wallHeight / 2, 0, [wallThickness, wallHeight, roomSize]],
+        [roomSize / 2, wallHeight / 2, 0, [wallThickness, wallHeight, roomSize]]
+      ].map((wall, i) => (
+        <group key={i}>
+          <mesh position={wall[0] as [number, number, number]} receiveShadow castShadow>
+            <boxGeometry args={wall[1] as [number, number, number]} />
+            <primitive object={wallMaterial.clone()} />
+          </mesh>
+          
+          {/* Decorative trim */}
+          <mesh position={[
+            (wall[0] as [number, number, number])[0],
+            wallHeight - 0.5,
+            (wall[0] as [number, number, number])[2]
+          ]} receiveShadow>
+            <boxGeometry args={[
+              (wall[1] as [number, number, number])[0] * 1.02,
+              0.3,
+              (wall[1] as [number, number, number])[2] * 1.02
+            ]} />
+            <meshStandardMaterial 
+              color="#ffd700"
+              roughness={0.2}
+              metalness={0.8}
+              emissive="#332200"
+              emissiveIntensity={0.1}
+            />
+          </mesh>
+        </group>
+      ))}
 
-      <mesh position={[0, wallHeight / 2, roomSize / 2]} receiveShadow>
-        <boxGeometry args={[roomSize, wallHeight, wallThickness]} />
-        <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
-      </mesh>
-
-      <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
-        <boxGeometry args={[wallThickness, wallHeight, roomSize]} />
-        <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
-      </mesh>
-
-      <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
-        <boxGeometry args={[wallThickness, wallHeight, roomSize]} />
-        <meshStandardMaterial color="#0a3d2a" roughness={0.7} />
-      </mesh>
-
+      {/* Ornate ceiling */}
       <mesh position={[0, wallHeight, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
-        <meshStandardMaterial color="#050505" side={THREE.DoubleSide} />
+        <meshStandardMaterial 
+          color="#0a0505" 
+          side={THREE.DoubleSide}
+          roughness={0.8}
+          metalness={0.1}
+        />
+      </mesh>
+
+      {/* Chandelier */}
+      <mesh position={[0, wallHeight - 1, 0]} castShadow>
+        <sphereGeometry args={[1.5, 16, 8]} />
+        <meshStandardMaterial 
+          color="#ffd700"
+          roughness={0.1}
+          metalness={0.9}
+          emissive="#ffaa00"
+          emissiveIntensity={0.3}
+        />
       </mesh>
     </group>
   );
@@ -66,12 +134,17 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
   const [hovered, setHovered] = useState(false);
 
   const { scene } = useGLTF(modelPath);
-
   const clonedScene = useMemo(() => scene.clone(), [scene]);
 
-  useFrame(() => {
-    if (meshRef.current && hovered) {
-      meshRef.current.position.y = position[1] + Math.sin(Date.now() * 0.003) * 0.1;
+  useFrame((state) => {
+    if (meshRef.current) {
+      if (hovered) {
+        meshRef.current.position.y = position[1] + Math.sin(state.clock.elapsedTime * 3) * 0.1;
+        meshRef.current.rotation.y += 0.01;
+      } else {
+        meshRef.current.position.y = THREE.MathUtils.lerp(meshRef.current.position.y, position[1], 0.1);
+        meshRef.current.rotation.y = THREE.MathUtils.lerp(meshRef.current.rotation.y, rotation[1], 0.1);
+      }
     }
   });
 
@@ -80,7 +153,7 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
       ref={meshRef}
       position={position}
       rotation={rotation}
-      scale={scale}
+      scale={hovered ? scale * 1.05 : scale}
       onClick={(e) => {
         e.stopPropagation();
         if (onClick) {
@@ -98,11 +171,37 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
       }}
     >
       <primitive object={clonedScene} />
+      
+      {/* Glow effect when hovered */}
+      {hovered && (
+        <pointLight
+          position={[0, 2, 0]}
+          color="#10b981"
+          intensity={20}
+          distance={10}
+        />
+      )}
+
+      {/* Enhanced label */}
       {hovered && label && (
-        <mesh position={[0, 3, 0]}>
-          <planeGeometry args={[2, 0.5]} />
-          <meshBasicMaterial color="#10b981" opacity={0.8} transparent />
-        </mesh>
+        <group position={[0, 3.5, 0]}>
+          <mesh>
+            <planeGeometry args={[3, 0.8]} />
+            <meshBasicMaterial 
+              color="#000000" 
+              opacity={0.8} 
+              transparent 
+            />
+          </mesh>
+          <mesh position={[0, 0, 0.01]}>
+            <planeGeometry args={[2.8, 0.6]} />
+            <meshBasicMaterial 
+              color="#10b981" 
+              opacity={0.9} 
+              transparent 
+            />
+          </mesh>
+        </group>
       )}
     </group>
   );
@@ -183,25 +282,93 @@ function CasinoObjects() {
 }
 
 function Lighting() {
+  const lightRef = useRef<THREE.PointLight>(null);
+  
+  useFrame((state) => {
+    if (lightRef.current) {
+      lightRef.current.intensity = 25 + Math.sin(state.clock.elapsedTime * 2) * 5;
+    }
+  });
+
   return (
     <>
-      <ambientLight intensity={0.3} />
+      {/* Ambient lighting with warmer tone */}
+      <ambientLight intensity={0.2} color="#fff8dc" />
 
+      {/* Main dramatic spotlight on cashier */}
       <spotLight
-        position={[0, 10, -20]}
-        angle={0.5}
-        penumbra={0.5}
-        intensity={50}
+        position={[0, 12, -18]}
+        target-position={[0, 0, -20]}
+        angle={0.4}
+        penumbra={0.6}
+        intensity={80}
         castShadow
         color="#10b981"
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
       />
 
-      <pointLight position={[-15, 5, -15]} intensity={20} color="#fbbf24" />
-      <pointLight position={[15, 5, -15]} intensity={20} color="#fbbf24" />
-      <pointLight position={[-15, 5, 15]} intensity={20} color="#fbbf24" />
-      <pointLight position={[15, 5, 15]} intensity={20} color="#fbbf24" />
+      {/* Corner accent lights with color variation */}
+      <pointLight position={[-20, 7, -20]} intensity={15} color="#ff6b6b" />
+      <pointLight position={[20, 7, -20]} intensity={15} color="#4ecdc4" />
+      <pointLight position={[-20, 7, 20]} intensity={15} color="#ffe66d" />
+      <pointLight position={[20, 7, 20]} intensity={15} color="#a8e6cf" />
 
-      <pointLight position={[0, 5, 0]} intensity={30} color="#10b981" />
+      {/* Slot machine area lighting */}
+      <spotLight
+        position={[-10, 8, -12]}
+        target-position={[-10, 0, -15]}
+        angle={0.6}
+        penumbra={0.4}
+        intensity={40}
+        color="#ffd700"
+        castShadow
+      />
+      <spotLight
+        position={[10, 8, -12]}
+        target-position={[10, 0, -15]}
+        angle={0.6}
+        penumbra={0.4}
+        intensity={40}
+        color="#ffd700"
+        castShadow
+      />
+
+      {/* Fish table lighting */}
+      <spotLight
+        position={[0, 6, 5]}
+        target-position={[0, 0, 8]}
+        angle={0.8}
+        penumbra={0.3}
+        intensity={35}
+        color="#00bfff"
+        castShadow
+      />
+
+      {/* Animated center light */}
+      <pointLight 
+        ref={lightRef}
+        position={[0, 8, 0]} 
+        intensity={25} 
+        color="#10b981"
+        castShadow
+      />
+
+      {/* Ceiling chandelier lights */}
+      <pointLight position={[0, 9, 0]} intensity={40} color="#ffd700" />
+      
+      {/* Atmospheric fog effect using directional light */}
+      <directionalLight
+        position={[10, 10, 5]}
+        intensity={0.5}
+        color="#ffffff"
+        castShadow
+        shadow-camera-far={50}
+        shadow-camera-left={-25}
+        shadow-camera-right={25}
+        shadow-camera-top={25}
+        shadow-camera-bottom={-25}
+      />
     </>
   );
 }
@@ -405,18 +572,93 @@ function MobileJoystick({
 export function CasinoScene() {
   return (
     <Canvas
-      shadows
-      camera={{ position: [0, 2, 25], fov: 75 }}
-      gl={{ antialias: true, powerPreference: "high-performance" }}
+      shadows={{ type: "PCFSoftShadowMap" }}
+      camera={{ 
+        position: [0, 3, 25], 
+        fov: 75,
+        near: 0.1,
+        far: 1000
+      }}
+      gl={{ 
+        antialias: true, 
+        powerPreference: "high-performance",
+        alpha: false,
+        stencil: false,
+        depth: true
+      }}
     >
-      <color attach="background" args={["#000000"]} />
+      {/* Atmospheric background gradient */}
+      <color attach="background" args={["#0a0a0a"]} />
+      <fog attach="fog" args={["#1a1a1a", 30, 60]} />
 
-      <Lighting />
-      <CasinoFloor />
-      <CasinoWalls />
-      <CasinoObjects />
-      <PlayerControls />
+      {/* Enhanced HDR environment */}
+      <Environment
+        background={false}
+        environmentIntensity={0.3}
+        preset="night"
+      />
+
+      <Suspense fallback={null}>
+        <Lighting />
+        <CasinoFloor />
+        <CasinoWalls />
+        <CasinoObjects />
+        <PlayerControls />
+      </Suspense>
+
+      {/* Subtle particles for atmosphere */}
+      <Points limit={1000}>
+        <pointsMaterial 
+          size={0.1}
+          sizeAttenuation
+          color="#ffffff"
+          transparent
+          opacity={0.3}
+          blending={THREE.AdditiveBlending}
+        />
+      </Points>
     </Canvas>
+  );
+}
+
+function Points({ limit }: { limit: number }) {
+  const pointsRef = useRef<THREE.Points>(null);
+  
+  const positions = useMemo(() => {
+    const positions = new Float32Array(limit * 3);
+    for (let i = 0; i < limit; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 100;
+      positions[i * 3 + 1] = Math.random() * 20;
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 100;
+    }
+    return positions;
+  }, [limit]);
+
+  useFrame((state) => {
+    if (pointsRef.current) {
+      pointsRef.current.rotation.y += 0.0005;
+    }
+  });
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute
+          attach="attributes-position"
+          count={positions.length / 3}
+          array={positions}
+          itemSize={3}
+        />
+      </bufferGeometry>
+      <pointsMaterial 
+        size={0.1}
+        sizeAttenuation
+        color="#ffffff"
+        transparent
+        opacity={0.3}
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
   );
 }
 

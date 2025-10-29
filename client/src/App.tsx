@@ -41,39 +41,42 @@ function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/80 to-transparent p-4">
+      <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-black/90 via-black/60 to-transparent p-6 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-yellow-400 bg-clip-text text-transparent">
-              Jade Royale
+          <div className="flex items-center gap-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-300 via-emerald-400 to-yellow-300 bg-clip-text text-transparent drop-shadow-lg animate-pulse">
+              💎 Jade Royale
             </h1>
             {user && (
-              <div className="flex items-center gap-2 bg-emerald-900/30 px-4 py-2 rounded-lg border border-emerald-500/30">
-                <Coins className="w-5 h-5 text-yellow-400" />
-                <span className="text-emerald-400 font-semibold">
+              <div className="flex items-center gap-3 bg-gradient-to-r from-emerald-900/40 to-emerald-800/40 px-6 py-3 rounded-xl border border-emerald-400/50 backdrop-blur-md shadow-lg shadow-emerald-500/20">
+                <Coins className="w-6 h-6 text-yellow-300 animate-bounce" />
+                <span className="text-emerald-300 font-bold text-lg tracking-wide">
                   ${user.balance.toLocaleString()}
                 </span>
               </div>
             )}
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             {user ? (
               <>
-                <span className="text-white">Welcome, <span className="text-emerald-400 font-semibold">{user.username}</span></span>
+                <div className="text-right">
+                  <div className="text-gray-300 text-sm">Welcome back,</div>
+                  <div className="text-emerald-300 font-bold text-lg tracking-wide">{user.username}</div>
+                </div>
                 <Button
                   onClick={handleLogout}
                   variant="outline"
-                  size="sm"
-                  className="border-emerald-500/30 hover:bg-emerald-900/30 text-white"
+                  size="default"
+                  className="border-red-500/50 hover:bg-red-900/30 hover:border-red-400 text-red-200 hover:text-red-100 transition-all duration-300 shadow-lg hover:shadow-red-500/20"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Logout
                 </Button>
               </>
             ) : (
-              <div className="text-gray-400 text-sm">
-                Click on any game or the cashier to get started
+              <div className="text-gray-300 text-base bg-black/40 px-4 py-2 rounded-lg border border-gray-600/30 backdrop-blur-sm">
+                ✨ Click on any game or the cashier to get started
               </div>
             )}
           </div>
@@ -84,12 +87,16 @@ function App() {
       <AuthModal />
       <CashierModal />
 
-      <div className="absolute bottom-4 left-0 right-0 z-10 text-center">
-        <p className="text-gray-400 text-sm bg-black/60 inline-block px-4 py-2 rounded-lg">
-          {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) 
-            ? "Touch left side to move • Touch right side to look • Tap games to play" 
-            : "WASD to move • Mouse to look • Click on games to play"}
-        </p>
+      <div className="absolute bottom-6 left-0 right-0 z-10 text-center">
+        <div className="inline-flex items-center gap-4 bg-gradient-to-r from-black/80 via-black/70 to-black/80 px-8 py-4 rounded-2xl border border-gray-500/30 backdrop-blur-md shadow-2xl">
+          <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
+          <p className="text-gray-200 text-base font-medium">
+            {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) 
+              ? "👆 Touch left side to move • Touch right side to look • Tap games to play" 
+              : "⌨️ WASD to move • 🖱️ Mouse to look • 🎮 Click on games to play"}
+          </p>
+          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+        </div>
       </div>
     </div>
   );
