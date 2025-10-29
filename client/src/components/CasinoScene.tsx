@@ -153,25 +153,37 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
       {/* Back Wall with optional doors underneath sign */}
       {backLeftDoor || backRightDoor ? (
         <>
-          {/* Wall above doors */}
+          {/* Wall above doors with background image */}
           <mesh position={[0, wallHeight - doorHeight / 2 - 0.5, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[roomSize, wallHeight - doorHeight - 1, 1]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+            <meshStandardMaterial 
+              map={useTexture("/casino-bg.jpg")}
+              roughness={0.4}
+              metalness={0.2}
+            />
           </mesh>
           
-          {/* Center divider between doors */}
+          {/* Center divider between doors with background image */}
           <mesh position={[0, doorHeight / 2, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[2, doorHeight, 1]} />
-            <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+            <meshStandardMaterial 
+              map={useTexture("/casino-bg.jpg")}
+              roughness={0.4}
+              metalness={0.2}
+            />
           </mesh>
           
           {/* Left hallway entrance - Fish Games */}
           {backLeftDoor && (
             <>
-              {/* Left wall section beside hallway */}
+              {/* Left wall section beside hallway with background image */}
               <mesh position={[-roomSize / 2 + doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
-                <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+                <meshStandardMaterial 
+                  map={useTexture("/casino-bg.jpg")}
+                  roughness={0.4}
+                  metalness={0.2}
+                />
               </mesh>
               
               {/* Hallway entrance frame - glowing cyan */}
@@ -183,6 +195,26 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                   emissiveIntensity={1.5}
                 />
               </mesh>
+              
+              {/* Decorative lights around entrance */}
+              {Array.from({ length: 20 }).map((_, i) => {
+                const isTopBottom = i < 10;
+                const xPos = isTopBottom ? (i - 4.5) * 0.7 - doorWidth / 2 - 1 : (i < 15 ? -doorWidth / 2 - 1 - 0.6 : doorWidth / 2 + 1 + 0.6);
+                const yPos = isTopBottom 
+                  ? (i < 5 ? doorHeight + 0.6 : -0.1)
+                  : (i - 9.5) * 0.5;
+                
+                return (
+                  <mesh key={i} position={[xPos, yPos, -roomSize / 2 + 0.6]}>
+                    <sphereGeometry args={[0.1, 8, 8]} />
+                    <meshStandardMaterial
+                      color="#06b6d4"
+                      emissive="#06b6d4"
+                      emissiveIntensity={2 + Math.sin(Date.now() * 0.005 + i * 0.3) * 1}
+                    />
+                  </mesh>
+                );
+              })}
               
               {/* Hallway corridor extending back */}
               <group position={[-doorWidth / 2 - 1, 0, -roomSize / 2]}>
@@ -268,10 +300,14 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           {/* Right door opening */}
           {backRightDoor && (
             <>
-              {/* Right wall section beside right door */}
+              {/* Right wall section beside right door with background image */}
               <mesh position={[roomSize / 2 - doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
-                <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
+                <meshStandardMaterial 
+                  map={useTexture("/casino-bg.jpg")}
+                  roughness={0.4}
+                  metalness={0.2}
+                />
               </mesh>
               {/* Right door frame - glowing cyan */}
               <mesh position={[doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
