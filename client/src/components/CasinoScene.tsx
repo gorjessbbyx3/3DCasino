@@ -26,63 +26,77 @@ const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom:
   setCurrentRoom: () => {}
 });
 
-// RGB LED Floor Tile
-function LEDTile({ position, delay = 0 }: { position: [number, number, number]; delay?: number }) {
+// Animated light bulb component
+function AnimatedBulb({ position, color, baseIntensity = 2, variance = 1, speed = 0.005, offset = 0 }: {
+  position: [number, number, number];
+  color: string;
+  baseIntensity?: number;
+  variance?: number;
+  speed?: number;
+  offset?: number;
+}) {
   const meshRef = useRef<THREE.Mesh>(null);
-  const { camera } = useThree();
-  const [hovered, setHovered] = useState(false);
 
   useFrame((state) => {
     if (meshRef.current) {
-      const time = state.clock.elapsedTime + delay;
       const material = meshRef.current.material as THREE.MeshStandardMaterial;
-
-      if (hovered) {
-        // Yellow highlight when hovered
-        material.emissive.setRGB(1, 1, 0);
-        material.emissiveIntensity = 0.8;
-      } else {
-        // RGB color cycling - dimmed
-        const r = Math.sin(time * 0.5) * 0.5 + 0.5;
-        const g = Math.sin(time * 0.5 + 2) * 0.5 + 0.5;
-        const b = Math.sin(time * 0.5 + 4) * 0.5 + 0.5;
-
-        material.emissive.setRGB(r, g, b);
-        material.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1;
-      }
+      const time = state.clock.elapsedTime;
+      material.emissiveIntensity = baseIntensity + Math.sin(time * speed * 1000 + offset * 0.3) * variance;
     }
   });
 
-  const handleClick = (e: any) => {
-    e.stopPropagation();
-    // Move camera to clicked tile position (keep eye level height)
-    camera.position.x = position[0];
-    camera.position.y = 1.7;
-    camera.position.z = position[2];
-  };
+  return (
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[0.1, 8, 8]} />
+      <meshStandardMaterial
+        color={color}
+        emissive={color}
+        emissiveIntensity={baseIntensity}
+      />
+    </mesh>
+  );
+}
+
+// Animated marquee bulb component
+function MarqueeBulb({ position, offset = 0 }: {
+  position: [number, number, number];
+  offset?: number;
+}) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      const material = meshRef.current.material as THREE.MeshStandardMaterial;
+      const time = state.clock.elapsedTime;
+      material.emissiveIntensity = 2 + Math.sin(time * 3 + offset * 0.5) * 1.5;
+    }
+  });
 
   return (
+    <mesh ref={meshRef} position={position}>
+      <sphereGeometry args={[0.15, 8, 8]} />
+      <meshStandardMaterial
+        color="#ffffff"
+        emissive="#ffffff"
+        emissiveIntensity={2}
+      />
+    </mesh>
+  );
+}
+
+// RGB LED Floor Tile - simplified static version
+function LEDTile({ position }: { position: [number, number, number] }) {
+  return (
     <mesh 
-      ref={meshRef} 
       rotation={[-Math.PI / 2, 0, 0]} 
       position={position} 
       receiveShadow
-      onClick={handleClick}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = "pointer";
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        document.body.style.cursor = "auto";
-      }}
     >
-      <planeGeometry args={[4.8, 4.8]} />
+      <planeGeometry args={[9.8, 9.8]} />
       <meshStandardMaterial
         color="#1a1a2e"
-        emissive="#ff0000"
-        emissiveIntensity={0.2}
+        emissive="#6366f1"
+        emissiveIntensity={0.3}
         roughness={0.2}
         metalness={0.8}
       />
@@ -94,19 +108,17 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
 function CasinoFloor({ roomSize = 35 }: { roomSize?: number }) {
   const tiles = useMemo(() => {
     const tileArray = [];
-    const tileSize = 5; // Larger tiles to reduce count
+    const tileSize = 10; // Larger tiles to reduce count
     const tilesPerSide = Math.floor(roomSize / tileSize);
 
     for (let x = 0; x < tilesPerSide; x++) {
       for (let z = 0; z < tilesPerSide; z++) {
         const posX = (x - tilesPerSide / 2) * tileSize + tileSize / 2;
         const posZ = (z - tilesPerSide / 2) * tileSize + tileSize / 2;
-        const delay = (x + z) * 0.1; // Stagger the animation
 
         tileArray.push({
           key: `tile-${x}-${z}`,
-          position: [posX, 0.01, posZ] as [number, number, number],
-          delay
+          position: [posX, 0.01, posZ] as [number, number, number]
         });
       }
     }
@@ -130,8 +142,8 @@ function CasinoFloor({ roomSize = 35 }: { roomSize?: number }) {
       </mesh>
 
       {/* RGB LED Tiles */}
-      {tiles.map((tile: { key: string; position: [number, number, number]; delay: number }) => (
-        <LEDTile key={tile.key} position={tile.position} delay={tile.delay} />
+      {tiles.map((tile: { key: string; position: [number, number, number] }) => (
+        <LEDTile key={tile.key} position={tile.position} />
       ))}
     </group>
   );
@@ -147,7 +159,6 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
   const wallHeight = 16;
   const doorWidth = 6;
   const doorHeight = 5;
-  const casinoBgTexture = useTexture("/casino-bg.jpg");
 
   return (
     <group>
@@ -197,25 +208,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                 />
               </mesh>
 
-              {/* Decorative lights around entrance */}
-              {Array.from({ length: 20 }).map((_, i) => {
-                const isTopBottom = i < 10;
-                const xPos = isTopBottom ? (i - 4.5) * 0.7 - doorWidth / 2 - 1 : (i < 15 ? -doorWidth / 2 - 1 - 0.6 : doorWidth / 2 + 1 + 0.6);
-                const yPos = isTopBottom 
-                  ? (i < 5 ? doorHeight + 0.6 : -0.1)
-                  : (i - 9.5) * 0.5;
-
-                return (
-                  <mesh key={i} position={[xPos, yPos, -roomSize / 2 + 0.6]}>
-                    <sphereGeometry args={[0.1, 8, 8]} />
-                    <meshStandardMaterial
-                      color="#06b6d4"
-                      emissive="#06b6d4"
-                      emissiveIntensity={2 + Math.sin(Date.now() * 0.005 + i * 0.3) * 1}
-                    />
-                  </mesh>
-                );
-              })}
+              {/* Decorative lights around entrance - temporarily simplified */}
 
               {/* Hallway corridor extending back */}
               <group position={[-doorWidth / 2 - 1, 0, -roomSize / 2]}>
@@ -359,11 +352,11 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         />
       </mesh>
 
-      {/* Front Wall (entrance side) - with casino background */}
+      {/* Front Wall (entrance side) - temporarily without texture */}
       <mesh position={[0, wallHeight / 2, roomSize / 2]} receiveShadow>
         <boxGeometry args={[roomSize, wallHeight, 1]} />
         <meshStandardMaterial 
-          map={casinoBgTexture}
+          color="#0f0f1a"
           roughness={0.4}
           metalness={0.2}
         />
@@ -392,24 +385,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           <pointLight position={[-5, 0, 1]} color="#00ff00" intensity={30} distance={10} />
           <pointLight position={[5, 0, 1]} color="#00ff00" intensity={30} distance={10} />
 
-          {/* Marquee bulbs around the sign */}
-          {Array.from({ length: 40 }).map((_, i) => {
-            const angle = (i / 40) * Math.PI * 2;
-            const radiusX = 12;
-            const radiusY = 2.5;
-            const x = Math.cos(angle) * radiusX;
-            const y = Math.sin(angle) * radiusY;
-            return (
-              <mesh key={i} position={[x, y, 0.1]}>
-                <sphereGeometry args={[0.15, 8, 8]} />
-                <meshStandardMaterial
-                  color="#ffffff"
-                  emissive="#ffffff"
-                  emissiveIntensity={2 + Math.sin(Date.now() * 0.003 + i * 0.5) * 1.5}
-                />
-              </mesh>
-            );
-          })}
+          {/* Marquee bulbs around the sign - temporarily simplified */}
 
           {/* Background panel for the sign */}
           <mesh position={[0, 0, -0.2]}>
@@ -433,7 +409,7 @@ function StarryCeiling({ roomSize, height }: { roomSize: number; height: number 
   // Generate random star positions - stable across renders
   const stars = useMemo(() => {
     const starArray: { pos: [number, number, number]; size: number; brightness: number }[] = [];
-    const numStars = 200;
+    const numStars = 50;
 
     for (let i = 0; i < numStars; i++) {
       starArray.push({
