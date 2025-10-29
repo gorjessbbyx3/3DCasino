@@ -78,7 +78,7 @@ function CasinoWalls() {
       ))}
 
       {/* Ceiling */}
-      <mesh position={[0, wallHeight, 0]} receiveShadow>
+      <mesh position={[0, wallHeight, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial
           color="#1a0f0a"
@@ -122,8 +122,96 @@ function GameObject({
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
 
-  const { scene } = useGLTF(modelPath);
-  const clonedScene = useMemo(() => scene.clone(), [scene]);
+  // Create placeholder geometry based on model type
+  const createPlaceholder = () => {
+    if (modelPath.includes('slot-machine')) {
+      return (
+        <group>
+          {/* Slot machine body */}
+          <mesh position={[0, 1, 0]}>
+            <boxGeometry args={[1, 2, 0.8]} />
+            <meshStandardMaterial color="#ff6b35" metalness={0.8} roughness={0.2} />
+          </mesh>
+          {/* Screen */}
+          <mesh position={[0, 1.2, 0.41]}>
+            <boxGeometry args={[0.8, 0.6, 0.1]} />
+            <meshStandardMaterial color="#000000" emissive="#ffd700" emissiveIntensity={0.3} />
+          </mesh>
+          {/* Arm */}
+          <mesh position={[0.6, 1, 0]}>
+            <cylinderGeometry args={[0.05, 0.05, 0.8]} />
+            <meshStandardMaterial color="#ffd700" metalness={1} roughness={0.1} />
+          </mesh>
+        </group>
+      );
+    } else if (modelPath.includes('fish-table')) {
+      return (
+        <group>
+          {/* Table surface */}
+          <mesh position={[0, 0.8, 0]}>
+            <cylinderGeometry args={[1.5, 1.5, 0.1]} />
+            <meshStandardMaterial color="#003d7a" metalness={0.2} roughness={0.8} />
+          </mesh>
+          {/* Screen */}
+          <mesh position={[0, 0.86, 0]}>
+            <cylinderGeometry args={[1.3, 1.3, 0.05]} />
+            <meshStandardMaterial color="#000040" emissive="#00bfff" emissiveIntensity={0.2} />
+          </mesh>
+          {/* Base */}
+          <mesh position={[0, 0.4, 0]}>
+            <cylinderGeometry args={[0.5, 0.8, 0.8]} />
+            <meshStandardMaterial color="#2a2a2a" />
+          </mesh>
+        </group>
+      );
+    } else if (modelPath.includes('cashier-booth')) {
+      return (
+        <group>
+          {/* Booth structure */}
+          <mesh position={[0, 1.5, 0]}>
+            <boxGeometry args={[3, 3, 2]} />
+            <meshStandardMaterial color="#8b4513" />
+          </mesh>
+          {/* Window */}
+          <mesh position={[0, 2, 1.01]}>
+            <boxGeometry args={[2, 1, 0.1]} />
+            <meshStandardMaterial color="#87ceeb" transparent opacity={0.7} />
+          </mesh>
+          {/* Sign */}
+          <mesh position={[0, 3.2, 1.01]}>
+            <boxGeometry args={[2.5, 0.5, 0.1]} />
+            <meshStandardMaterial color="#ffd700" />
+          </mesh>
+        </group>
+      );
+    } else if (modelPath.includes('pitbull-pirate')) {
+      return (
+        <group>
+          {/* Body */}
+          <mesh position={[0, 1, 0]}>
+            <cylinderGeometry args={[0.3, 0.4, 1.5]} />
+            <meshStandardMaterial color="#8b4513" />
+          </mesh>
+          {/* Head */}
+          <mesh position={[0, 2, 0]}>
+            <sphereGeometry args={[0.4]} />
+            <meshStandardMaterial color="#d2691e" />
+          </mesh>
+          {/* Pirate hat */}
+          <mesh position={[0, 2.5, 0]}>
+            <coneGeometry args={[0.5, 0.6]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+          {/* Eye patch */}
+          <mesh position={[0.2, 2.1, 0.35]}>
+            <sphereGeometry args={[0.08]} />
+            <meshStandardMaterial color="#000000" />
+          </mesh>
+        </group>
+      );
+    }
+    return null;
+  };
 
   useFrame((state) => {
     if (meshRef.current && hovered) {
@@ -151,7 +239,7 @@ function GameObject({
         document.body.style.cursor = "auto";
       }}
     >
-      <primitive object={clonedScene} />
+      {createPlaceholder()}
 
       {/* Glow effect */}
       {hovered && (
@@ -477,8 +565,4 @@ export function CasinoScene() {
   );
 }
 
-// Preload all models
-useGLTF.preload("/models/slot-machine.glb");
-useGLTF.preload("/models/fish-table.glb");
-useGLTF.preload("/models/cashier-booth.glb");
-useGLTF.preload("/models/pitbull-pirate.glb");
+// Models will be loaded as placeholder geometry for now
