@@ -1321,5 +1321,9 @@ function CanvasWrapper() {
 }
 
 export function CasinoScene() {
-  return <CanvasWrapper />;
+  return (
+    <div style={{ width: '100%', height: '100%' }}>
+      <CanvasWrapper />
+    </div>
+  );
 }

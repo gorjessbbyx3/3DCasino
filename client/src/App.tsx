@@ -43,7 +43,7 @@ function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      <div className="absolute top-0 left-0 right-0 z-10 glass-morphism p-6 border-b border-emerald-500/30 animate-border-glow">
+      <div className="absolute top-0 left-0 right-0 z-50 glass-morphism p-6 border-b border-emerald-500/30 animate-border-glow">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <h1 className="text-5xl font-bold text-gradient-casino drop-shadow-2xl animate-text-glow tracking-tight">
@@ -102,7 +102,9 @@ function App() {
         </div>
       </div>
 
-      <CasinoScene />
+      <div className="absolute inset-0 z-0" style={{ width: '100%', height: '100%' }}>
+        <CasinoScene />
+      </div>
       <AuthModal />
       <CashierModal />
       <StatsModal />
@@ -113,7 +115,7 @@ function App() {
       <AudioControls />
       <Toaster position="top-right" richColors />
 
-      <div className="absolute bottom-8 left-0 right-0 z-10 text-center">
+      <div className="absolute bottom-8 left-0 right-0 z-50 text-center">
         <div className="inline-flex items-center gap-6 glass-morphism px-10 py-5 rounded-3xl border-2 border-purple-400/50 shadow-2xl shadow-purple-500/30 animate-float animate-border-glow">
           <div className="relative">
             <div className="w-3 h-3 bg-emerald-400 rounded-full animate-pulse"></div>
