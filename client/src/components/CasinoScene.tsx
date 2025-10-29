@@ -10,18 +10,18 @@ function CasinoFloor() {
       {/* Main carpet floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]} receiveShadow>
         <planeGeometry args={[100, 100]} />
-        <meshStandardMaterial 
+        <meshStandardMaterial
           color="#2a0f0f"
           roughness={0.8}
           metalness={0.1}
           normalScale={[0.5, 0.5]}
         />
       </mesh>
-      
+
       {/* Decorative border */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]} receiveShadow>
         <ringGeometry args={[45, 48, 64]} />
-        <meshStandardMaterial 
+        <meshStandardMaterial
           color="#ffd700"
           roughness={0.3}
           metalness={0.7}
@@ -33,7 +33,7 @@ function CasinoFloor() {
       {/* Center medallion */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]} receiveShadow>
         <circleGeometry args={[8, 32]} />
-        <meshStandardMaterial 
+        <meshStandardMaterial
           color="#10b981"
           roughness={0.2}
           metalness={0.8}
@@ -71,7 +71,7 @@ function CasinoWalls() {
             <boxGeometry args={wall[1] as [number, number, number]} />
             <primitive object={wallMaterial.clone()} />
           </mesh>
-          
+
           {/* Decorative trim */}
           <mesh position={[
             (wall[0] as [number, number, number])[0],
@@ -83,7 +83,7 @@ function CasinoWalls() {
               0.3,
               (wall[1] as [number, number, number])[2] * 1.02
             ]} />
-            <meshStandardMaterial 
+            <meshStandardMaterial
               color="#ffd700"
               roughness={0.2}
               metalness={0.8}
@@ -97,8 +97,8 @@ function CasinoWalls() {
       {/* Ornate ceiling */}
       <mesh position={[0, wallHeight, 0]} receiveShadow>
         <planeGeometry args={[roomSize, roomSize]} />
-        <meshStandardMaterial 
-          color="#0a0505" 
+        <meshStandardMaterial
+          color="#0a0505"
           side={THREE.DoubleSide}
           roughness={0.8}
           metalness={0.1}
@@ -108,7 +108,7 @@ function CasinoWalls() {
       {/* Chandelier */}
       <mesh position={[0, wallHeight - 1, 0]} castShadow>
         <sphereGeometry args={[1.5, 16, 8]} />
-        <meshStandardMaterial 
+        <meshStandardMaterial
           color="#ffd700"
           roughness={0.1}
           metalness={0.9}
@@ -171,7 +171,7 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
       }}
     >
       <primitive object={clonedScene} />
-      
+
       {/* Glow effect when hovered */}
       {hovered && (
         <pointLight
@@ -187,18 +187,18 @@ function GameObject({ position, rotation = [0, 0, 0], modelPath, scale = 2.5, on
         <group position={[0, 3.5, 0]}>
           <mesh>
             <planeGeometry args={[3, 0.8]} />
-            <meshBasicMaterial 
-              color="#000000" 
-              opacity={0.8} 
-              transparent 
+            <meshBasicMaterial
+              color="#000000"
+              opacity={0.8}
+              transparent
             />
           </mesh>
           <mesh position={[0, 0, 0.01]}>
             <planeGeometry args={[2.8, 0.6]} />
-            <meshBasicMaterial 
-              color="#10b981" 
-              opacity={0.9} 
-              transparent 
+            <meshBasicMaterial
+              color="#10b981"
+              opacity={0.9}
+              transparent
             />
           </mesh>
         </group>
@@ -283,7 +283,7 @@ function CasinoObjects() {
 
 function Lighting() {
   const lightRef = useRef<THREE.PointLight>(null);
-  
+
   useFrame((state) => {
     if (lightRef.current) {
       lightRef.current.intensity = 25 + Math.sin(state.clock.elapsedTime * 2) * 5;
@@ -346,17 +346,17 @@ function Lighting() {
       />
 
       {/* Animated center light */}
-      <pointLight 
+      <pointLight
         ref={lightRef}
-        position={[0, 8, 0]} 
-        intensity={25} 
+        position={[0, 8, 0]}
+        intensity={25}
         color="#10b981"
         castShadow
       />
 
       {/* Ceiling chandelier lights */}
       <pointLight position={[0, 9, 0]} intensity={40} color="#ffd700" />
-      
+
       {/* Atmospheric fog effect using directional light */}
       <directionalLight
         position={[10, 10, 5]}
@@ -482,10 +482,10 @@ function PlayerControls() {
   return null;
 }
 
-function MobileJoystick({ 
-  onMove, 
-  onRotate 
-}: { 
+function MobileJoystick({
+  onMove,
+  onRotate
+}: {
   onMove: (m: { forward: number; right: number }) => void;
   onRotate: (r: { yaw: number; pitch: number }) => void;
 }) {
@@ -573,14 +573,14 @@ export function CasinoScene() {
   return (
     <Canvas
       shadows={{ type: "PCFSoftShadowMap" }}
-      camera={{ 
-        position: [0, 3, 25], 
+      camera={{
+        position: [0, 3, 25],
         fov: 75,
         near: 0.1,
         far: 1000
       }}
-      gl={{ 
-        antialias: true, 
+      gl={{
+        antialias: true,
         powerPreference: "high-performance",
         alpha: false,
         stencil: false,
@@ -608,7 +608,7 @@ export function CasinoScene() {
 
       {/* Subtle particles for atmosphere */}
       <Points limit={1000}>
-        <pointsMaterial 
+        <pointsMaterial
           size={0.1}
           sizeAttenuation
           color="#ffffff"
@@ -623,7 +623,7 @@ export function CasinoScene() {
 
 function Points({ limit }: { limit: number }) {
   const pointsRef = useRef<THREE.Points>(null);
-  
+
   const positions = useMemo(() => {
     const positions = new Float32Array(limit * 3);
     for (let i = 0; i < limit; i++) {
@@ -650,7 +650,7 @@ function Points({ limit }: { limit: number }) {
           itemSize={3}
         />
       </bufferGeometry>
-      <pointsMaterial 
+      <pointsMaterial
         size={0.1}
         sizeAttenuation
         color="#ffffff"
