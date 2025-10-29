@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, Suspense } from "react";
+import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Environment, Text, PointerLockControls } from "@react-three/drei";
 import * as THREE from "three";
@@ -26,11 +26,65 @@ const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom:
   setCurrentRoom: () => {}
 });
 
-// VIP Underground Casino Floor
+// RGB LED Floor Tile
+function LEDTile({ position, delay = 0 }: { position: [number, number, number]; delay?: number }) {
+  const meshRef = useRef<THREE.Mesh>(null);
+
+  useFrame((state) => {
+    if (meshRef.current) {
+      const time = state.clock.elapsedTime + delay;
+      const material = meshRef.current.material as THREE.MeshStandardMaterial;
+      
+      // RGB color cycling
+      const r = Math.sin(time * 0.5) * 0.5 + 0.5;
+      const g = Math.sin(time * 0.5 + 2) * 0.5 + 0.5;
+      const b = Math.sin(time * 0.5 + 4) * 0.5 + 0.5;
+      
+      material.emissive.setRGB(r, g, b);
+      material.emissiveIntensity = 0.6 + Math.sin(time * 2) * 0.2;
+    }
+  });
+
+  return (
+    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={position} receiveShadow>
+      <planeGeometry args={[2.8, 2.8]} />
+      <meshStandardMaterial
+        color="#1a1a2e"
+        emissive="#ff0000"
+        emissiveIntensity={0.6}
+        roughness={0.2}
+        metalness={0.8}
+      />
+    </mesh>
+  );
+}
+
+// VIP Underground Casino Floor with RGB LED Tiles
 function CasinoFloor({ roomSize = 50 }: { roomSize?: number }) {
+  const tiles = useMemo(() => {
+    const tileArray = [];
+    const tileSize = 3;
+    const tilesPerSide = Math.floor(roomSize / tileSize);
+    
+    for (let x = 0; x < tilesPerSide; x++) {
+      for (let z = 0; z < tilesPerSide; z++) {
+        const posX = (x - tilesPerSide / 2) * tileSize + tileSize / 2;
+        const posZ = (z - tilesPerSide / 2) * tileSize + tileSize / 2;
+        const delay = (x + z) * 0.1; // Stagger the animation
+        
+        tileArray.push({
+          key: `tile-${x}-${z}`,
+          position: [posX, 0.01, posZ] as [number, number, number],
+          delay
+        });
+      }
+    }
+    return tileArray;
+  }, [roomSize]);
+
   return (
     <group>
-      {/* Main polished dark floor */}
+      {/* Base floor */}
       <mesh 
         rotation={[-Math.PI / 2, 0, 0]} 
         position={[0, 0, 0]} 
@@ -38,35 +92,16 @@ function CasinoFloor({ roomSize = 50 }: { roomSize?: number }) {
       >
         <planeGeometry args={[roomSize, roomSize]} />
         <meshStandardMaterial
-          color="#0a0a15"
+          color="#000000"
           roughness={0.1}
           metalness={0.9}
-          envMapIntensity={1}
         />
       </mesh>
 
-      {/* Center floor design - cyan circle with purple ring */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, 0]}>
-        <ringGeometry args={[4, 6, 64]} />
-        <meshStandardMaterial
-          color="#a855f7"
-          emissive="#a855f7"
-          emissiveIntensity={0.5}
-          roughness={0.2}
-          metalness={0.8}
-        />
-      </mesh>
-      
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.02, 0]}>
-        <circleGeometry args={[4, 64]} />
-        <meshStandardMaterial
-          color="#00ffff"
-          emissive="#00ffff"
-          emissiveIntensity={0.3}
-          roughness={0.2}
-          metalness={0.8}
-        />
-      </mesh>
+      {/* RGB LED Tiles */}
+      {tiles.map((tile: { key: string; position: [number, number, number]; delay: number }) => (
+        <LEDTile key={tile.key} position={tile.position} delay={tile.delay} />
+      ))}
     </group>
   );
 }
