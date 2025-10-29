@@ -213,25 +213,6 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         <meshStandardMaterial color="#0f0f1a" roughness={0.6} metalness={0.4} />
       </mesh>
 
-      {/* Ceiling neon strips */}
-      <mesh position={[-10, wallHeight - 1, 0]}>
-        <boxGeometry args={[0.5, 0.2, roomSize]} />
-        <meshStandardMaterial
-          color="#00ffff"
-          emissive="#00ffff"
-          emissiveIntensity={2}
-        />
-      </mesh>
-      
-      <mesh position={[10, wallHeight - 1, 0]}>
-        <boxGeometry args={[0.5, 0.2, roomSize]} />
-        <meshStandardMaterial
-          color="#a855f7"
-          emissive="#a855f7"
-          emissiveIntensity={2}
-        />
-      </mesh>
-
       {/* Back wall sign */}
       {backSign && (
         <Text
@@ -250,79 +231,79 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
   );
 }
 
-// Frame lights component for slot machines
-function FrameLights({ hovered }: { hovered: boolean }) {
-  const lightsRef = useRef<THREE.Group>(null);
+// Starry ceiling component
+function StarryCeiling({ roomSize, height }: { roomSize: number; height: number }) {
+  const starsRef = useRef<THREE.Group>(null);
   
-  // Create light positions around the frame
-  const lightPositions = useMemo(() => {
-    const positions: [number, number, number][] = [];
-    const frameWidth = 1.15;
-    const frameHeight = 1.05;
-    const spacing = 0.15;
+  // Generate random star positions - stable across renders
+  const stars = useMemo(() => {
+    const starArray: { pos: [number, number, number]; size: number; brightness: number }[] = [];
+    const numStars = 200;
     
-    // Top lights
-    for (let x = -frameWidth / 2; x <= frameWidth / 2; x += spacing) {
-      positions.push([x, 1.3 + frameHeight / 2, 0.52]);
+    for (let i = 0; i < numStars; i++) {
+      starArray.push({
+        pos: [
+          (Math.random() - 0.5) * roomSize * 0.95,
+          height - 0.5,
+          (Math.random() - 0.5) * roomSize * 0.95
+        ],
+        size: Math.random() * 0.08 + 0.02,
+        brightness: Math.random() * 2 + 1
+      });
     }
-    
-    // Bottom lights
-    for (let x = -frameWidth / 2; x <= frameWidth / 2; x += spacing) {
-      positions.push([x, 1.3 - frameHeight / 2, 0.52]);
-    }
-    
-    // Left lights
-    for (let y = -frameHeight / 2 + spacing; y < frameHeight / 2; y += spacing) {
-      positions.push([-frameWidth / 2, 1.3 + y, 0.52]);
-    }
-    
-    // Right lights
-    for (let y = -frameHeight / 2 + spacing; y < frameHeight / 2; y += spacing) {
-      positions.push([frameWidth / 2, 1.3 + y, 0.52]);
-    }
-    
-    return positions;
-  }, []);
+    return starArray;
+  }, [roomSize, height]);
   
   useFrame((state) => {
-    if (lightsRef.current) {
+    if (starsRef.current) {
       const time = state.clock.elapsedTime;
-      lightsRef.current.children.forEach((light, index) => {
-        // Chase effect around the frame
-        const offset = (index / lightPositions.length) * Math.PI * 2;
-        const intensity = Math.sin(time * 3 + offset) * 0.5 + 0.5;
-        
-        if (light instanceof THREE.Mesh) {
-          const material = light.material as THREE.MeshStandardMaterial;
-          material.emissiveIntensity = hovered ? (1 + intensity) * 1.5 : 0.5 + intensity * 0.5;
+      let meshIndex = 0;
+      starsRef.current.children.forEach((child) => {
+        if (child instanceof THREE.Mesh && meshIndex < stars.length) {
+          const material = child.material as THREE.MeshStandardMaterial;
+          // Twinkling effect
+          const twinkle = Math.sin(time * (1 + meshIndex * 0.1)) * 0.3 + 0.7;
+          material.emissiveIntensity = stars[meshIndex].brightness * twinkle;
+          meshIndex++;
         }
       });
     }
   });
   
   return (
-    <group ref={lightsRef}>
-      {lightPositions.map((pos, index) => (
-        <group key={index}>
-          {/* Light bulb */}
-          <mesh position={pos} castShadow>
-            <sphereGeometry args={[0.04, 8, 8]} />
-            <meshStandardMaterial
-              color="#fbbf24"
-              emissive="#fbbf24"
-              emissiveIntensity={1}
-              metalness={0.8}
-              roughness={0.2}
-            />
-          </mesh>
-          {/* Point light for glow */}
-          <pointLight
-            position={pos}
-            color="#fbbf24"
-            intensity={hovered ? 3 : 1.5}
-            distance={0.8}
+    <group ref={starsRef}>
+      {/* Dark ceiling background */}
+      <mesh position={[0, height, 0]} rotation={[Math.PI / 2, 0, 0]} receiveShadow>
+        <planeGeometry args={[roomSize, roomSize]} />
+        <meshStandardMaterial 
+          color="#000511" 
+          roughness={0.9}
+          metalness={0.1}
+        />
+      </mesh>
+      
+      {/* Stars */}
+      {stars.map((star, i) => (
+        <mesh key={i} position={star.pos}>
+          <sphereGeometry args={[star.size, 8, 8]} />
+          <meshStandardMaterial
+            color="#ffffff"
+            emissive="#ffffff"
+            emissiveIntensity={star.brightness}
+            toneMapped={false}
           />
-        </group>
+        </mesh>
+      ))}
+      
+      {/* Some larger glowing stars */}
+      {stars.slice(0, 30).map((star, i) => (
+        <pointLight
+          key={`light-${i}`}
+          position={star.pos}
+          color="#e0e7ff"
+          intensity={0.3}
+          distance={3}
+        />
       ))}
     </group>
   );
@@ -355,94 +336,101 @@ function GameObject({
     if (modelPath.includes('slot-machine')) {
       return (
         <group>
-          {/* Slot machine body - neon purple glow with enhanced metallic finish */}
-          <mesh position={[0, 1, 0]} castShadow receiveShadow>
-            <boxGeometry args={[1.2, 2.2, 0.9]} />
+          {/* Premium curved cabinet - IGT style sleek design */}
+          <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.65, 0.7, 2.4, 32]} />
             <meshStandardMaterial 
-              color="#1a0a2e" 
-              metalness={0.95} 
-              roughness={0.1}
-              emissive="#a855f7"
-              emissiveIntensity={hovered ? 0.8 : 0.5}
-            />
-          </mesh>
-          
-          {/* Larger Screen - bright purple glow with animation */}
-          <mesh position={[0, 1.3, 0.46]} castShadow>
-            <boxGeometry args={[1.1, 1.0, 0.12]} />
-            <meshStandardMaterial 
-              color="#000000" 
-              emissive={hovered ? "#e879f9" : "#c084fc"}
-              emissiveIntensity={hovered ? 3.5 : 2.5}
-            />
-          </mesh>
-          
-          {/* Screen frame - gold trim */}
-          <mesh position={[0, 1.3, 0.47]} castShadow>
-            <boxGeometry args={[1.15, 1.05, 0.08]} />
-            <meshStandardMaterial 
-              color="#fbbf24" 
-              metalness={1} 
-              roughness={0.1}
-              emissive="#fbbf24"
+              color="#0a0a1e" 
+              metalness={0.98} 
+              roughness={0.05}
+              emissive="#6366f1"
               emissiveIntensity={hovered ? 0.6 : 0.3}
             />
           </mesh>
           
-          {/* Frame accent lights - 4 corners for elegant look */}
-          {[
-            [-0.575, 1.825, 0.52], // Top left
-            [0.575, 1.825, 0.52],  // Top right
-            [-0.575, 0.775, 0.52], // Bottom left
-            [0.575, 0.775, 0.52],  // Bottom right
-          ].map((pos, i) => (
-            <mesh key={i} position={pos as [number, number, number]} castShadow>
-              <sphereGeometry args={[0.05, 8, 8]} />
-              <meshStandardMaterial
-                color="#fbbf24"
-                emissive="#fbbf24"
-                emissiveIntensity={hovered ? 4 : 2}
-                metalness={1}
-                roughness={0.05}
-              />
-            </mesh>
-          ))}
-          
-          {/* Decorative top crown */}
-          <mesh position={[0, 2.3, 0]} castShadow>
-            <cylinderGeometry args={[0.3, 0.4, 0.3, 6]} />
+          {/* Premium large screen - ultra bright display */}
+          <mesh position={[0, 1.5, 0.66]} castShadow>
+            <boxGeometry args={[1.2, 1.3, 0.08]} />
             <meshStandardMaterial 
-              color="#fbbf24" 
+              color="#000000" 
+              emissive={hovered ? "#a78bfa" : "#8b5cf6"}
+              emissiveIntensity={hovered ? 4.5 : 3.2}
+            />
+          </mesh>
+          
+          {/* Curved screen bezel - glossy frame */}
+          <mesh position={[0, 1.5, 0.68]} castShadow>
+            <boxGeometry args={[1.26, 1.36, 0.04]} />
+            <meshStandardMaterial 
+              color="#1a1a2e" 
               metalness={1} 
-              roughness={0.1}
-              emissive="#fbbf24"
+              roughness={0.02}
+              emissive="#3b82f6"
               emissiveIntensity={hovered ? 0.8 : 0.4}
             />
           </mesh>
           
-          {/* Arm - gold accent with hover animation */}
-          <mesh 
-            position={[0.65, hovered ? 1.2 : 1, 0]} 
-            rotation={[0, 0, hovered ? -0.3 : 0]}
-            castShadow
-          >
-            <cylinderGeometry args={[0.06, 0.06, 0.8]} />
+          {/* LED strip lights around screen - premium marquee effect */}
+          {Array.from({ length: 16 }).map((_, i) => {
+            const angle = (i / 16) * Math.PI * 2;
+            const radius = 0.68;
+            const x = Math.sin(angle) * radius;
+            const y = 1.5 + Math.cos(angle) * radius * 0.52;
+            return (
+              <mesh key={i} position={[x, y, 0.7]} castShadow>
+                <sphereGeometry args={[0.025, 8, 8]} />
+                <meshStandardMaterial
+                  color="#60a5fa"
+                  emissive="#60a5fa"
+                  emissiveIntensity={hovered ? 5 : 2.5}
+                  metalness={0.9}
+                  roughness={0.1}
+                />
+              </mesh>
+            );
+          })}
+          
+          {/* Top curved topper - signature IGT style */}
+          <mesh position={[0, 2.7, 0]} castShadow>
+            <cylinderGeometry args={[0.45, 0.55, 0.4, 32]} />
             <meshStandardMaterial 
-              color="#fbbf24" 
-              metalness={1} 
-              roughness={0.1}
-              emissive="#fbbf24"
-              emissiveIntensity={hovered ? 0.8 : 0.3}
+              color="#1e1b4b" 
+              metalness={0.95} 
+              roughness={0.05}
+              emissive="#6366f1"
+              emissiveIntensity={hovered ? 1.2 : 0.6}
             />
           </mesh>
           
-          {/* Base pedestal */}
-          <mesh position={[0, 0.2, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.5, 0.6, 0.4, 8]} />
+          {/* Illuminated top logo area */}
+          <mesh position={[0, 2.7, 0.46]} castShadow>
+            <boxGeometry args={[0.8, 0.25, 0.05]} />
             <meshStandardMaterial 
-              color="#1a0a2e" 
-              metalness={0.9} 
-              roughness={0.2}
+              color="#000000" 
+              emissive="#a78bfa"
+              emissiveIntensity={hovered ? 3 : 1.8}
+            />
+          </mesh>
+          
+          {/* Control panel area - angled */}
+          <mesh position={[0, 0.4, 0.5]} rotation={[-0.3, 0, 0]} castShadow receiveShadow>
+            <boxGeometry args={[1, 0.3, 0.4]} />
+            <meshStandardMaterial 
+              color="#0f0f23" 
+              metalness={0.9}
+              roughness={0.15}
+            />
+          </mesh>
+          
+          {/* Premium base with LED underglow */}
+          <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.75, 0.8, 0.3, 32]} />
+            <meshStandardMaterial 
+              color="#0a0a1e" 
+              metalness={0.95} 
+              roughness={0.1}
+              emissive="#3b82f6"
+              emissiveIntensity={hovered ? 0.8 : 0.3}
             />
           </mesh>
         </group>
@@ -715,6 +703,9 @@ function SlotMachineRoom() {
 
   return (
     <group>
+      {/* Starry Ceiling */}
+      <StarryCeiling roomSize={35} height={6} />
+      
       {/* Cashier Window on back wall, left of Fish Games door */}
       <CashierWindow />
 
@@ -763,6 +754,9 @@ function FishGameRoom() {
 
   return (
     <group>
+      {/* Starry Ceiling */}
+      <StarryCeiling roomSize={35} height={6} />
+      
       {/* 6 Rectangular Fish Tables in two rows */}
       {Array.from({ length: 6 }, (_, i) => (
         <GameObject
