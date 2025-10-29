@@ -13,6 +13,18 @@ if (!process.env.DATABASE_URL) {
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle({ client: pool });
 
+export interface GameStats {
+  totalBets: number;
+  totalWins: number;
+  totalLosses: number;
+  totalWinAmount: number;
+  totalBetAmount: number;
+  netProfit: number;
+  gamesPlayed: number;
+  winRate: number;
+  biggestWin: number;
+}
+
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -23,6 +35,7 @@ export interface IStorage {
   deposit(userId: number, amount: number, description?: string): Promise<{ user: User; transaction: Transaction }>;
   withdraw(userId: number, amount: number, description?: string): Promise<{ user: User; transaction: Transaction }>;
   slotMachineSpin(userId: number, bet: number, machineNumber: number): Promise<{ user: User; symbols: string[]; winAmount: number }>;
+  getUserStats(userId: number): Promise<GameStats>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -179,6 +192,35 @@ export class DatabaseStorage implements IStorage {
 
     const updatedUser = await this.getUser(userId);
     return { user: updatedUser!, symbols, winAmount };
+  }
+
+  async getUserStats(userId: number): Promise<GameStats> {
+    const userTransactions = await this.getUserTransactions(userId, 1000);
+    
+    const bets = userTransactions.filter(t => t.type === "bet");
+    const wins = userTransactions.filter(t => t.type === "win");
+    
+    const totalBetAmount = bets.reduce((sum, t) => sum + t.amount, 0);
+    const totalWinAmount = wins.reduce((sum, t) => sum + t.amount, 0);
+    const totalBets = bets.length;
+    const totalWins = wins.length;
+    const totalLosses = totalBets - totalWins;
+    const netProfit = totalWinAmount - totalBetAmount;
+    const gamesPlayed = totalBets;
+    const winRate = gamesPlayed > 0 ? (totalWins / gamesPlayed) * 100 : 0;
+    const biggestWin = wins.length > 0 ? Math.max(...wins.map(t => t.amount)) : 0;
+
+    return {
+      totalBets,
+      totalWins,
+      totalLosses,
+      totalWinAmount,
+      totalBetAmount,
+      netProfit,
+      gamesPlayed,
+      winRate,
+      biggestWin,
+    };
   }
 }
 

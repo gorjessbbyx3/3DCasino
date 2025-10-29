@@ -4,10 +4,11 @@ import { CasinoScene } from "./components/CasinoScene";
 import { AuthModal } from "./components/AuthModal";
 import { CashierModal } from "./components/CashierModal";
 import { SlotMachineModal } from "./components/SlotMachineModal";
+import { StatsModal, openStats } from "./components/StatsModal";
 import { AudioManager } from "./components/AudioManager";
 import { AudioControls } from "./components/AudioControls";
 import { useUser } from "./lib/stores/useUser";
-import { Coins, LogOut } from "lucide-react";
+import { Coins, LogOut, BarChart3 } from "lucide-react";
 import { Button } from "./components/ui/button";
 import { apiRequest } from "./lib/queryClient";
 import { Toaster } from "sonner";
@@ -61,9 +62,18 @@ function App() {
             )}
           </div>
 
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
             {user ? (
               <>
+                <Button
+                  onClick={openStats}
+                  variant="outline"
+                  size="default"
+                  className="border-blue-500/50 hover:bg-blue-900/30 hover:border-blue-400 text-blue-200 hover:text-blue-100 transition-all duration-300 shadow-lg hover:shadow-blue-500/20"
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Stats
+                </Button>
                 <div className="text-right">
                   <div className="text-gray-300 text-sm">Welcome back,</div>
                   <div className="text-emerald-300 font-bold text-lg tracking-wide">{user.username}</div>
@@ -90,6 +100,7 @@ function App() {
       <CasinoScene />
       <AuthModal />
       <CashierModal />
+      <StatsModal />
       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
         <SlotMachineModal key={num} machineNumber={num} />
       ))}
