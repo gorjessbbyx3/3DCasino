@@ -36,7 +36,7 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
     if (meshRef.current) {
       const time = state.clock.elapsedTime + delay;
       const material = meshRef.current.material as THREE.MeshStandardMaterial;
-      
+
       if (hovered) {
         // Yellow highlight when hovered
         material.emissive.setRGB(1, 1, 0);
@@ -46,7 +46,7 @@ function LEDTile({ position, delay = 0 }: { position: [number, number, number]; 
         const r = Math.sin(time * 0.5) * 0.5 + 0.5;
         const g = Math.sin(time * 0.5 + 2) * 0.5 + 0.5;
         const b = Math.sin(time * 0.5 + 4) * 0.5 + 0.5;
-        
+
         material.emissive.setRGB(r, g, b);
         material.emissiveIntensity = 0.2 + Math.sin(time * 2) * 0.1;
       }
@@ -96,13 +96,13 @@ function CasinoFloor({ roomSize = 35 }: { roomSize?: number }) {
     const tileArray = [];
     const tileSize = 5; // Larger tiles to reduce count
     const tilesPerSide = Math.floor(roomSize / tileSize);
-    
+
     for (let x = 0; x < tilesPerSide; x++) {
       for (let z = 0; z < tilesPerSide; z++) {
         const posX = (x - tilesPerSide / 2) * tileSize + tileSize / 2;
         const posZ = (z - tilesPerSide / 2) * tileSize + tileSize / 2;
         const delay = (x + z) * 0.1; // Stagger the animation
-        
+
         tileArray.push({
           key: `tile-${x}-${z}`,
           position: [posX, 0.01, posZ] as [number, number, number],
@@ -147,7 +147,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
   const wallHeight = 16;
   const doorWidth = 6;
   const doorHeight = 5;
-  
+
   return (
     <group>
       {/* Back Wall with optional doors underneath sign */}
@@ -162,7 +162,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               metalness={0.4}
             />
           </mesh>
-          
+
           {/* Center divider between doors */}
           <mesh position={[0, doorHeight / 2, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[2, doorHeight, 1]} />
@@ -172,7 +172,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               metalness={0.4}
             />
           </mesh>
-          
+
           {/* Left hallway entrance - Fish Games */}
           {backLeftDoor && (
             <>
@@ -185,7 +185,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                   metalness={0.4}
                 />
               </mesh>
-              
+
               {/* Hallway entrance frame - glowing cyan */}
               <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
                 <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
@@ -195,7 +195,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                   emissiveIntensity={1.5}
                 />
               </mesh>
-              
+
               {/* Decorative lights around entrance */}
               {Array.from({ length: 20 }).map((_, i) => {
                 const isTopBottom = i < 10;
@@ -203,7 +203,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                 const yPos = isTopBottom 
                   ? (i < 5 ? doorHeight + 0.6 : -0.1)
                   : (i - 9.5) * 0.5;
-                
+
                 return (
                   <mesh key={i} position={[xPos, yPos, -roomSize / 2 + 0.6]}>
                     <sphereGeometry args={[0.1, 8, 8]} />
@@ -215,7 +215,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                   </mesh>
                 );
               })}
-              
+
               {/* Hallway corridor extending back */}
               <group position={[-doorWidth / 2 - 1, 0, -roomSize / 2]}>
                 {/* Left hallway wall */}
@@ -227,7 +227,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                     metalness={0.3}
                   />
                 </mesh>
-                
+
                 {/* Right hallway wall */}
                 <mesh position={[doorWidth / 2, doorHeight / 2, -4]} castShadow receiveShadow>
                   <boxGeometry args={[0.5, doorHeight, 8]} />
@@ -237,7 +237,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                     metalness={0.3}
                   />
                 </mesh>
-                
+
                 {/* Hallway ceiling */}
                 <mesh position={[0, doorHeight, -4]} receiveShadow>
                   <boxGeometry args={[doorWidth, 0.3, 8]} />
@@ -247,7 +247,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                     metalness={0.5}
                   />
                 </mesh>
-                
+
                 {/* Hallway floor */}
                 <mesh position={[0, 0, -4]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
                   <planeGeometry args={[doorWidth, 8]} />
@@ -257,7 +257,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                     metalness={0.6}
                   />
                 </mesh>
-                
+
                 {/* Hallway ceiling lights */}
                 {[0, -2, -4, -6].map((z, i) => (
                   <group key={i} position={[0, doorHeight - 0.2, z]}>
@@ -272,7 +272,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                     <pointLight color="#06b6d4" intensity={15} distance={8} />
                   </group>
                 ))}
-                
+
                 {/* End of hallway - archway to fish room */}
                 <mesh position={[0, doorHeight / 2, -8]}>
                   <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
@@ -283,7 +283,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                   />
                 </mesh>
               </group>
-              
+
               {/* Hallway entrance label */}
               <Text
                 position={[-doorWidth / 2 - 1, doorHeight + 1, -roomSize / 2 + 1]}
@@ -296,7 +296,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               </Text>
             </>
           )}
-          
+
           {/* Right door opening */}
           {backRightDoor && (
             <>
@@ -385,12 +385,12 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           >
             {backSign}
           </Text>
-          
+
           {/* Outer glow effect using point lights */}
           <pointLight position={[0, 0, 1]} color="#ffffff" intensity={50} distance={15} />
           <pointLight position={[-5, 0, 1]} color="#00ff00" intensity={30} distance={10} />
           <pointLight position={[5, 0, 1]} color="#00ff00" intensity={30} distance={10} />
-          
+
           {/* Marquee bulbs around the sign */}
           {Array.from({ length: 40 }).map((_, i) => {
             const angle = (i / 40) * Math.PI * 2;
@@ -409,7 +409,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               </mesh>
             );
           })}
-          
+
           {/* Background panel for the sign */}
           <mesh position={[0, 0, -0.2]}>
             <boxGeometry args={[25, 5.5, 0.3]} />
@@ -428,12 +428,12 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
 // Starry ceiling component
 function StarryCeiling({ roomSize, height }: { roomSize: number; height: number }) {
   const starsRef = useRef<THREE.Group>(null);
-  
+
   // Generate random star positions - stable across renders
   const stars = useMemo(() => {
     const starArray: { pos: [number, number, number]; size: number; brightness: number }[] = [];
     const numStars = 200;
-    
+
     for (let i = 0; i < numStars; i++) {
       starArray.push({
         pos: [
@@ -447,7 +447,7 @@ function StarryCeiling({ roomSize, height }: { roomSize: number; height: number 
     }
     return starArray;
   }, [roomSize, height]);
-  
+
   useFrame((state) => {
     if (starsRef.current) {
       const time = state.clock.elapsedTime;
@@ -463,7 +463,7 @@ function StarryCeiling({ roomSize, height }: { roomSize: number; height: number 
       });
     }
   });
-  
+
   return (
     <group ref={starsRef}>
       {/* Dark ceiling background */}
@@ -475,7 +475,7 @@ function StarryCeiling({ roomSize, height }: { roomSize: number; height: number 
           metalness={0.1}
         />
       </mesh>
-      
+
       {/* Stars */}
       {stars.map((star, i) => (
         <mesh key={i} position={star.pos}>
@@ -488,7 +488,7 @@ function StarryCeiling({ roomSize, height }: { roomSize: number; height: number 
           />
         </mesh>
       ))}
-      
+
       {/* Some larger glowing stars */}
       {stars.slice(0, 30).map((star, i) => (
         <pointLight
@@ -528,11 +528,11 @@ function GameObject({
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const coinsRef = useRef<Array<{ offset: [number, number, number], speed: number, angle: number, startTime: number }>>([]);
-  
+
   // Load game logo and screen textures for slot machines (always load to avoid conditional hook)
   const gameLogoTexture = useTexture("/game-logo.png");
   const screenGameTexture = useTexture("/screen-game.png");
-  
+
   // Initialize coins for slot machine hover effect
   React.useEffect(() => {
     if (modelPath.includes('slot-machine')) {
@@ -560,7 +560,7 @@ function GameObject({
               emissiveIntensity={hovered ? 0.6 : 0.3}
             />
           </mesh>
-          
+
           {/* Premium large screen - ultra bright display with game image */}
           <mesh position={[0, 2.2, 0.66]} castShadow>
             <boxGeometry args={[1.2, 1.6, 0.08]} />
@@ -570,7 +570,7 @@ function GameObject({
               emissiveIntensity={hovered ? 0.5 : 0.3}
             />
           </mesh>
-          
+
           {/* Curved screen bezel - glossy frame */}
           <mesh position={[0, 2.2, 0.68]} castShadow>
             <boxGeometry args={[1.26, 1.66, 0.04]} />
@@ -582,7 +582,7 @@ function GameObject({
               emissiveIntensity={hovered ? 0.8 : 0.4}
             />
           </mesh>
-          
+
           {/* Game logo frame above screen */}
           <group position={[0, 3.25, 0.7]}>
             {/* Golden decorative frame */}
@@ -596,7 +596,7 @@ function GameObject({
                 emissiveIntensity={0.3}
               />
             </mesh>
-            
+
             {/* Game logo image */}
             <mesh position={[0, 0, 0.05]}>
               <planeGeometry args={[1.3, 0.4]} />
@@ -605,7 +605,7 @@ function GameObject({
                 transparent={true}
               />
             </mesh>
-            
+
             {/* Frame border lights */}
             {[
               [-0.7, 0.25], [0.7, 0.25], [-0.7, -0.25], [0.7, -0.25]
@@ -620,7 +620,7 @@ function GameObject({
               </mesh>
             ))}
           </group>
-          
+
           {/* LED strip lights around screen - premium marquee effect */}
           {Array.from({ length: 16 }).map((_, i) => {
             const angle = (i / 16) * Math.PI * 2;
@@ -640,7 +640,7 @@ function GameObject({
               </mesh>
             );
           })}
-          
+
           {/* Top curved topper - signature IGT style */}
           <mesh position={[0, 3.8, 0]} castShadow>
             <cylinderGeometry args={[0.45, 0.55, 0.4, 32]} />
@@ -652,7 +652,7 @@ function GameObject({
               emissiveIntensity={hovered ? 1.2 : 0.6}
             />
           </mesh>
-          
+
           {/* Illuminated top logo area */}
           <mesh position={[0, 3.8, 0.46]} castShadow>
             <boxGeometry args={[0.8, 0.25, 0.05]} />
@@ -662,7 +662,7 @@ function GameObject({
               emissiveIntensity={hovered ? 3 : 1.8}
             />
           </mesh>
-          
+
           {/* Control panel area - angled */}
           <mesh position={[0, 0.6, 0.5]} rotation={[-0.3, 0, 0]} castShadow receiveShadow>
             <boxGeometry args={[1, 0.3, 0.4]} />
@@ -672,7 +672,7 @@ function GameObject({
               roughness={0.15}
             />
           </mesh>
-          
+
           {/* Premium base with LED underglow */}
           <mesh position={[0, 0.15, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[0.75, 0.8, 0.3, 32]} />
@@ -684,7 +684,7 @@ function GameObject({
               emissiveIntensity={hovered ? 0.8 : 0.3}
             />
           </mesh>
-          
+
           {/* Casino stool in front */}
           <group position={[0, 0, 1.2]}>
             {/* Stool seat - cushioned top */}
@@ -835,11 +835,11 @@ function GameObject({
         }
         const elapsed = state.clock.elapsedTime - coin.startTime;
         const distance = elapsed * coin.speed;
-        
+
         coin.offset[0] = Math.cos(coin.angle) * distance;
         coin.offset[1] = 2 + Math.sin(elapsed * 3) * 0.5 - elapsed * 0.5;
         coin.offset[2] = Math.sin(coin.angle) * distance;
-        
+
         // Reset coin if it's too far
         if (distance > 3) {
           coin.startTime = state.clock.elapsedTime;
@@ -889,7 +889,7 @@ function GameObject({
               wireframe={false}
             />
           </mesh>
-          
+
           {/* Bright outer glow shell */}
           <mesh position={[0, 1.8, 0]}>
             <cylinderGeometry args={[0.8, 0.85, 3.8, 32]} />
@@ -899,7 +899,7 @@ function GameObject({
               opacity={0.15}
             />
           </mesh>
-          
+
           {/* Flying coins */}
           {coinsRef.current.map((coin, i) => coin.startTime > 0 && (
             <group key={i} position={coin.offset}>
@@ -1048,7 +1048,7 @@ function SlotMachineRoom() {
     <group>
       {/* Starry Ceiling */}
       <StarryCeiling roomSize={35} height={16} />
-      
+
       {/* Cashier Window on back wall, left of Fish Games door */}
       <CashierWindow />
 
@@ -1101,7 +1101,7 @@ function FishGameRoom() {
     <group>
       {/* Starry Ceiling */}
       <StarryCeiling roomSize={35} height={16} />
-      
+
       {/* 6 Rectangular Fish Tables in two rows */}
       {Array.from({ length: 6 }, (_, i) => (
         <GameObject
@@ -1293,14 +1293,14 @@ function Scene() {
       <FirstPersonControls />
       <RoomLighting roomType={currentRoom} />
       <CasinoFloor />
-      
+
       {currentRoom === 'slots' && (
         <>
           <RoomWalls backRightDoor={true} backSign="JADE ROYALE" />
           <SlotMachineRoom />
         </>
       )}
-      
+
       {currentRoom === 'fish' && (
         <>
           <RoomWalls backLeftDoor={true} backSign="🎣 FISH GAMES 🎣" />
