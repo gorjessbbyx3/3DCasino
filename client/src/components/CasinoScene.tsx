@@ -628,7 +628,7 @@ function FirstPersonControls() {
 export function CasinoScene() {
   return (
     <Canvas
-      shadows={{ type: "PCFSoftShadowMap" }}
+      shadows
       camera={{
         position: [0, 2.5, 30],
         fov: 75,
