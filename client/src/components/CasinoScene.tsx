@@ -344,9 +344,9 @@ function GameObject({
     if (modelPath.includes('slot-machine')) {
       return (
         <group>
-          {/* Premium curved cabinet - IGT style sleek design */}
-          <mesh position={[0, 1.2, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.65, 0.7, 2.4, 32]} />
+          {/* Premium curved cabinet - IGT style sleek design - TALLER */}
+          <mesh position={[0, 1.8, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.65, 0.7, 3.6, 32]} />
             <meshStandardMaterial 
               color="#0a0a1e" 
               metalness={0.98} 
@@ -357,8 +357,8 @@ function GameObject({
           </mesh>
           
           {/* Premium large screen - ultra bright display */}
-          <mesh position={[0, 1.5, 0.66]} castShadow>
-            <boxGeometry args={[1.2, 1.3, 0.08]} />
+          <mesh position={[0, 2.2, 0.66]} castShadow>
+            <boxGeometry args={[1.2, 1.6, 0.08]} />
             <meshStandardMaterial 
               color="#000000" 
               emissive={hovered ? "#a78bfa" : "#8b5cf6"}
@@ -367,8 +367,8 @@ function GameObject({
           </mesh>
           
           {/* Curved screen bezel - glossy frame */}
-          <mesh position={[0, 1.5, 0.68]} castShadow>
-            <boxGeometry args={[1.26, 1.36, 0.04]} />
+          <mesh position={[0, 2.2, 0.68]} castShadow>
+            <boxGeometry args={[1.26, 1.66, 0.04]} />
             <meshStandardMaterial 
               color="#1a1a2e" 
               metalness={1} 
@@ -383,7 +383,7 @@ function GameObject({
             const angle = (i / 16) * Math.PI * 2;
             const radius = 0.68;
             const x = Math.sin(angle) * radius;
-            const y = 1.5 + Math.cos(angle) * radius * 0.52;
+            const y = 2.2 + Math.cos(angle) * radius * 0.65;
             return (
               <mesh key={i} position={[x, y, 0.7]} castShadow>
                 <sphereGeometry args={[0.025, 8, 8]} />
@@ -399,7 +399,7 @@ function GameObject({
           })}
           
           {/* Top curved topper - signature IGT style */}
-          <mesh position={[0, 2.7, 0]} castShadow>
+          <mesh position={[0, 3.8, 0]} castShadow>
             <cylinderGeometry args={[0.45, 0.55, 0.4, 32]} />
             <meshStandardMaterial 
               color="#1e1b4b" 
@@ -411,7 +411,7 @@ function GameObject({
           </mesh>
           
           {/* Illuminated top logo area */}
-          <mesh position={[0, 2.7, 0.46]} castShadow>
+          <mesh position={[0, 3.8, 0.46]} castShadow>
             <boxGeometry args={[0.8, 0.25, 0.05]} />
             <meshStandardMaterial 
               color="#000000" 
@@ -421,7 +421,7 @@ function GameObject({
           </mesh>
           
           {/* Control panel area - angled */}
-          <mesh position={[0, 0.4, 0.5]} rotation={[-0.3, 0, 0]} castShadow receiveShadow>
+          <mesh position={[0, 0.6, 0.5]} rotation={[-0.3, 0, 0]} castShadow receiveShadow>
             <boxGeometry args={[1, 0.3, 0.4]} />
             <meshStandardMaterial 
               color="#0f0f23" 
@@ -441,6 +441,37 @@ function GameObject({
               emissiveIntensity={hovered ? 0.8 : 0.3}
             />
           </mesh>
+          
+          {/* Casino stool in front */}
+          <group position={[0, 0, 1.2]}>
+            {/* Stool seat - cushioned top */}
+            <mesh position={[0, 0.65, 0]} castShadow>
+              <cylinderGeometry args={[0.25, 0.25, 0.1, 32]} />
+              <meshStandardMaterial 
+                color="#8b0000" 
+                metalness={0.3}
+                roughness={0.7}
+              />
+            </mesh>
+            {/* Stool pole */}
+            <mesh position={[0, 0.35, 0]} castShadow>
+              <cylinderGeometry args={[0.04, 0.04, 0.6, 16]} />
+              <meshStandardMaterial 
+                color="#2a2a2a" 
+                metalness={0.9}
+                roughness={0.1}
+              />
+            </mesh>
+            {/* Stool base */}
+            <mesh position={[0, 0.05, 0]} castShadow receiveShadow>
+              <cylinderGeometry args={[0.3, 0.3, 0.05, 32]} />
+              <meshStandardMaterial 
+                color="#1a1a1a" 
+                metalness={0.8}
+                roughness={0.2}
+              />
+            </mesh>
+          </group>
         </group>
       );
     } else if (modelPath.includes('fish-table')) {
