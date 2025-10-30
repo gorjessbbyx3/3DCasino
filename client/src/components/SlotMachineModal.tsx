@@ -77,16 +77,7 @@ export function SlotMachineModal({ machineNumber = 1 }: SlotMachineModalProps) {
         throw new Error(data.message || "Spin failed");
       }
 
-      const tempReels: string[][] = [[], [], []];
-      for (let i = 0; i < 15; i++) {
-        for (let j = 0; j < 3; j++) {
-          tempReels[j].push(SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)]);
-        }
-        
-        setReels([tempReels[0][i], tempReels[1][i], tempReels[2][i]]);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-
+      // Directly set the result symbols without animation
       setReels(data.symbols);
       setUser(data.user);
       setLastWin(data.winAmount);

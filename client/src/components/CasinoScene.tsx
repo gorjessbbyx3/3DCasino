@@ -351,8 +351,17 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         </mesh>
       )}
 
-      {/* Back wall sign - Broadway/Hollywood style */}
-      {backSign && (
+      {/* Back wall sign - Image display */}
+      {backSign && backSign === "JADE ROYALE" ? (
+        <mesh position={[0, wallHeight - 4, -roomSize / 2 + 0.6]}>
+          <planeGeometry args={[20, 8]} />
+          <meshStandardMaterial 
+            map={useTexture("/textures/jade-royale-sign.jpeg")}
+            transparent={false}
+          />
+          <pointLight position={[0, 0, 1]} color="#ffffff" intensity={30} distance={15} />
+        </mesh>
+      ) : backSign ? (
         <group position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}>
           {/* Main sign text - green with white glow */}
           <Text
@@ -402,7 +411,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
             />
           </mesh>
         </group>
-      )}
+      ) : null}
     </group>
   );
 }
