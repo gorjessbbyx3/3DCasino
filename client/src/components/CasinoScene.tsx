@@ -301,11 +301,11 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           {/* Right door opening */}
           {backRightDoor && (
             <>
-              {/* Right wall section beside right door - cashier area with neon room */}
+              {/* Right wall section beside right door with neon image */}
               <mesh position={[roomSize / 2 - doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial 
-                  map={useTexture("/cashier-wall.png")}
+                  map={useTexture("/neon-walls.png")}
                   roughness={0.3}
                   metalness={0.1}
                 />
@@ -935,6 +935,7 @@ function CashierWindow() {
   const { setShowAuthModal, user } = useUser();
   const [hovered, setHovered] = useState(false);
   const texture = useLoader(THREE.TextureLoader, '/Copilot_20251028_193236_1761716033443.png');
+  const wallTexture = useTexture("/cashier-wall.png");
 
   const handleCashierClick = () => {
     if (!user) {
@@ -946,6 +947,16 @@ function CashierWindow() {
 
   return (
     <group position={[-10, 3, -16.5]}>
+      {/* Background wall panel with neon room image */}
+      <mesh position={[0, 2, -0.3]} receiveShadow>
+        <planeGeometry args={[8, 6]} />
+        <meshStandardMaterial 
+          map={wallTexture}
+          roughness={0.3}
+          metalness={0.1}
+        />
+      </mesh>
+
       {/* Cashier booth frame */}
       <mesh 
         position={[0, 2, 0]} 
