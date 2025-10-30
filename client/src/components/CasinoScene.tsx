@@ -27,6 +27,42 @@ const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom:
 });
 
 
+// Clickable entrance component
+function ClickableEntrance({ position, doorWidth, doorHeight }: { 
+  position: [number, number, number]; 
+  doorWidth: number;
+  doorHeight: number;
+}) {
+  const { camera } = useThree();
+  
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+    // Teleport through the door
+    camera.position.set(0, 2.4, -17);
+  };
+  
+  return (
+    <mesh 
+      position={position}
+      onClick={handleClick}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "auto";
+      }}
+    >
+      <planeGeometry args={[doorWidth, doorHeight]} />
+      <meshStandardMaterial 
+        map={useTexture("/fish-entrance.png")}
+        emissive="#ffffff"
+        emissiveIntensity={0.5}
+      />
+    </mesh>
+  );
+}
+
 // Room walls with doorways
 function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false, backSign = "" }: { 
   roomSize?: number; 
@@ -53,38 +89,15 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
             />
           </mesh>
           
-          {/* Center divider between doors - black */}
-          <mesh position={[0, doorHeight / 2, -roomSize / 2]} receiveShadow>
-            <boxGeometry args={[2, doorHeight, 1]} />
-            <meshStandardMaterial 
-              color="#0f0f1a"
-              roughness={0.6}
-              metalness={0.4}
-            />
-          </mesh>
           
           {/* Left hallway entrance - Fish Games */}
           {backLeftDoor && (
             <>
-              {/* Left wall section beside hallway - black */}
-              <mesh position={[-roomSize / 2 + doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
-                <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
-                <meshStandardMaterial 
-                  color="#0f0f1a"
-                  roughness={0.6}
-                  metalness={0.4}
-                />
-              </mesh>
-              
-              {/* Fish entrance image filling the doorway */}
-              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.01]}>
-                <planeGeometry args={[doorWidth, doorHeight]} />
-                <meshStandardMaterial 
-                  map={useTexture("/fish-entrance.png")}
-                  emissive="#ffffff"
-                  emissiveIntensity={0.5}
-                />
-              </mesh>
+              <ClickableEntrance 
+                position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.01]}
+                doorWidth={doorWidth}
+                doorHeight={doorHeight}
+              />
               
               {/* Hallway corridor extending back */}
               <group position={[-doorWidth / 2 - 1, 0, -roomSize / 2]}>
@@ -170,25 +183,11 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           {/* Right door opening */}
           {backRightDoor && (
             <>
-              {/* Right wall section beside right door - black */}
-              <mesh position={[roomSize / 2 - doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
-                <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
-                <meshStandardMaterial 
-                  color="#0f0f1a"
-                  roughness={0.6}
-                  metalness={0.4}
-                />
-              </mesh>
-              
-              {/* Fish entrance image filling the right doorway */}
-              <mesh position={[doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2 + 0.01]}>
-                <planeGeometry args={[doorWidth, doorHeight]} />
-                <meshStandardMaterial 
-                  map={useTexture("/fish-entrance.png")}
-                  emissive="#ffffff"
-                  emissiveIntensity={0.5}
-                />
-              </mesh>
+              <ClickableEntrance 
+                position={[doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2 + 0.01]}
+                doorWidth={doorWidth}
+                doorHeight={doorHeight}
+              />
             </>
           )}
         </>
@@ -363,6 +362,7 @@ interface GameObjectProps {
   label?: string;
   glowColor?: string;
   machineColor?: string;
+  screenImage?: string;
 }
 
 function GameObject({
@@ -373,7 +373,8 @@ function GameObject({
   onClick,
   label,
   glowColor = "#10b981",
-  machineColor = "#6366f1"
+  machineColor = "#6366f1",
+  screenImage
 }: GameObjectProps) {
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -410,11 +411,19 @@ function GameObject({
           {/* Premium large screen - ultra bright display */}
           <mesh position={[0, 2.2, 0.66]} castShadow>
             <boxGeometry args={[1.2, 1.6, 0.08]} />
-            <meshStandardMaterial 
-              color="#000000" 
-              emissive={machineColor}
-              emissiveIntensity={hovered ? 4.5 : 3.2}
-            />
+            {screenImage ? (
+              <meshStandardMaterial 
+                map={useTexture(screenImage)}
+                emissive={machineColor}
+                emissiveIntensity={hovered ? 0.8 : 0.3}
+              />
+            ) : (
+              <meshStandardMaterial 
+                color="#000000" 
+                emissive={machineColor}
+                emissiveIntensity={hovered ? 4.5 : 3.2}
+              />
+            )}
           </mesh>
           
           {/* Curved screen bezel - glossy frame */}
@@ -899,17 +908,44 @@ function SlotMachineRoom() {
       <CashierWindow />
 
       {/* Left wall slots - 5 machines */}
-      {Array.from({ length: 5 }, (_, i) => (
+      {/* Machine 1 - Gates of Olympus */}
+      <GameObject
+        key="slot-left-0"
+        position={[-14, 0, -10]}
+        rotation={[0, Math.PI / 2, 0]}
+        modelPath="slot-machine"
+        scale={2.5}
+        onClick={() => handleSlotMachineClick(1)}
+        label="Slot Machine 1"
+        glowColor="#a855f7"
+        machineColor={machineColors[0]}
+        screenImage="/slot-olympus.png"
+      />
+      {/* Machine 2 - Bigger Bass */}
+      <GameObject
+        key="slot-left-1"
+        position={[-14, 0, -5]}
+        rotation={[0, Math.PI / 2, 0]}
+        modelPath="slot-machine"
+        scale={2.5}
+        onClick={() => handleSlotMachineClick(2)}
+        label="Slot Machine 2"
+        glowColor="#a855f7"
+        machineColor={machineColors[1]}
+        screenImage="/slot-bass.png"
+      />
+      {/* Machines 3-5 - default screens */}
+      {Array.from({ length: 3 }, (_, i) => (
         <GameObject
-          key={`slot-left-${i}`}
-          position={[-14, 0, (i - 2) * 5]}
+          key={`slot-left-${i+2}`}
+          position={[-14, 0, (i) * 5]}
           rotation={[0, Math.PI / 2, 0]}
           modelPath="slot-machine"
           scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 1)}
-          label={`Slot Machine ${i + 1}`}
+          onClick={() => handleSlotMachineClick(i + 3)}
+          label={`Slot Machine ${i + 3}`}
           glowColor="#a855f7"
-          machineColor={machineColors[i]}
+          machineColor={machineColors[i + 2]}
         />
       ))}
 
@@ -1075,20 +1111,20 @@ function StreetViewControls() {
       // Back door to fish games (under sign)
       if (camera.position.z < -16) {
         setCurrentRoom('fish');
-        camera.position.set(0, 1.7, 14);
+        camera.position.set(0, 2.4, 14);
       }
     } else if (currentRoom === 'fish') {
       // Exit back to slots from back wall
       if (camera.position.z < -16) {
         setCurrentRoom('slots');
-        camera.position.set(0, 1.7, 14);
+        camera.position.set(0, 2.4, 14);
       }
     }
 
     // Keep camera within current room bounds
     camera.position.x = Math.max(-16.5, Math.min(16.5, camera.position.x));
     camera.position.z = Math.max(-16.5, Math.min(16.5, camera.position.z));
-    camera.position.y = 1.7; // Always keep at eye level
+    camera.position.y = 2.4; // Always keep at eye level with slot machine screens
   });
 
   return null;
@@ -1099,12 +1135,24 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
   const { camera } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
+  
+  // Load custom floor texture
+  const floorTexture = useTexture("/floor-texture.jpeg");
+  
+  // Configure texture for proper tiling
+  useEffect(() => {
+    if (floorTexture) {
+      floorTexture.wrapS = THREE.RepeatWrapping;
+      floorTexture.wrapT = THREE.RepeatWrapping;
+      floorTexture.repeat.set(4, 4);
+    }
+  }, [floorTexture]);
 
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
     const point = event.point;
     // Teleport camera to clicked position, keeping eye level
-    camera.position.set(point.x, 1.7, point.z);
+    camera.position.set(point.x, 2.4, point.z);
   };
 
   return (
@@ -1126,15 +1174,11 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
       }}
     >
       <planeGeometry args={[roomSize, roomSize]} />
-      <meshPhysicalMaterial
-        color={hovered ? "#f0f0f0" : "#ffffff"}
-        roughness={0.05}
+      <meshStandardMaterial
+        map={floorTexture}
+        color={hovered ? "#ffffff" : "#dddddd"}
+        roughness={0.3}
         metalness={0.1}
-        transparent={true}
-        opacity={0.9}
-        reflectivity={0.8}
-        clearcoat={1.0}
-        clearcoatRoughness={0.1}
       />
     </mesh>
   );
@@ -1174,7 +1218,7 @@ function CanvasWrapper() {
       <Canvas
         shadows
         camera={{ 
-          position: [0, 1.7, 14], 
+          position: [0, 2.4, 14], 
           fov: 75,
           near: 0.1,
           far: 1000
@@ -1200,7 +1244,7 @@ function CanvasWrapper() {
             minPolarAngle={Math.PI / 2}
             maxPolarAngle={Math.PI / 2}
             rotateSpeed={0.5}
-            target={[0, 1.7, 0]}
+            target={[0, 2.4, 0]}
           />
         </Suspense>
       </Canvas>
