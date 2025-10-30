@@ -27,113 +27,29 @@ const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom:
   setCurrentRoom: () => {}
 });
 
-// RGB LED Floor Tile
-function LEDTile({ position, delay = 0 }: { position: [number, number, number]; delay?: number }) {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const { camera } = useThree();
-  const [hovered, setHovered] = useState(false);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      const time = state.clock.elapsedTime + delay;
-      const material = meshRef.current.material as THREE.MeshStandardMaterial;
-      
-      if (hovered) {
-        // Yellow highlight when hovered
-        material.emissive.setRGB(1, 1, 0);
-        material.emissiveIntensity = 1.2;
-      } else {
-        // RGB color cycling
-        const r = Math.sin(time * 0.5) * 0.5 + 0.5;
-        const g = Math.sin(time * 0.5 + 2) * 0.5 + 0.5;
-        const b = Math.sin(time * 0.5 + 4) * 0.5 + 0.5;
-        
-        material.emissive.setRGB(r, g, b);
-        material.emissiveIntensity = 0.6 + Math.sin(time * 2) * 0.2;
-      }
-    }
-  });
-
-  const handleClick = (e: any) => {
-    e.stopPropagation();
-    // Move camera to clicked tile position (keep eye level height)
-    camera.position.x = position[0];
-    camera.position.y = 1.7;
-    camera.position.z = position[2];
-  };
-
-  return (
-    <mesh 
-      ref={meshRef} 
-      rotation={[-Math.PI / 2, 0, 0]} 
-      position={position} 
-      receiveShadow
-      onClick={handleClick}
-      onPointerOver={(e) => {
-        e.stopPropagation();
-        setHovered(true);
-        document.body.style.cursor = "pointer";
-      }}
-      onPointerOut={() => {
-        setHovered(false);
-        document.body.style.cursor = "auto";
-      }}
-    >
-      <planeGeometry args={[4.8, 4.8]} />
-      <meshStandardMaterial
-        color="#1a1a2e"
-        emissive="#ff0000"
-        emissiveIntensity={0.6}
-        roughness={0.2}
-        metalness={0.8}
-      />
-    </mesh>
-  );
-}
-
-// VIP Underground Casino Floor with RGB LED Tiles
+// White Glass Floor
 function CasinoFloor({ roomSize = 35 }: { roomSize?: number }) {
-  const tiles = useMemo(() => {
-    const tileArray = [];
-    const tileSize = 5; // Larger tiles to reduce count
-    const tilesPerSide = Math.floor(roomSize / tileSize);
-    
-    for (let x = 0; x < tilesPerSide; x++) {
-      for (let z = 0; z < tilesPerSide; z++) {
-        const posX = (x - tilesPerSide / 2) * tileSize + tileSize / 2;
-        const posZ = (z - tilesPerSide / 2) * tileSize + tileSize / 2;
-        const delay = (x + z) * 0.1; // Stagger the animation
-        
-        tileArray.push({
-          key: `tile-${x}-${z}`,
-          position: [posX, 0.01, posZ] as [number, number, number],
-          delay
-        });
-      }
-    }
-    return tileArray;
-  }, [roomSize]);
-
   return (
     <group>
-      {/* Base floor */}
+      {/* White Glass Floor */}
       <mesh 
         rotation={[-Math.PI / 2, 0, 0]} 
         position={[0, 0, 0]} 
         receiveShadow
+        castShadow
       >
         <planeGeometry args={[roomSize, roomSize]} />
-        <meshStandardMaterial
-          color="#000000"
-          roughness={0.1}
-          metalness={0.9}
+        <meshPhysicalMaterial
+          color="#ffffff"
+          roughness={0.05}
+          metalness={0.1}
+          transparent={true}
+          opacity={0.9}
+          reflectivity={0.8}
+          clearcoat={1.0}
+          clearcoatRoughness={0.1}
         />
       </mesh>
-
-      {/* RGB LED Tiles */}
-      {tiles.map((tile: { key: string; position: [number, number, number]; delay: number }) => (
-        <LEDTile key={tile.key} position={tile.position} delay={tile.delay} />
-      ))}
     </group>
   );
 }
