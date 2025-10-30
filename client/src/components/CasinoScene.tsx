@@ -1402,9 +1402,8 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
     <mesh
       ref={meshRef}
       rotation={[-Math.PI / 2, 0, 0]}
-      position={[0, 0, 0]}
+      position={[0, -0.01, 0]}
       receiveShadow
-      castShadow
       onClick={handleClick}
       onPointerOver={(e) => {
         e.stopPropagation();
@@ -1419,9 +1418,8 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
       <planeGeometry args={[roomSize, roomSize]} />
       <meshStandardMaterial
         map={floorTexture}
-        color="#ffffff"
-        roughness={0.3}
-        metalness={0.1}
+        side={THREE.DoubleSide}
+        toneMapped={false}
       />
     </mesh>
   );
