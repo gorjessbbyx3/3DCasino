@@ -5,6 +5,7 @@ import { AuthModal } from "./components/AuthModal";
 import { CashierModal } from "./components/CashierModal";
 import { SlotMachineModal } from "./components/SlotMachineModal";
 import { StatsModal, openStats } from "./components/StatsModal";
+import { AgeGateModal } from "./components/AgeGateModal";
 import { AudioManager } from "./components/AudioManager";
 import { AudioControls } from "./components/AudioControls";
 import { useUser } from "./lib/stores/useUser";
@@ -46,7 +47,8 @@ function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
-      <div className="absolute top-0 left-0 right-0 z-10 glass-morphism p-6 border-b border-emerald-500/30 animate-border-glow">
+      <AgeGateModal />
+      <div className="absolute top-0 left-0 right-0 z-10 glass-morphism p-6 border-b border-emerald-500/30 animate-border-glow md:block hidden">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
             <h1 className="text-5xl font-bold text-gradient-casino drop-shadow-2xl animate-text-glow tracking-tight">

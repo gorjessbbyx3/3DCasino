@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
 import { Environment, Text, PointerLockControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
+import { MobileControls } from "./MobileControls";
 import { useUser } from "@/lib/stores/useUser";
 
 const openCashierModal = () => {
@@ -153,36 +154,36 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
       {/* Back Wall with optional doors underneath sign */}
       {backLeftDoor || backRightDoor ? (
         <>
-          {/* Wall above doors with background image */}
+          {/* Wall above doors with neon image */}
           <mesh position={[0, wallHeight - doorHeight / 2 - 0.5, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[roomSize, wallHeight - doorHeight - 1, 1]} />
             <meshStandardMaterial 
-              map={useTexture("/casino-bg.jpg")}
-              roughness={0.4}
-              metalness={0.2}
+              map={useTexture("/neon-walls.png")}
+              roughness={0.3}
+              metalness={0.1}
             />
           </mesh>
           
-          {/* Center divider between doors with background image */}
+          {/* Center divider between doors with neon image */}
           <mesh position={[0, doorHeight / 2, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[2, doorHeight, 1]} />
             <meshStandardMaterial 
-              map={useTexture("/casino-bg.jpg")}
-              roughness={0.4}
-              metalness={0.2}
+              map={useTexture("/neon-walls.png")}
+              roughness={0.3}
+              metalness={0.1}
             />
           </mesh>
           
           {/* Left hallway entrance - Fish Games */}
           {backLeftDoor && (
             <>
-              {/* Left wall section beside hallway with background image */}
+              {/* Left wall section beside hallway with neon image */}
               <mesh position={[-roomSize / 2 + doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial 
-                  map={useTexture("/casino-bg.jpg")}
-                  roughness={0.4}
-                  metalness={0.2}
+                  map={useTexture("/neon-walls.png")}
+                  roughness={0.3}
+                  metalness={0.1}
                 />
               </mesh>
               
@@ -218,43 +219,43 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               
               {/* Hallway corridor extending back */}
               <group position={[-doorWidth / 2 - 1, 0, -roomSize / 2]}>
-                {/* Left hallway wall */}
+                {/* Left hallway wall with neon image */}
                 <mesh position={[-doorWidth / 2, doorHeight / 2, -4]} castShadow receiveShadow>
                   <boxGeometry args={[0.5, doorHeight, 8]} />
                   <meshStandardMaterial 
-                    color="#1a1a2e"
-                    roughness={0.5}
-                    metalness={0.3}
+                    map={useTexture("/fish-hallway.png")}
+                    roughness={0.2}
+                    metalness={0.1}
                   />
                 </mesh>
                 
-                {/* Right hallway wall */}
+                {/* Right hallway wall with neon image */}
                 <mesh position={[doorWidth / 2, doorHeight / 2, -4]} castShadow receiveShadow>
                   <boxGeometry args={[0.5, doorHeight, 8]} />
                   <meshStandardMaterial 
-                    color="#1a1a2e"
-                    roughness={0.5}
-                    metalness={0.3}
+                    map={useTexture("/fish-hallway.png")}
+                    roughness={0.2}
+                    metalness={0.1}
                   />
                 </mesh>
                 
-                {/* Hallway ceiling */}
+                {/* Hallway ceiling with neon image */}
                 <mesh position={[0, doorHeight, -4]} receiveShadow>
                   <boxGeometry args={[doorWidth, 0.3, 8]} />
                   <meshStandardMaterial 
-                    color="#0a0a1a"
-                    roughness={0.4}
-                    metalness={0.5}
+                    map={useTexture("/fish-hallway.png")}
+                    roughness={0.2}
+                    metalness={0.1}
                   />
                 </mesh>
                 
-                {/* Hallway floor */}
+                {/* Hallway floor with neon image */}
                 <mesh position={[0, 0, -4]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
                   <planeGeometry args={[doorWidth, 8]} />
                   <meshStandardMaterial 
-                    color="#1a1a2e"
-                    roughness={0.3}
-                    metalness={0.6}
+                    map={useTexture("/fish-hallway.png")}
+                    roughness={0.2}
+                    metalness={0.1}
                   />
                 </mesh>
                 
@@ -300,13 +301,13 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           {/* Right door opening */}
           {backRightDoor && (
             <>
-              {/* Right wall section beside right door with background image */}
+              {/* Right wall section beside right door - cashier area with neon room */}
               <mesh position={[roomSize / 2 - doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial 
-                  map={useTexture("/casino-bg.jpg")}
-                  roughness={0.4}
-                  metalness={0.2}
+                  map={useTexture("/cashier-wall.png")}
+                  roughness={0.3}
+                  metalness={0.1}
                 />
               </mesh>
               {/* Right door frame - glowing cyan */}
@@ -338,23 +339,23 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         </mesh>
       )}
 
-      {/* Left Wall - with casino background */}
+      {/* Left Wall - with neon archway */}
       <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
         <meshStandardMaterial 
-          map={useTexture("/casino-bg.jpg")}
-          roughness={0.4}
-          metalness={0.2}
+          map={useTexture("/neon-walls.png")}
+          roughness={0.3}
+          metalness={0.1}
         />
       </mesh>
 
-      {/* Right Wall - with casino background */}
+      {/* Right Wall - with neon archway */}
       <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
         <meshStandardMaterial 
-          map={useTexture("/casino-bg.jpg")}
-          roughness={0.4}
-          metalness={0.2}
+          map={useTexture("/neon-walls.png")}
+          roughness={0.3}
+          metalness={0.1}
         />
       </mesh>
 
@@ -1162,7 +1163,7 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
 }
 
 // First-person WASD movement controls with room transitions
-function FirstPersonControls() {
+function FirstPersonControls({ mobileInput }: { mobileInput?: { x: number; y: number; rotation: number } }) {
   const { camera } = useThree();
   const { currentRoom, setCurrentRoom } = React.useContext(RoomContext);
   const [moveForward, setMoveForward] = useState(false);
@@ -1246,6 +1247,17 @@ function FirstPersonControls() {
       camera.position.addScaledVector(right, speed);
     }
 
+    // Mobile joystick input
+    if (mobileInput && (mobileInput.x !== 0 || mobileInput.y !== 0)) {
+      camera.position.addScaledVector(right, mobileInput.x * speed);
+      camera.position.addScaledVector(direction, -mobileInput.y * speed);
+    }
+
+    // Mobile rotation input
+    if (mobileInput && mobileInput.rotation !== 0) {
+      camera.rotation.y += mobileInput.rotation;
+    }
+
     // Room transitions based on position - door on back wall
     if (currentRoom === 'slots') {
       // Back door to fish games (under sign)
@@ -1270,12 +1282,12 @@ function FirstPersonControls() {
   return null;
 }
 
-function Scene() {
+function Scene({ mobileInput }: { mobileInput?: { x: number; y: number; rotation: number } }) {
   const { currentRoom } = React.useContext(RoomContext);
 
   return (
     <>
-      <FirstPersonControls />
+      <FirstPersonControls mobileInput={mobileInput} />
       <RoomLighting roomType={currentRoom} />
       <CasinoFloor />
       
@@ -1298,6 +1310,18 @@ function Scene() {
 
 function CanvasWrapper() {
   const roomState = useRoomState();
+  const [mobileInput, setMobileInput] = useState({ x: 0, y: 0, rotation: 0 });
+
+  const handleMobileMove = (x: number, y: number) => {
+    setMobileInput(prev => ({ ...prev, x, y }));
+  };
+
+  const handleMobileRotate = (delta: number) => {
+    setMobileInput(prev => ({ ...prev, rotation: delta }));
+    setTimeout(() => {
+      setMobileInput(prev => ({ ...prev, rotation: 0 }));
+    }, 16);
+  };
 
   return (
     <RoomContext.Provider value={roomState}>
@@ -1322,7 +1346,7 @@ function CanvasWrapper() {
         }}
       >
         <Suspense fallback={null}>
-          <Scene />
+          <Scene mobileInput={mobileInput} />
           <Environment preset="night" background={false} />
           <PointerLockControls 
             maxPolarAngle={Math.PI / 2}
@@ -1330,6 +1354,7 @@ function CanvasWrapper() {
           />
         </Suspense>
       </Canvas>
+      <MobileControls onMove={handleMobileMove} onRotate={handleMobileRotate} />
     </RoomContext.Provider>
   );
 }
