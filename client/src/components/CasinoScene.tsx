@@ -1375,14 +1375,14 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
   const [hovered, setHovered] = useState(false);
   
   // Load custom floor texture
-  const floorTexture = useTexture("/floor-texture.jpeg");
+  const floorTexture = useTexture("/textures/disco-floor.png");
   
   // Configure texture for proper tiling
   useEffect(() => {
     if (floorTexture) {
       floorTexture.wrapS = THREE.RepeatWrapping;
       floorTexture.wrapT = THREE.RepeatWrapping;
-      floorTexture.repeat.set(4, 4);
+      floorTexture.repeat.set(6, 6); // More repeats for colorful tiles
     }
   }, [floorTexture]);
 
@@ -1414,7 +1414,9 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
       <planeGeometry args={[roomSize, roomSize]} />
       <meshStandardMaterial
         map={floorTexture}
-        color={hovered ? "#ffffff" : "#dddddd"}
+        color={hovered ? "#ffffff" : "#ffffff"}
+        emissive="#ffffff"
+        emissiveIntensity={0.2}
         roughness={0.3}
         metalness={0.1}
       />
