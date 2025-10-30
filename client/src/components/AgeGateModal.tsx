@@ -40,14 +40,6 @@ export function AgeGateModal() {
         <div className="relative min-h-[700px] flex flex-col items-center justify-end pb-16 pt-80">
           {/* Age Verification Content - positioned to align with the box in the image */}
           <div className="max-w-md w-full px-8">
-            <h2 className="text-3xl font-bold text-yellow-300 mb-4 text-center drop-shadow-lg">
-              Age Verification
-            </h2>
-            
-            <p className="text-white text-center mb-6 text-lg leading-relaxed drop-shadow-md font-medium">
-              You must be 18 years or older to enter this casino gameroom.
-            </p>
-
             {/* Checkbox */}
             <div className="flex items-center space-x-3 mb-6 p-3 bg-black/40 rounded-xl border border-yellow-400/30 backdrop-blur-sm">
               <Checkbox 
