@@ -1324,6 +1324,16 @@ function Scene({ mobileInput }: { mobileInput?: { x: number; y: number; rotation
 function CanvasWrapper() {
   const roomState = useRoomState();
   const [mobileInput, setMobileInput] = useState({ x: 0, y: 0, rotation: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const handleMobileMove = (x: number, y: number) => {
     setMobileInput(prev => ({ ...prev, x, y }));
@@ -1361,10 +1371,12 @@ function CanvasWrapper() {
         <Suspense fallback={null}>
           <Scene mobileInput={mobileInput} />
           <Environment preset="night" background={false} />
-          <PointerLockControls 
-            maxPolarAngle={Math.PI / 2}
-            minPolarAngle={Math.PI / 2}
-          />
+          {!isMobile && (
+            <PointerLockControls 
+              maxPolarAngle={Math.PI / 2}
+              minPolarAngle={Math.PI / 2}
+            />
+          )}
         </Suspense>
       </Canvas>
       <MobileControls onMove={handleMobileMove} onRotate={handleMobileRotate} />
