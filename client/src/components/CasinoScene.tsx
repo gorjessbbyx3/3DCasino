@@ -187,25 +187,23 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                 />
               </mesh>
               
-              {/* Entrance background image - visible through doorway */}
-              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.2]}>
-                <planeGeometry args={[doorWidth, doorHeight]} />
+              {/* Entrance background image filling the doorway */}
+              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 - 0.01]}>
+                <planeGeometry args={[doorWidth - 0.1, doorHeight - 0.1]} />
                 <meshStandardMaterial 
                   map={useTexture("/fish-entrance.png")}
                   emissive="#ffffff"
-                  emissiveIntensity={0.3}
+                  emissiveIntensity={0.5}
                 />
               </mesh>
 
-              {/* Hallway entrance frame - glowing cyan */}
-              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
-                <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
+              {/* Hallway entrance frame - glowing cyan (thin outline) */}
+              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.05]}>
+                <boxGeometry args={[doorWidth + 0.2, doorHeight + 0.2, 0.05]} />
                 <meshStandardMaterial 
                   color="#06b6d4"
                   emissive="#06b6d4"
-                  emissiveIntensity={1.5}
-                  transparent={true}
-                  opacity={0.3}
+                  emissiveIntensity={2}
                 />
               </mesh>
               
