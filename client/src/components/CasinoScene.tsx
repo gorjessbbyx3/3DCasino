@@ -1056,8 +1056,6 @@ function SlotMachineRoom() {
           map={useTexture("/neon-room1.png")}
           roughness={0.3}
           metalness={0.2}
-          emissive="#ffffff"
-          emissiveIntensity={0.15}
         />
       </mesh>
 
@@ -1068,8 +1066,6 @@ function SlotMachineRoom() {
           map={useTexture("/neon-room2.png")}
           roughness={0.3}
           metalness={0.2}
-          emissive="#ffffff"
-          emissiveIntensity={0.15}
         />
       </mesh>
       
@@ -1414,9 +1410,7 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
       <planeGeometry args={[roomSize, roomSize]} />
       <meshStandardMaterial
         map={floorTexture}
-        color={hovered ? "#ffffff" : "#ffffff"}
-        emissive="#ffffff"
-        emissiveIntensity={0.2}
+        color="#ffffff"
         roughness={0.3}
         metalness={0.1}
       />
