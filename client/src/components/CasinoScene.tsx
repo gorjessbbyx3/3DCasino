@@ -290,25 +290,16 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                   metalness={0.4}
                 />
               </mesh>
-              {/* Right door frame - glowing cyan */}
-              <mesh position={[doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2 + 0.5]}>
-                <boxGeometry args={[doorWidth + 1, doorHeight + 1, 0.3]} />
+              
+              {/* Fish entrance image filling the right doorway */}
+              <mesh position={[doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2 + 0.01]}>
+                <planeGeometry args={[doorWidth, doorHeight]} />
                 <meshStandardMaterial 
-                  color="#06b6d4"
-                  emissive="#06b6d4"
-                  emissiveIntensity={1}
+                  map={useTexture("/fish-entrance.png")}
+                  emissive="#ffffff"
+                  emissiveIntensity={0.5}
                 />
               </mesh>
-              {/* Right door label */}
-              <Text
-                position={[doorWidth / 2 + 1, doorHeight + 1, -roomSize / 2 + 1]}
-                fontSize={0.8}
-                color="#06b6d4"
-                anchorX="center"
-                anchorY="middle"
-              >
-                🎣 FISH GAMES
-              </Text>
             </>
           )}
         </>
