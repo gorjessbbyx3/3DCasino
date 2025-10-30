@@ -154,36 +154,36 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
       {/* Back Wall with optional doors underneath sign */}
       {backLeftDoor || backRightDoor ? (
         <>
-          {/* Wall above doors with neon image */}
+          {/* Wall above doors */}
           <mesh position={[0, wallHeight - doorHeight / 2 - 0.5, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[roomSize, wallHeight - doorHeight - 1, 1]} />
             <meshStandardMaterial 
-              map={useTexture("/neon-walls.png")}
-              roughness={0.3}
-              metalness={0.1}
+              color="#0f0f1a"
+              roughness={0.6}
+              metalness={0.4}
             />
           </mesh>
           
-          {/* Center divider between doors with neon image */}
+          {/* Center divider between doors */}
           <mesh position={[0, doorHeight / 2, -roomSize / 2]} receiveShadow>
             <boxGeometry args={[2, doorHeight, 1]} />
             <meshStandardMaterial 
-              map={useTexture("/neon-walls.png")}
-              roughness={0.3}
-              metalness={0.1}
+              color="#0f0f1a"
+              roughness={0.6}
+              metalness={0.4}
             />
           </mesh>
           
           {/* Left hallway entrance - Fish Games */}
           {backLeftDoor && (
             <>
-              {/* Left wall section beside hallway with neon image */}
+              {/* Left wall section beside hallway */}
               <mesh position={[-roomSize / 2 + doorWidth / 2 + 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial 
-                  map={useTexture("/neon-walls.png")}
-                  roughness={0.3}
-                  metalness={0.1}
+                  color="#0f0f1a"
+                  roughness={0.6}
+                  metalness={0.4}
                 />
               </mesh>
               
@@ -219,43 +219,43 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
               
               {/* Hallway corridor extending back */}
               <group position={[-doorWidth / 2 - 1, 0, -roomSize / 2]}>
-                {/* Left hallway wall with neon image */}
+                {/* Left hallway wall */}
                 <mesh position={[-doorWidth / 2, doorHeight / 2, -4]} castShadow receiveShadow>
                   <boxGeometry args={[0.5, doorHeight, 8]} />
                   <meshStandardMaterial 
-                    map={useTexture("/fish-hallway.png")}
-                    roughness={0.2}
-                    metalness={0.1}
+                    color="#1a1a2e"
+                    roughness={0.5}
+                    metalness={0.3}
                   />
                 </mesh>
                 
-                {/* Right hallway wall with neon image */}
+                {/* Right hallway wall */}
                 <mesh position={[doorWidth / 2, doorHeight / 2, -4]} castShadow receiveShadow>
                   <boxGeometry args={[0.5, doorHeight, 8]} />
                   <meshStandardMaterial 
-                    map={useTexture("/fish-hallway.png")}
-                    roughness={0.2}
-                    metalness={0.1}
+                    color="#1a1a2e"
+                    roughness={0.5}
+                    metalness={0.3}
                   />
                 </mesh>
                 
-                {/* Hallway ceiling with neon image */}
+                {/* Hallway ceiling */}
                 <mesh position={[0, doorHeight, -4]} receiveShadow>
                   <boxGeometry args={[doorWidth, 0.3, 8]} />
                   <meshStandardMaterial 
-                    map={useTexture("/fish-hallway.png")}
-                    roughness={0.2}
-                    metalness={0.1}
+                    color="#0a0a1a"
+                    roughness={0.4}
+                    metalness={0.5}
                   />
                 </mesh>
                 
-                {/* Hallway floor with neon image */}
+                {/* Hallway floor */}
                 <mesh position={[0, 0, -4]} receiveShadow rotation={[-Math.PI / 2, 0, 0]}>
                   <planeGeometry args={[doorWidth, 8]} />
                   <meshStandardMaterial 
-                    map={useTexture("/fish-hallway.png")}
-                    roughness={0.2}
-                    metalness={0.1}
+                    color="#1a1a2e"
+                    roughness={0.3}
+                    metalness={0.6}
                   />
                 </mesh>
                 
@@ -301,13 +301,13 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           {/* Right door opening */}
           {backRightDoor && (
             <>
-              {/* Right wall section beside right door with neon image */}
+              {/* Right wall section beside right door */}
               <mesh position={[roomSize / 2 - doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2]} receiveShadow>
                 <boxGeometry args={[roomSize / 2 - doorWidth - 2, doorHeight, 1]} />
                 <meshStandardMaterial 
-                  map={useTexture("/neon-walls.png")}
-                  roughness={0.3}
-                  metalness={0.1}
+                  color="#0f0f1a"
+                  roughness={0.6}
+                  metalness={0.4}
                 />
               </mesh>
               {/* Right door frame - glowing cyan */}
@@ -339,23 +339,23 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
         </mesh>
       )}
 
-      {/* Left Wall - with neon archway */}
+      {/* Left Wall */}
       <mesh position={[-roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-walls.png")}
-          roughness={0.3}
-          metalness={0.1}
+          color="#0f0f1a"
+          roughness={0.6}
+          metalness={0.4}
         />
       </mesh>
 
-      {/* Right Wall - with neon archway */}
+      {/* Right Wall */}
       <mesh position={[roomSize / 2, wallHeight / 2, 0]} receiveShadow>
         <boxGeometry args={[1, wallHeight, roomSize]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-walls.png")}
-          roughness={0.3}
-          metalness={0.1}
+          color="#0f0f1a"
+          roughness={0.6}
+          metalness={0.4}
         />
       </mesh>
 
@@ -935,7 +935,6 @@ function CashierWindow() {
   const { setShowAuthModal, user } = useUser();
   const [hovered, setHovered] = useState(false);
   const texture = useLoader(THREE.TextureLoader, '/Copilot_20251028_193236_1761716033443.png');
-  const wallTexture = useTexture("/cashier-wall.png");
 
   const handleCashierClick = () => {
     if (!user) {
@@ -947,16 +946,6 @@ function CashierWindow() {
 
   return (
     <group position={[-10, 3, -16.5]}>
-      {/* Background wall panel with neon room image */}
-      <mesh position={[0, 2, -0.3]} receiveShadow>
-        <planeGeometry args={[8, 6]} />
-        <meshStandardMaterial 
-          map={wallTexture}
-          roughness={0.3}
-          metalness={0.1}
-        />
-      </mesh>
-
       {/* Cashier booth frame */}
       <mesh 
         position={[0, 2, 0]} 
