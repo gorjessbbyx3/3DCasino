@@ -207,8 +207,8 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                 );
               })}
 
-              {/* Entrance background image filling the doorway - positioned IN FRONT of lights */}
-              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 0.7]}>
+              {/* Entrance background image filling the doorway - positioned IN FRONT of everything */}
+              <mesh position={[-doorWidth / 2 - 1, doorHeight / 2, -roomSize / 2 + 1.5]}>
                 <planeGeometry args={[doorWidth - 0.2, doorHeight - 0.2]} />
                 <meshStandardMaterial 
                   map={useTexture("/fish-entrance.png")}
