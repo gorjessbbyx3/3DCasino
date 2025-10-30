@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 export function AgeGateModal() {
   const [showAgeGate, setShowAgeGate] = useState(false);
@@ -24,35 +25,31 @@ export function AgeGateModal() {
   return (
     <Dialog open={showAgeGate} onOpenChange={() => {}}>
       <DialogContent 
-        className="sm:max-w-2xl border-0 p-0 overflow-hidden"
+        className="sm:max-w-3xl border-0 p-0 overflow-hidden"
         style={{
-          backgroundImage: 'url(/age-gate-bg.png)',
+          backgroundImage: 'url(/age-gate-custom.jpeg)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
         hideClose
       >
-        <div className="relative min-h-[600px] flex flex-col items-center justify-center p-12 bg-black/40 backdrop-blur-sm">
-          {/* Title */}
-          <div className="text-center mb-12">
-            <h1 className="text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 mb-4 drop-shadow-2xl tracking-wide">
-              Jade Royale
-            </h1>
-            <div className="h-1 w-48 mx-auto bg-gradient-to-r from-transparent via-yellow-400 to-transparent rounded-full"></div>
-          </div>
-
-          {/* Age Verification Box */}
-          <div className="bg-black/60 backdrop-blur-md border-2 border-yellow-400/50 rounded-2xl p-10 shadow-2xl shadow-yellow-500/20 max-w-md w-full">
-            <h2 className="text-3xl font-bold text-yellow-300 mb-6 text-center">
+        <VisuallyHidden>
+          <DialogTitle>Age Verification</DialogTitle>
+        </VisuallyHidden>
+        
+        <div className="relative min-h-[700px] flex flex-col items-center justify-end pb-16 pt-80">
+          {/* Age Verification Content - positioned to align with the box in the image */}
+          <div className="max-w-md w-full px-8">
+            <h2 className="text-3xl font-bold text-yellow-300 mb-4 text-center drop-shadow-lg">
               Age Verification
             </h2>
             
-            <p className="text-gray-200 text-center mb-8 text-lg leading-relaxed">
+            <p className="text-white text-center mb-6 text-lg leading-relaxed drop-shadow-md font-medium">
               You must be 18 years or older to enter this casino gameroom.
             </p>
 
             {/* Checkbox */}
-            <div className="flex items-center space-x-4 mb-8 p-4 bg-white/5 rounded-xl border border-white/10">
+            <div className="flex items-center space-x-3 mb-6 p-3 bg-black/40 rounded-xl border border-yellow-400/30 backdrop-blur-sm">
               <Checkbox 
                 id="age-confirm" 
                 checked={isChecked}
@@ -61,7 +58,7 @@ export function AgeGateModal() {
               />
               <label 
                 htmlFor="age-confirm" 
-                className="text-white text-lg cursor-pointer select-none"
+                className="text-white text-base cursor-pointer select-none drop-shadow-md font-medium"
               >
                 I confirm that I am 18 years or older
               </label>
@@ -71,23 +68,17 @@ export function AgeGateModal() {
             <Button
               onClick={handleEnter}
               disabled={!isChecked}
-              className="w-full py-6 text-xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 hover:from-yellow-600 hover:via-yellow-500 hover:to-yellow-600 text-black shadow-lg shadow-yellow-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 disabled:hover:scale-100"
+              className="w-full py-6 text-xl font-bold bg-gradient-to-r from-yellow-500 via-yellow-400 to-yellow-500 hover:from-yellow-600 hover:via-yellow-500 hover:to-yellow-600 text-black shadow-lg shadow-yellow-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-105 disabled:hover:scale-100"
             >
               ENTER GAMEROOM
             </Button>
 
             {/* Legal Text */}
-            <p className="text-gray-400 text-xs text-center mt-6 leading-relaxed">
+            <p className="text-white/80 text-xs text-center mt-4 leading-relaxed drop-shadow-md">
               By entering, you agree that you meet the legal age requirement
               and accept our terms of service.
             </p>
           </div>
-
-          {/* Decorative Elements */}
-          <div className="absolute top-4 left-4 w-16 h-16 border-t-2 border-l-2 border-yellow-400/30 rounded-tl-2xl"></div>
-          <div className="absolute top-4 right-4 w-16 h-16 border-t-2 border-r-2 border-yellow-400/30 rounded-tr-2xl"></div>
-          <div className="absolute bottom-4 left-4 w-16 h-16 border-b-2 border-l-2 border-yellow-400/30 rounded-bl-2xl"></div>
-          <div className="absolute bottom-4 right-4 w-16 h-16 border-b-2 border-r-2 border-yellow-400/30 rounded-br-2xl"></div>
         </div>
       </DialogContent>
     </Dialog>
