@@ -1,8 +1,7 @@
 import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
-import { Canvas, useFrame, useThree, useLoader } from "@react-three/fiber";
-import { Environment, Text, PointerLockControls, useTexture } from "@react-three/drei";
+import { Canvas, useFrame, useThree, useLoader, ThreeEvent } from "@react-three/fiber";
+import { Environment, Text, OrbitControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
-import { MobileControls } from "./MobileControls";
 import { useUser } from "@/lib/stores/useUser";
 
 const openCashierModal = () => {
@@ -27,32 +26,6 @@ const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom:
   setCurrentRoom: () => {}
 });
 
-// White Glass Floor
-function CasinoFloor({ roomSize = 35 }: { roomSize?: number }) {
-  return (
-    <group>
-      {/* White Glass Floor */}
-      <mesh 
-        rotation={[-Math.PI / 2, 0, 0]} 
-        position={[0, 0, 0]} 
-        receiveShadow
-        castShadow
-      >
-        <planeGeometry args={[roomSize, roomSize]} />
-        <meshPhysicalMaterial
-          color="#ffffff"
-          roughness={0.05}
-          metalness={0.1}
-          transparent={true}
-          opacity={0.9}
-          reflectivity={0.8}
-          clearcoat={1.0}
-          clearcoatRoughness={0.1}
-        />
-      </mesh>
-    </group>
-  );
-}
 
 // Room walls with doorways
 function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false, backSign = "" }: { 
@@ -1091,102 +1064,12 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
   return null;
 }
 
-// First-person WASD movement controls with room transitions
-function FirstPersonControls({ mobileInput }: { mobileInput?: { x: number; y: number; rotation: number } }) {
+// Street View-style controls - click to teleport, drag to look around
+function StreetViewControls() {
   const { camera } = useThree();
   const { currentRoom, setCurrentRoom } = React.useContext(RoomContext);
-  const [moveForward, setMoveForward] = useState(false);
-  const [moveBackward, setMoveBackward] = useState(false);
-  const [moveLeft, setMoveLeft] = useState(false);
-  const [moveRight, setMoveRight] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      switch (event.code) {
-        case 'KeyW':
-        case 'ArrowUp':
-          setMoveForward(true);
-          break;
-        case 'KeyS':
-        case 'ArrowDown':
-          setMoveBackward(true);
-          break;
-        case 'KeyA':
-        case 'ArrowLeft':
-          setMoveLeft(true);
-          break;
-        case 'KeyD':
-        case 'ArrowRight':
-          setMoveRight(true);
-          break;
-      }
-    };
-
-    const handleKeyUp = (event: KeyboardEvent) => {
-      switch (event.code) {
-        case 'KeyW':
-        case 'ArrowUp':
-          setMoveForward(false);
-          break;
-        case 'KeyS':
-        case 'ArrowDown':
-          setMoveBackward(false);
-          break;
-        case 'KeyA':
-        case 'ArrowLeft':
-          setMoveLeft(false);
-          break;
-        case 'KeyD':
-        case 'ArrowRight':
-          setMoveRight(false);
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('keyup', handleKeyUp);
-
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
-
-  useFrame((_, delta) => {
-    const speed = 15 * delta;
-    const direction = new THREE.Vector3();
-
-    camera.getWorldDirection(direction);
-    direction.y = 0;
-    direction.normalize();
-
-    const right = new THREE.Vector3();
-    right.crossVectors(direction, camera.up).normalize();
-
-    if (moveForward) {
-      camera.position.addScaledVector(direction, speed);
-    }
-    if (moveBackward) {
-      camera.position.addScaledVector(direction, -speed);
-    }
-    if (moveLeft) {
-      camera.position.addScaledVector(right, -speed);
-    }
-    if (moveRight) {
-      camera.position.addScaledVector(right, speed);
-    }
-
-    // Mobile joystick input
-    if (mobileInput && (mobileInput.x !== 0 || mobileInput.y !== 0)) {
-      camera.position.addScaledVector(right, mobileInput.x * speed);
-      camera.position.addScaledVector(direction, -mobileInput.y * speed);
-    }
-
-    // Mobile rotation input
-    if (mobileInput && mobileInput.rotation !== 0) {
-      camera.rotation.y += mobileInput.rotation;
-    }
-
+  useFrame(() => {
     // Room transitions based on position - door on back wall
     if (currentRoom === 'slots') {
       // Back door to fish games (under sign)
@@ -1205,20 +1088,66 @@ function FirstPersonControls({ mobileInput }: { mobileInput?: { x: number; y: nu
     // Keep camera within current room bounds
     camera.position.x = Math.max(-16.5, Math.min(16.5, camera.position.x));
     camera.position.z = Math.max(-16.5, Math.min(16.5, camera.position.z));
-    camera.position.y = 1.7; // Eye level
+    camera.position.y = 1.7; // Always keep at eye level
   });
 
   return null;
 }
 
-function Scene({ mobileInput }: { mobileInput?: { x: number; y: number; rotation: number } }) {
+// Clickable floor for teleportation
+function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
+  const { camera } = useThree();
+  const meshRef = useRef<THREE.Mesh>(null);
+  const [hovered, setHovered] = useState(false);
+
+  const handleClick = (event: ThreeEvent<MouseEvent>) => {
+    event.stopPropagation();
+    const point = event.point;
+    // Teleport camera to clicked position, keeping eye level
+    camera.position.set(point.x, 1.7, point.z);
+  };
+
+  return (
+    <mesh
+      ref={meshRef}
+      rotation={[-Math.PI / 2, 0, 0]}
+      position={[0, 0, 0]}
+      receiveShadow
+      castShadow
+      onClick={handleClick}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        setHovered(true);
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        setHovered(false);
+        document.body.style.cursor = "auto";
+      }}
+    >
+      <planeGeometry args={[roomSize, roomSize]} />
+      <meshPhysicalMaterial
+        color={hovered ? "#f0f0f0" : "#ffffff"}
+        roughness={0.05}
+        metalness={0.1}
+        transparent={true}
+        opacity={0.9}
+        reflectivity={0.8}
+        clearcoat={1.0}
+        clearcoatRoughness={0.1}
+      />
+    </mesh>
+  );
+}
+
+function Scene() {
   const { currentRoom } = React.useContext(RoomContext);
 
   return (
     <>
-      <FirstPersonControls mobileInput={mobileInput} />
+      <StreetViewControls />
       <RoomLighting roomType={currentRoom} />
-      <CasinoFloor />
+      <ClickableFloor />
       
       {currentRoom === 'slots' && (
         <>
@@ -1239,28 +1168,6 @@ function Scene({ mobileInput }: { mobileInput?: { x: number; y: number; rotation
 
 function CanvasWrapper() {
   const roomState = useRoomState();
-  const [mobileInput, setMobileInput] = useState({ x: 0, y: 0, rotation: 0 });
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent));
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
-  const handleMobileMove = (x: number, y: number) => {
-    setMobileInput(prev => ({ ...prev, x, y }));
-  };
-
-  const handleMobileRotate = (delta: number) => {
-    setMobileInput(prev => ({ ...prev, rotation: delta }));
-    setTimeout(() => {
-      setMobileInput(prev => ({ ...prev, rotation: 0 }));
-    }, 16);
-  };
 
   return (
     <RoomContext.Provider value={roomState}>
@@ -1285,17 +1192,18 @@ function CanvasWrapper() {
         }}
       >
         <Suspense fallback={null}>
-          <Scene mobileInput={mobileInput} />
+          <Scene />
           <Environment preset="night" background={false} />
-          {!isMobile && (
-            <PointerLockControls 
-              maxPolarAngle={Math.PI / 2}
-              minPolarAngle={Math.PI / 2}
-            />
-          )}
+          <OrbitControls
+            enablePan={false}
+            enableZoom={false}
+            minPolarAngle={Math.PI / 2}
+            maxPolarAngle={Math.PI / 2}
+            rotateSpeed={0.5}
+            target={[0, 1.7, 0]}
+          />
         </Suspense>
       </Canvas>
-      <MobileControls onMove={handleMobileMove} onRotate={handleMobileRotate} />
     </RoomContext.Provider>
   );
 }

@@ -125,9 +125,7 @@ function App() {
             <div className="absolute inset-0 w-3 h-3 bg-emerald-400/50 rounded-full animate-sparkle"></div>
           </div>
           <p className="text-gradient-casino text-lg font-semibold tracking-wide animate-text-glow">
-            {/iPhone|iPad|iPod|Android/i.test(navigator.userAgent) 
-              ? "👆 Touch left side to move • Touch right side to look • Tap games to play" 
-              : "⌨️ WASD to move • 🖱️ Mouse to look • 🎮 Click on games to play"}
+            🖱️ Click floor to move • Drag to look around • 🎮 Click games to play
           </p>
           <div className="relative">
             <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
