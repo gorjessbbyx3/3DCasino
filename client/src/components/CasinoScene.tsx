@@ -27,7 +27,7 @@ const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom:
 });
 
 
-// Clickable entrance component
+// Clickable entrance component (to fish games)
 function ClickableEntrance({ position, doorWidth, doorHeight }: { 
   position: [number, number, number]; 
   doorWidth: number;
@@ -63,11 +63,52 @@ function ClickableEntrance({ position, doorWidth, doorHeight }: {
   );
 }
 
+// Clickable exit door component (back to lobby)
+function ClickableDoorExit({ position, doorWidth, doorHeight }: { 
+  position: [number, number, number]; 
+  doorWidth: number;
+  doorHeight: number;
+}) {
+  const { camera } = useThree();
+  const { setCurrentRoom } = React.useContext(RoomContext);
+  
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+    // Return to slots lobby
+    setCurrentRoom('slots');
+    camera.position.set(0, 2.4, -14);
+  };
+  
+  return (
+    <mesh 
+      position={position}
+      onClick={handleClick}
+      onPointerOver={(e) => {
+        e.stopPropagation();
+        document.body.style.cursor = "pointer";
+      }}
+      onPointerOut={() => {
+        document.body.style.cursor = "auto";
+      }}
+    >
+      <planeGeometry args={[doorWidth, doorHeight]} />
+      <meshStandardMaterial 
+        color="#1a1a2e"
+        emissive="#06b6d4"
+        emissiveIntensity={0.3}
+        transparent
+        opacity={0.7}
+      />
+    </mesh>
+  );
+}
+
 // Room walls with doorways
-function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false, backSign = "" }: { 
+function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false, frontDoor = false, backSign = "" }: { 
   roomSize?: number; 
   backLeftDoor?: boolean; 
   backRightDoor?: boolean;
+  frontDoor?: boolean;
   backSign?: string;
 }) {
   const wallHeight = 16;
@@ -167,16 +208,45 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
                 </mesh>
               </group>
               
-              {/* Hallway entrance label */}
-              <Text
-                position={[-doorWidth / 2 - 1, doorHeight + 1, -roomSize / 2 + 1]}
-                fontSize={0.8}
-                color="#06b6d4"
-                anchorX="center"
-                anchorY="middle"
-              >
-                🎣 FISH GAMES
-              </Text>
+              {/* Hallway entrance sign - large and prominent */}
+              <group position={[-doorWidth / 2 - 1, doorHeight + 1.5, -roomSize / 2 + 1]}>
+                <Text
+                  fontSize={1.5}
+                  color="#06b6d4"
+                  anchorX="center"
+                  anchorY="middle"
+                  outlineWidth={0.15}
+                  outlineColor="#ffffff"
+                  letterSpacing={0.05}
+                >
+                  🎣 FISH GAMES 🎣
+                </Text>
+                
+                {/* Glow effect for the sign */}
+                <pointLight position={[0, 0, 0.5]} color="#06b6d4" intensity={20} distance={8} />
+                
+                {/* Decorative border lights */}
+                {[-3, -1.5, 0, 1.5, 3].map((x, i) => (
+                  <mesh key={i} position={[x, 0.8, 0]}>
+                    <sphereGeometry args={[0.08, 8, 8]} />
+                    <meshStandardMaterial
+                      color="#06b6d4"
+                      emissive="#06b6d4"
+                      emissiveIntensity={3}
+                    />
+                  </mesh>
+                ))}
+                {[-3, -1.5, 0, 1.5, 3].map((x, i) => (
+                  <mesh key={`bottom-${i}`} position={[x, -0.8, 0]}>
+                    <sphereGeometry args={[0.08, 8, 8]} />
+                    <meshStandardMaterial
+                      color="#06b6d4"
+                      emissive="#06b6d4"
+                      emissiveIntensity={3}
+                    />
+                  </mesh>
+                ))}
+              </group>
             </>
           )}
           
@@ -217,6 +287,69 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
           metalness={0.4}
         />
       </mesh>
+
+      {/* Front Wall with optional door back to lobby */}
+      {frontDoor ? (
+        <>
+          {/* Wall above door */}
+          <mesh position={[0, wallHeight - doorHeight / 2 - 0.5, roomSize / 2]} receiveShadow>
+            <boxGeometry args={[roomSize, wallHeight - doorHeight - 1, 1]} />
+            <meshStandardMaterial 
+              color="#0f0f1a"
+              roughness={0.6}
+              metalness={0.4}
+            />
+          </mesh>
+          
+          {/* Wall left of door */}
+          <mesh position={[-roomSize / 2 + (roomSize - doorWidth) / 4, doorHeight / 2, roomSize / 2]} receiveShadow>
+            <boxGeometry args={[(roomSize - doorWidth) / 2, doorHeight, 1]} />
+            <meshStandardMaterial 
+              color="#0f0f1a"
+              roughness={0.6}
+              metalness={0.4}
+            />
+          </mesh>
+          
+          {/* Wall right of door */}
+          <mesh position={[roomSize / 2 - (roomSize - doorWidth) / 4, doorHeight / 2, roomSize / 2]} receiveShadow>
+            <boxGeometry args={[(roomSize - doorWidth) / 2, doorHeight, 1]} />
+            <meshStandardMaterial 
+              color="#0f0f1a"
+              roughness={0.6}
+              metalness={0.4}
+            />
+          </mesh>
+          
+          {/* Clickable door to return to lobby */}
+          <ClickableDoorExit position={[0, doorHeight / 2, roomSize / 2 - 0.01]} doorWidth={doorWidth} doorHeight={doorHeight} />
+          
+          {/* EXIT text on door */}
+          <Text
+            position={[0, doorHeight / 2 + 1, roomSize / 2 - 0.5]}
+            fontSize={1.2}
+            color="#00ff00"
+            anchorX="center"
+            anchorY="middle"
+            outlineWidth={0.1}
+            outlineColor="#ffffff"
+          >
+            ← EXIT TO LOBBY
+          </Text>
+          
+          {/* Door lighting */}
+          <pointLight position={[0, doorHeight, roomSize / 2 - 2]} color="#06b6d4" intensity={15} distance={10} />
+        </>
+      ) : (
+        <mesh position={[0, wallHeight / 2, roomSize / 2]} receiveShadow>
+          <boxGeometry args={[roomSize, wallHeight, 1]} />
+          <meshStandardMaterial 
+            color="#0f0f1a"
+            roughness={0.6}
+            metalness={0.4}
+          />
+        </mesh>
+      )}
 
       {/* Back wall sign - Broadway/Hollywood style */}
       {backSign && (
@@ -1100,30 +1233,99 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
   return null;
 }
 
-// Street View-style controls - click to teleport, drag to look around
-function StreetViewControls() {
-  const { camera } = useThree();
+// Keyboard movement controls with smooth walking
+function KeyboardMovementControls() {
+  const { camera, controls } = useThree();
   const { currentRoom, setCurrentRoom } = React.useContext(RoomContext);
+  const keysPressed = useRef<{ [key: string]: boolean }>({});
 
-  useFrame(() => {
-    // Room transitions based on position - door on back wall
-    if (currentRoom === 'slots') {
-      // Back door to fish games (under sign)
-      if (camera.position.z < -16) {
-        setCurrentRoom('fish');
-        camera.position.set(0, 2.4, 14);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(key)) {
+        keysPressed.current[key] = true;
+        console.log('Key pressed:', key);
       }
-    } else if (currentRoom === 'fish') {
-      // Exit back to slots from back wall
-      if (camera.position.z < -16) {
-        setCurrentRoom('slots');
-        camera.position.set(0, 2.4, 14);
+    };
+
+    const handleKeyUp = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      keysPressed.current[key] = false;
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keyup', handleKeyUp);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  useFrame((state, delta) => {
+    const moveSpeed = 8 * delta; // Units per second
+    const forward = new THREE.Vector3();
+    const right = new THREE.Vector3();
+
+    // Get camera direction vectors
+    camera.getWorldDirection(forward);
+    forward.y = 0; // Keep movement on horizontal plane
+    forward.normalize();
+    
+    right.crossVectors(forward, new THREE.Vector3(0, 1, 0));
+    right.normalize();
+
+    // Track if we moved
+    let moved = false;
+
+    // WASD and Arrow key movement
+    if (keysPressed.current['w'] || keysPressed.current['arrowup']) {
+      camera.position.addScaledVector(forward, moveSpeed);
+      moved = true;
+    }
+    if (keysPressed.current['s'] || keysPressed.current['arrowdown']) {
+      camera.position.addScaledVector(forward, -moveSpeed);
+      moved = true;
+    }
+    if (keysPressed.current['a'] || keysPressed.current['arrowleft']) {
+      camera.position.addScaledVector(right, -moveSpeed);
+      moved = true;
+    }
+    if (keysPressed.current['d'] || keysPressed.current['arrowright']) {
+      camera.position.addScaledVector(right, moveSpeed);
+      moved = true;
+    }
+
+    // Update OrbitControls target to follow camera position
+    if (moved && controls) {
+      const orbitControls = controls as any;
+      if (orbitControls.target) {
+        // Keep the target in front of the camera at eye level
+        const targetPosition = camera.position.clone();
+        targetPosition.addScaledVector(forward, 5);
+        targetPosition.y = 2.4;
+        orbitControls.target.copy(targetPosition);
       }
     }
 
-    // Keep camera within current room bounds
+    // Room transitions based on position - door on back wall
+    if (currentRoom === 'slots') {
+      // Back door to fish games (under sign)
+      if (camera.position.z < -17) {
+        setCurrentRoom('fish');
+        camera.position.set(0, 2.4, 15);
+      }
+    } else if (currentRoom === 'fish') {
+      // Front door back to slots lobby
+      if (camera.position.z > 17) {
+        setCurrentRoom('slots');
+        camera.position.set(0, 2.4, -15);
+      }
+    }
+
+    // Keep camera within current room bounds (allow a bit of buffer for transitions)
     camera.position.x = Math.max(-16.5, Math.min(16.5, camera.position.x));
-    camera.position.z = Math.max(-16.5, Math.min(16.5, camera.position.z));
+    camera.position.z = Math.max(-18, Math.min(18, camera.position.z));
     camera.position.y = 2.4; // Always keep at eye level with slot machine screens
   });
 
@@ -1189,7 +1391,7 @@ function Scene() {
 
   return (
     <>
-      <StreetViewControls />
+      <KeyboardMovementControls />
       <RoomLighting roomType={currentRoom} />
       <ClickableFloor />
       
@@ -1202,7 +1404,7 @@ function Scene() {
       
       {currentRoom === 'fish' && (
         <>
-          <RoomWalls backLeftDoor={true} backSign="🎣 FISH GAMES 🎣" />
+          <RoomWalls backSign="🎣 FISH GAMES 🎣" frontDoor={true} />
           <FishGameRoom />
         </>
       )}
