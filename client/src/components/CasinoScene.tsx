@@ -340,7 +340,7 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
 
       {/* Back wall sign - Image display */}
       {backSign && backSign === "JADE ROYALE" ? (
-        <mesh position={[0, 12, -roomSize / 2 + 0.6]}>
+        <mesh position={[0, 16, -roomSize / 2 + 0.6]}>
           <planeGeometry args={[28, 12]} />
           <meshStandardMaterial 
             map={useTexture("/textures/jade-royale-sign.jpeg")}
