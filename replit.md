@@ -6,6 +6,16 @@ Jade Royale Casino is a 3D online casino platform featuring an immersive 3D casi
 
 The platform provides user authentication, virtual currency management, slot machine games, and comprehensive player statistics tracking. Users navigate a visually rich 3D casino environment where they can interact with different game stations.
 
+## Recent Changes
+
+**October 31, 2025 - Frontend Optimization & Cleanup:**
+- Removed 38 unused UI components (kept only 6 essential: button, checkbox, dialog, input, label, sonner)
+- Removed 3 unused files: pages/not-found.tsx, components/MobileControls.tsx, hooks/use-is-mobile.tsx
+- Removed ~163 unused npm packages (from 613 → 454 total packages)
+- Fixed sonner.tsx to remove next-themes dependency, hardcoded dark theme
+- Fixed TypeScript errors in CashierModal.tsx and server/routes.ts
+- Total optimization: ~159 package reduction for improved load times and bundle size
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
@@ -18,10 +28,9 @@ Preferred communication style: Simple, everyday language.
 - React 18 with TypeScript for UI components
 - Three.js via @react-three/fiber for 3D rendering
 - @react-three/drei for 3D utilities and controls
-- @react-three/postprocessing for visual effects
 - Vite as build tool and development server
 - TailwindCSS for styling
-- Radix UI components for accessible UI primitives
+- Minimal Radix UI components (5 primitives: checkbox, dialog, label, slot, visually-hidden)
 
 **State Management:**
 - Zustand for client-side state management

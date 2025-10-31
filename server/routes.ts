@@ -131,6 +131,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
+      if (!user) {
+        throw new Error("Failed to create demo user");
+      }
+
       (req.session as any).userId = user.id;
 
       res.json({

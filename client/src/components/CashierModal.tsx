@@ -249,7 +249,7 @@ export function CashierModal() {
                     size="sm"
                     onClick={() => setAmount(amt.toString())}
                     className="border-purple-500/30 text-purple-400 hover:bg-purple-500/20"
-                    disabled={user && user.balance < amt}
+                    disabled={!!(user && user.balance < amt)}
                   >
                     ${amt}
                   </Button>
