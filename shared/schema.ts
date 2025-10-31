@@ -7,6 +7,8 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   balance: integer("balance").notNull().default(1000),
+  isDemo: boolean("is_demo").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const transactions = pgTable("transactions", {
@@ -38,6 +40,11 @@ export const spinHistory = pgTable("spin_history", {
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
+});
+
+export const upgradeDemoSchema = z.object({
+  username: z.string().min(3).max(20),
+  password: z.string().min(6),
 });
 
 export const insertTransactionSchema = createInsertSchema(transactions).omit({

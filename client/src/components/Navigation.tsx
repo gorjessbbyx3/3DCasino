@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { useUser } from "@/lib/stores/useUser";
-import { Coins, LogOut, Lock, User, BarChart3 } from "lucide-react";
+import { Coins, LogOut, Lock, User, BarChart3, Crown } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { openStats } from "./StatsModal";
 import { openDailyCheckIn } from "./DailyCheckInModal";
 import { openSpinWheel } from "./SpinWheelModal";
+import { UpgradeAccountModal } from "./UpgradeAccountModal";
 
 export function Navigation() {
   const { user, setUser } = useUser();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -121,6 +123,18 @@ export function Navigation() {
 
                   {/* Menu Items */}
                   <div className="py-1">
+                    {user.isDemo && (
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setShowUpgradeModal(true);
+                        }}
+                        className="w-full px-4 py-2 text-left text-yellow-400 hover:bg-yellow-400/20 flex items-center gap-2 transition-colors font-semibold"
+                      >
+                        <Crown className="w-4 h-4" />
+                        Upgrade Account
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setShowUserMenu(false);
@@ -207,6 +221,12 @@ export function Navigation() {
           </div>
         </div>
       )}
+
+      {/* Upgrade Account Modal */}
+      <UpgradeAccountModal 
+        open={showUpgradeModal} 
+        onOpenChange={setShowUpgradeModal} 
+      />
     </div>
   );
 }

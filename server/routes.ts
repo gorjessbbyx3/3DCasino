@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import session from "express-session";
-import { insertUserSchema } from "@shared/schema";
+import { insertUserSchema, upgradeDemoSchema } from "@shared/schema";
 import bcrypt from "bcryptjs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -40,6 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: user.id,
         username: user.username,
         balance: user.balance,
+        isDemo: user.isDemo || false,
       });
     } catch (error) {
       res.status(400).json({ message: "Invalid registration data" });
@@ -66,6 +67,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         id: user.id,
         username: user.username,
         balance: user.balance,
+        isDemo: user.isDemo || false,
       });
     } catch (error) {
       res.status(400).json({ message: "Login failed" });
@@ -96,7 +98,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       id: user.id,
       username: user.username,
       balance: user.balance,
+      isDemo: user.isDemo,
     });
+  });
+
+  app.post("/api/auth/demo", async (req, res) => {
+    try {
+      let user;
+      let attempts = 0;
+      const maxAttempts = 10;
+
+      while (attempts < maxAttempts) {
+        try {
+          const randomId = Date.now() + Math.floor(Math.random() * 100000);
+          const demoUsername = `Demo_Player_${randomId}`;
+          const demoPassword = await bcrypt.hash(`demo_${randomId}`, 10);
+
+          user = await storage.createDemoUser({
+            username: demoUsername,
+            password: demoPassword,
+          });
+          break;
+        } catch (error: any) {
+          if (error.message && error.message.includes("unique")) {
+            attempts++;
+            if (attempts >= maxAttempts) {
+              throw new Error("Could not create unique demo username");
+            }
+            continue;
+          }
+          throw error;
+        }
+      }
+
+      (req.session as any).userId = user.id;
+
+      res.json({
+        id: user.id,
+        username: user.username,
+        balance: user.balance,
+        isDemo: user.isDemo,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to create demo account" });
+    }
+  });
+
+  app.post("/api/auth/upgrade-demo", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const data = upgradeDemoSchema.parse(req.body);
+      
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (!user.isDemo) {
+        return res.status(400).json({ message: "Only demo accounts can be upgraded" });
+      }
+
+      const trimmedUsername = data.username.trim();
+      if (trimmedUsername.length < 3 || trimmedUsername.length > 20) {
+        return res.status(400).json({ message: "Username must be 3-20 characters" });
+      }
+
+      if (!/^[a-zA-Z0-9_]+$/.test(trimmedUsername)) {
+        return res.status(400).json({ message: "Username can only contain letters, numbers, and underscores" });
+      }
+
+      if (data.password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
+
+      const existingUser = await storage.getUserByUsername(trimmedUsername);
+      if (existingUser) {
+        return res.status(400).json({ message: "Username already exists" });
+      }
+
+      const hashedPassword = await bcrypt.hash(data.password, 12);
+      const upgradedUser = await storage.upgradeDemoUser(userId, trimmedUsername, hashedPassword);
+
+      res.json({
+        id: upgradedUser.id,
+        username: upgradedUser.username,
+        balance: upgradedUser.balance,
+        isDemo: upgradedUser.isDemo,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to upgrade account" });
+    }
   });
 
   app.post("/api/cashier/deposit", async (req, res) => {

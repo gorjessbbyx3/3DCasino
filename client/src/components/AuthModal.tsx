@@ -44,6 +44,23 @@ export function AuthModal() {
     }
   };
 
+  const handleDemoMode = async () => {
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await apiRequest("POST", "/api/auth/demo", {});
+      const user = await res.json();
+      
+      setUser(user);
+      setShowAuthModal(false);
+    } catch (err: any) {
+      setError(err.message || "Failed to create demo account");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
       <DialogContent className="sm:max-w-md bg-gradient-to-br from-gray-900 to-black border-2 border-emerald-500/30">
@@ -95,6 +112,24 @@ export function AuthModal() {
             className="w-full bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-500 hover:to-emerald-600 text-white font-semibold py-3 shadow-lg shadow-emerald-500/20"
           >
             {loading ? "Please wait..." : isLogin ? "Sign In" : "Create Account"}
+          </Button>
+
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-700"></div>
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-gray-900 px-2 text-gray-400">Or</span>
+            </div>
+          </div>
+
+          <Button
+            type="button"
+            onClick={handleDemoMode}
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-500 hover:to-orange-500 text-white font-semibold py-3 shadow-lg shadow-yellow-500/20"
+          >
+            {loading ? "Please wait..." : "Try Demo Mode (2000 Free Credits)"}
           </Button>
 
           <div className="text-center mt-4">

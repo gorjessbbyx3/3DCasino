@@ -4,6 +4,7 @@ export interface User {
   id: number;
   username: string;
   balance: number;
+  isDemo?: boolean;
 }
 
 interface UserState {
