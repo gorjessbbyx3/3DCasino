@@ -29,15 +29,18 @@ export function AuthModal() {
     setLoading(true);
 
     try {
+      console.log('[Frontend] Auth submit:', isLogin ? 'login' : 'register', { username, passwordLength: password.length });
       const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
       const res = await apiRequest("POST", endpoint, { username, password });
       const user = await res.json();
+      console.log('[Frontend] Auth success:', user);
       
       setUser(user);
       setShowAuthModal(false);
       setUsername("");
       setPassword("");
     } catch (err: any) {
+      console.error('[Frontend] Auth error:', err);
       setError(err.message || "Authentication failed");
     } finally {
       setLoading(false);
@@ -49,12 +52,16 @@ export function AuthModal() {
     setLoading(true);
 
     try {
+      console.log('[Frontend] Demo mode request starting');
       const res = await apiRequest("POST", "/api/auth/demo", {});
+      console.log('[Frontend] Demo mode response received:', res.status);
       const user = await res.json();
+      console.log('[Frontend] Demo user data:', user);
       
       setUser(user);
       setShowAuthModal(false);
     } catch (err: any) {
+      console.error('[Frontend] Demo mode error:', err);
       setError(err.message || "Failed to create demo account");
     } finally {
       setLoading(false);

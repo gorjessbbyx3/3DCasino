@@ -551,10 +551,10 @@ function VideoMaterial({ videoUrl }: { videoUrl: string }) {
   });
 
   if (!videoTexture) {
-    return <meshStandardMaterial color="#000000" emissive="#06b6d4" emissiveIntensity={2} />;
+    return <meshStandardMaterial color="#000000" emissive="#06b6d4" emissiveIntensity={2} side={THREE.DoubleSide} />;
   }
 
-  return <meshStandardMaterial map={videoTexture} toneMapped={false} />;
+  return <meshStandardMaterial map={videoTexture} toneMapped={false} side={THREE.DoubleSide} />;
 }
 
 // Game object component

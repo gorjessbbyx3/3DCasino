@@ -42,7 +42,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         balance: user.balance,
         isDemo: user.isDemo || false,
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error('[AUTH] Registration failed');
       res.status(400).json({ message: "Invalid registration data" });
     }
   });
@@ -136,6 +137,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       (req.session as any).userId = user.id;
+      console.log('[AUTH] Demo account created successfully');
 
       res.json({
         id: user.id,
@@ -144,7 +146,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isDemo: user.isDemo,
       });
     } catch (error: any) {
-      res.status(400).json({ message: error.message || "Failed to create demo account" });
+      console.error('[AUTH] Demo account creation failed');
+      res.status(400).json({ message: "Failed to create demo account" });
     }
   });
 
