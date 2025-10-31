@@ -18,7 +18,7 @@ The platform provides user authentication, virtual currency management, slot mac
 - Removed black frame/bezel from slot machine video displays for clean edge-to-edge video
 - Enhanced floor texture visibility with emissive lighting and increased tile repetition (12x12)
 - Updated Olympus game branding image (slot-olympus-new.jpeg) on machines #1 and #7
-- Added 9 slot machines with placeholder images (alternating between two designs) on machines #3-6 and #9-13
+- Added 9 slot machines with placeholder images (6 unique designs cycling) on machines #3-6 and #9-13
 - Repositioned game name images from y=3.5 to y=4.5 for better separation from video screens
 
 **October 31, 2025 - Backend APIs & Fish Table Redesign:**
