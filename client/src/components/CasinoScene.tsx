@@ -1247,9 +1247,9 @@ function SlotMachineRoom() {
             undefined
           }
           gameNameImage={
-            i === 0 ? "/slot-olympus.png" :
+            i === 0 ? "/slot-olympus-new.jpeg" :
             i === 1 ? "/slot-bass.webp" :
-            i === 6 ? "/slot-olympus.png" :
+            i === 6 ? "/slot-olympus-new.jpeg" :
             i === 7 ? "/slot-bass.webp" :
             undefined
           }
