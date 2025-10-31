@@ -1176,7 +1176,7 @@ function SlotMachineRoom() {
           label={`Slot Machine ${i + 1}`}
           glowColor="#a855f7"
           machineColor={machineColors[i]}
-          videoUrl={i === 0 ? "/videos/olympus-promo.mp4" : i === 1 ? "/videos/bigger-bass.mp4" : i === 2 ? "/videos/slot-game-1.mp4" : i === 3 ? "/videos/slot-game-2.mp4" : undefined}
+          videoUrl={undefined}
           gameNameImage={i === 0 ? "/slot-olympus.png" : i === 1 ? "/slot-bass.webp" : undefined}
         />
       ))}
@@ -1193,7 +1193,7 @@ function SlotMachineRoom() {
           label={`Slot Machine ${i + 5}`}
           glowColor="#a855f7"
           machineColor={machineColors[i + 4]}
-          videoUrl={i % 2 === 0 ? "/videos/slot-game-1.mp4" : "/videos/slot-game-2.mp4"}
+          videoUrl={i === 2 ? "/videos/slot-game-1.mp4" : undefined}
         />
       ))}
 
@@ -1209,7 +1209,7 @@ function SlotMachineRoom() {
           label={`Slot Machine ${i + 10}`}
           glowColor="#a855f7"
           machineColor={machineColors[(i + 9) % machineColors.length]}
-          videoUrl={i % 2 === 0 ? "/videos/slot-game-2.mp4" : "/videos/slot-game-1.mp4"}
+          videoUrl={undefined}
         />
       ))}
     </group>
@@ -1387,10 +1387,10 @@ function KeyboardMovementControls() {
     // Adjust camera FOV for mobile devices to zoom in
     const isMobile = window.innerWidth < 768;
     if (isMobile && camera instanceof THREE.PerspectiveCamera) {
-      camera.fov = 60;
+      camera.fov = 40;
       camera.updateProjectionMatrix();
     } else if (camera instanceof THREE.PerspectiveCamera) {
-      camera.fov = 75;
+      camera.fov = 50;
       camera.updateProjectionMatrix();
     }
 
@@ -1543,7 +1543,7 @@ function CanvasWrapper() {
       shadows
       camera={{ 
         position: [0, 2.4, 14], 
-        fov: 75,
+        fov: 50,
         near: 0.1,
         far: 1000
       }}
