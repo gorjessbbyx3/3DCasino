@@ -1188,19 +1188,71 @@ function SlotMachineRoom() {
   );
 }
 
+// Holographic Video Display Component
+function HolographicVideo({ position, videoUrl }: { position: [number, number, number]; videoUrl: string }) {
+  return (
+    <group position={position}>
+      {/* Holographic frame with glowing edges */}
+      <mesh position={[0, 0, 0]}>
+        <boxGeometry args={[4.5, 0.05, 3]} />
+        <meshStandardMaterial 
+          color="#06b6d4" 
+          emissive="#06b6d4" 
+          emissiveIntensity={2}
+          transparent
+          opacity={0.8}
+        />
+      </mesh>
+      
+      {/* Video plane floating above table */}
+      <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[4.2, 2.8]} />
+        <VideoMaterial videoUrl={videoUrl} />
+      </mesh>
+      
+      {/* Holographic glow effect */}
+      <pointLight position={[0, 0, 0]} color="#06b6d4" intensity={3} distance={8} />
+      
+      {/* Corner markers for holographic effect */}
+      {[
+        [-2.1, 0, -1.4], [2.1, 0, -1.4], 
+        [-2.1, 0, 1.4], [2.1, 0, 1.4]
+      ].map((pos, i) => (
+        <mesh key={i} position={pos as [number, number, number]}>
+          <sphereGeometry args={[0.1, 16, 16]} />
+          <meshStandardMaterial 
+            color="#06b6d4" 
+            emissive="#06b6d4" 
+            emissiveIntensity={3}
+          />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 // Fish Game Room
 function FishGameRoom() {
   const { setShowAuthModal, user } = useUser();
+  const { selectedFishTable, setSelectedFishTable } = useRoom();
   const roomSize = 35;
-  const wallHeight = 16;
 
-  const handleGameClick = () => {
+  const handleTableClick = (tableNumber: number) => {
     if (!user) {
       setShowAuthModal(true);
     } else {
-      window.location.href = "/coming-soon";
+      // Toggle selection - if clicking the same table, deselect it
+      setSelectedFishTable(selectedFishTable === tableNumber ? null : tableNumber);
     }
   };
+
+  // Fish tables arranged in a single horizontal line
+  const tableSpacing = 5.5;
+  const tablePositions = Array.from({ length: 6 }, (_, i) => ({
+    x: (i - 2.5) * tableSpacing,
+    z: -10,
+    tableNumber: i + 1
+  }));
 
   return (
     <group>
@@ -1247,23 +1299,34 @@ function FishGameRoom() {
         />
       </mesh>
       
-      {/* 6 Rectangular Fish Tables in two rows with video screens */}
-      {Array.from({ length: 6 }, (_, i) => (
+      {/* 6 Fish Tables in a single horizontal line - NO video on table surface */}
+      {tablePositions.map(({ x, z, tableNumber }) => (
         <GameObject
-          key={`fish-${i}`}
-          position={[
-            ((i % 3) - 1) * 8,
-            0,
-            Math.floor(i / 3) === 0 ? -6 : 6
-          ]}
+          key={`fish-${tableNumber}`}
+          position={[x, 0, z]}
           modelPath="fish-table"
           scale={1.8}
-          onClick={handleGameClick}
-          label={`Fish Table ${i + 1}`}
-          glowColor="#06b6d4"
-          videoUrl={i % 2 === 0 ? "/videos/fish-game-1.mp4" : "/videos/fish-game-2.mp4"}
+          onClick={() => handleTableClick(tableNumber)}
+          label={`Fish Table ${tableNumber}`}
+          glowColor={selectedFishTable === tableNumber ? "#00ff00" : "#06b6d4"}
         />
       ))}
+      
+      {/* Holographic video display above selected table */}
+      {selectedFishTable !== null && (
+        <HolographicVideo 
+          position={[
+            tablePositions[selectedFishTable - 1].x,
+            3.5, // Height above table
+            tablePositions[selectedFishTable - 1].z
+          ]}
+          videoUrl={
+            selectedFishTable % 2 === 0 
+              ? "/videos/fish-game-2.mp4" 
+              : "/videos/fish-game-1.mp4"
+          }
+        />
+      )}
     </group>
   );
 }
@@ -1326,7 +1389,7 @@ function RoomLighting({ roomType }: { roomType: 'slots' | 'fish' }) {
 // Keyboard movement controls with smooth walking
 function KeyboardMovementControls() {
   const { camera, controls } = useThree();
-  const { currentRoom, setCurrentRoom } = useRoom();
+  const { currentRoom, setCurrentRoom, setSelectedFishTable } = useRoom();
   const keysPressed = useRef<{ [key: string]: boolean }>({});
 
   useEffect(() => {
@@ -1419,6 +1482,7 @@ function KeyboardMovementControls() {
       // Front door back to slots lobby
       if (camera.position.z > 17) {
         setCurrentRoom('slots');
+        setSelectedFishTable(null); // Clear fish table selection when leaving
         camera.position.set(0, 2.4, -15);
       }
     }
