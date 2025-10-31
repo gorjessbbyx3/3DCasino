@@ -1,4 +1,4 @@
-import { users, transactions, dailyCheckIns, type User, type InsertUser, type Transaction, type InsertTransaction, type DailyCheckIn, type InsertDailyCheckIn } from "@shared/schema";
+import { users, transactions, dailyCheckIns, spinHistory, type User, type InsertUser, type Transaction, type InsertTransaction, type DailyCheckIn, type InsertDailyCheckIn, type SpinHistory, type InsertSpinHistory } from "@shared/schema";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import { eq, desc, and } from "drizzle-orm";
@@ -38,6 +38,8 @@ export interface IStorage {
   getUserStats(userId: number): Promise<GameStats>;
   getWeeklyCheckIns(userId: number, weekStartDate: string): Promise<DailyCheckIn[]>;
   claimDailyCheckIn(userId: number, dayOfWeek: number, weekStartDate: string, reward: number): Promise<{ user: User; checkIn: DailyCheckIn }>;
+  getLastSpin(userId: number): Promise<SpinHistory | undefined>;
+  spinWheel(userId: number, prize: number): Promise<{ user: User; spin: SpinHistory }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -282,6 +284,46 @@ export class DatabaseStorage implements IStorage {
 
     const updatedUser = await this.getUser(userId);
     return { user: updatedUser!, checkIn: checkInResult[0] };
+  }
+
+  async getLastSpin(userId: number): Promise<SpinHistory | undefined> {
+    const result = await db
+      .select()
+      .from(spinHistory)
+      .where(eq(spinHistory.userId, userId))
+      .orderBy(desc(spinHistory.spunAt))
+      .limit(1);
+    return result[0];
+  }
+
+  async spinWheel(userId: number, prize: number): Promise<{ user: User; spin: SpinHistory }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const newBalance = user.balance + prize;
+    await this.updateUserBalance(userId, newBalance);
+
+    await this.createTransaction({
+      userId,
+      type: "deposit",
+      amount: prize,
+      balanceBefore: user.balance,
+      balanceAfter: newBalance,
+      description: "Spin Wheel Prize",
+    });
+
+    const spinResult = await db
+      .insert(spinHistory)
+      .values({
+        userId,
+        prize,
+      })
+      .returning();
+
+    const updatedUser = await this.getUser(userId);
+    return { user: updatedUser!, spin: spinResult[0] };
   }
 }
 

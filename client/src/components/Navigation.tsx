@@ -4,6 +4,7 @@ import { Coins, LogOut, Lock, User, BarChart3 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { openStats } from "./StatsModal";
 import { openDailyCheckIn } from "./DailyCheckInModal";
+import { openSpinWheel } from "./SpinWheelModal";
 
 export function Navigation() {
   const { user, setUser } = useUser();
@@ -25,8 +26,7 @@ export function Navigation() {
   };
 
   const handleFreeCredits = () => {
-    // TODO: Implement free credits logic
-    console.log("Free credits clicked");
+    openSpinWheel();
   };
 
   if (!user) return null;

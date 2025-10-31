@@ -287,6 +287,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/spin-wheel/status", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const lastSpin = await storage.getLastSpin(userId);
+      
+      if (!lastSpin) {
+        return res.json({
+          canSpin: true,
+          timeUntilNextSpin: 0,
+        });
+      }
+
+      const now = new Date();
+      const lastSpinTime = new Date(lastSpin.spunAt);
+      const twelveHoursInMs = 12 * 60 * 60 * 1000;
+      const timeSinceLastSpin = now.getTime() - lastSpinTime.getTime();
+      const timeUntilNextSpin = Math.max(0, twelveHoursInMs - timeSinceLastSpin);
+
+      res.json({
+        canSpin: timeUntilNextSpin === 0,
+        timeUntilNextSpin,
+        lastSpin: lastSpin,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch spin status" });
+    }
+  });
+
+  app.post("/api/spin-wheel/spin", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const lastSpin = await storage.getLastSpin(userId);
+      
+      if (lastSpin) {
+        const now = new Date();
+        const lastSpinTime = new Date(lastSpin.spunAt);
+        const twelveHoursInMs = 12 * 60 * 60 * 1000;
+        const timeSinceLastSpin = now.getTime() - lastSpinTime.getTime();
+        
+        if (timeSinceLastSpin < twelveHoursInMs) {
+          return res.status(400).json({ message: "You must wait 12 hours between spins" });
+        }
+      }
+
+      const prizes = [250, 300, 350, 400, 450, 500, 550, 600, 650, 700];
+      const randomPrize = prizes[Math.floor(Math.random() * prizes.length)];
+
+      const result = await storage.spinWheel(userId, randomPrize);
+      
+      res.json({
+        user: {
+          id: result.user.id,
+          username: result.user.username,
+          balance: result.user.balance,
+        },
+        prize: randomPrize,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to spin wheel" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

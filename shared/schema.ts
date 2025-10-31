@@ -28,6 +28,13 @@ export const dailyCheckIns = pgTable("daily_check_ins", {
   claimedAt: timestamp("claimed_at").notNull().defaultNow(),
 });
 
+export const spinHistory = pgTable("spin_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  prize: integer("prize").notNull(),
+  spunAt: timestamp("spun_at").notNull().defaultNow(),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -43,9 +50,16 @@ export const insertDailyCheckInSchema = createInsertSchema(dailyCheckIns).omit({
   claimedAt: true,
 });
 
+export const insertSpinHistorySchema = createInsertSchema(spinHistory).omit({
+  id: true,
+  spunAt: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type Transaction = typeof transactions.$inferSelect;
 export type InsertTransaction = z.infer<typeof insertTransactionSchema>;
 export type DailyCheckIn = typeof dailyCheckIns.$inferSelect;
 export type InsertDailyCheckIn = z.infer<typeof insertDailyCheckInSchema>;
+export type SpinHistory = typeof spinHistory.$inferSelect;
+export type InsertSpinHistory = z.infer<typeof insertSpinHistorySchema>;
