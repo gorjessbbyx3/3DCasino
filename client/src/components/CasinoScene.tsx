@@ -622,8 +622,8 @@ function GameObject({
   const createPlaceholder = () => {
     if (modelPath.includes('slot-machine')) {
       // 9:16 aspect ratio for vertical screen
-      const screenWidth = 0.9;
-      const screenHeight = screenWidth * (16 / 9); // 1.6
+      const screenWidth = 1.4;
+      const screenHeight = screenWidth * (16 / 9); // 2.49
       
       return (
         <group>
@@ -1021,20 +1021,7 @@ function GameObject({
         </>
       )}
 
-      {/* Label */}
-      {hovered && label && (
-        <Text
-          position={[0, modelPath.includes('slot-machine') ? 5 : 4, 0]}
-          fontSize={0.8}
-          color="#ffffff"
-          anchorX="center"
-          anchorY="middle"
-          outlineColor="#000000"
-          outlineWidth={0.02}
-        >
-          {label}
-        </Text>
-      )}
+      {/* Label - removed to show only glow effect */}
     </group>
   );
 }
@@ -1176,7 +1163,7 @@ function SlotMachineRoom() {
           label={`Slot Machine ${i + 1}`}
           glowColor="#a855f7"
           machineColor={machineColors[i]}
-          videoUrl={undefined}
+          videoUrl={i === 0 ? "/videos/olympus-promo.mp4" : i === 1 ? "/videos/bigger-bass.mp4" : undefined}
           gameNameImage={i === 0 ? "/slot-olympus.png" : i === 1 ? "/slot-bass.webp" : undefined}
         />
       ))}
@@ -1193,7 +1180,8 @@ function SlotMachineRoom() {
           label={`Slot Machine ${i + 5}`}
           glowColor="#a855f7"
           machineColor={machineColors[i + 4]}
-          videoUrl={i === 2 ? "/videos/slot-game-1.mp4" : undefined}
+          videoUrl={i === 2 ? "/videos/slot-game-1.mp4" : i === 3 ? "/videos/slot-game-2.mp4" : undefined}
+          gameNameImage={i === 2 ? "/slot-olympus.png" : i === 3 ? "/slot-bass.webp" : undefined}
         />
       ))}
 
