@@ -24,9 +24,11 @@ The platform provides user authentication, virtual currency management, slot mac
 **October 31, 2025 - Backend APIs & Fish Table Redesign:**
 - Implemented complete backend for daily check-in feature (7-day calendar with $300-$900 rewards)
 - Implemented complete backend for spin wheel feature (12-hour cooldown, 250-700 credit prizes)
-- Redesigned fish table layout: 6 tables arranged in single horizontal line (instead of 2x3 grid)
+- Fish table layout: 6 tables in 2x3 grid formation with aerial camera view (Y=18)
 - Added holographic video display system: videos float 3.5 units above selected table with glowing frame
-- Fish tables now toggle selection with green glow when selected, cyan when unselected
+- Fish tables toggle selection with green glow when selected, cyan when unselected
+- Aerial camera view in fish room (top-down perspective) for optimal video visibility
+- Dynamic OrbitControls adjust polar angles based on room (horizontal for slots, angled-down for fish)
 - Expanded camera bounds to -25/+25 on X-axis for full slot machine access (13 machines, 3.8 unit spacing)
 - Added selectedFishTable state to useRoom store for tracking active fish table
 

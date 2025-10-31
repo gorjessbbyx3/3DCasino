@@ -1329,13 +1329,15 @@ function FishGameRoom() {
     }
   };
 
-  // Fish tables arranged in a single horizontal line
-  const tableSpacing = 5.5;
-  const tablePositions = Array.from({ length: 6 }, (_, i) => ({
-    x: (i - 2.5) * tableSpacing,
-    z: -10,
-    tableNumber: i + 1
-  }));
+  // Fish tables arranged in 2x3 grid
+  const tablePositions = [
+    { x: -6, z: -8, tableNumber: 1 },
+    { x: 0, z: -8, tableNumber: 2 },
+    { x: 6, z: -8, tableNumber: 3 },
+    { x: -6, z: 0, tableNumber: 4 },
+    { x: 0, z: 0, tableNumber: 5 },
+    { x: 6, z: 0, tableNumber: 6 },
+  ];
 
   return (
     <group>
@@ -1559,7 +1561,7 @@ function KeyboardMovementControls() {
       // Back door to fish games (under sign)
       if (camera.position.z < -17) {
         setCurrentRoom('fish');
-        camera.position.set(0, 3.5, 15);
+        camera.position.set(0, 18, 5); // Aerial view for fish room
       }
     } else if (currentRoom === 'fish') {
       // Front door back to slots lobby
@@ -1570,10 +1572,16 @@ function KeyboardMovementControls() {
       }
     }
 
-    // Keep camera within current room bounds (expanded for slot machine access)
-    camera.position.x = Math.max(-25, Math.min(25, camera.position.x));
-    camera.position.z = Math.max(-18, Math.min(18, camera.position.z));
-    camera.position.y = 3.5; // Elevated view to see more of the casino
+    // Keep camera within current room bounds
+    if (currentRoom === 'slots') {
+      camera.position.x = Math.max(-25, Math.min(25, camera.position.x));
+      camera.position.z = Math.max(-18, Math.min(18, camera.position.z));
+      camera.position.y = 3.5; // Elevated view to see more of the casino
+    } else if (currentRoom === 'fish') {
+      camera.position.x = Math.max(-15, Math.min(15, camera.position.x));
+      camera.position.z = Math.max(-15, Math.min(15, camera.position.z));
+      camera.position.y = 18; // Aerial view for fish room
+    }
   });
 
   return null;
@@ -1635,6 +1643,39 @@ function ClickableFloor({ roomSize = 55 }: { roomSize?: number }) {
   );
 }
 
+// Dynamic OrbitControls based on room
+function DynamicOrbitControls() {
+  const { currentRoom } = useRoom();
+  const controlsRef = useRef<any>();
+  
+  useEffect(() => {
+    if (controlsRef.current) {
+      if (currentRoom === 'fish') {
+        // Aerial view for fish room - allow looking down
+        controlsRef.current.minPolarAngle = 0.1;
+        controlsRef.current.maxPolarAngle = Math.PI / 3;
+        controlsRef.current.target.set(0, 0, 0);
+      } else {
+        // Normal view for slots room - horizontal
+        controlsRef.current.minPolarAngle = Math.PI / 2;
+        controlsRef.current.maxPolarAngle = Math.PI / 2;
+        controlsRef.current.target.set(0, 3.5, 0);
+      }
+      controlsRef.current.update();
+    }
+  }, [currentRoom]);
+
+  return (
+    <OrbitControls
+      ref={controlsRef}
+      enablePan={false}
+      enableZoom={false}
+      rotateSpeed={0.5}
+      target={[0, 3.5, 0]}
+    />
+  );
+}
+
 function Scene() {
   const { currentRoom } = useRoom();
 
@@ -1643,6 +1684,7 @@ function Scene() {
       <KeyboardMovementControls />
       <RoomLighting roomType={currentRoom} />
       <ClickableFloor />
+      <DynamicOrbitControls />
       
       {currentRoom === 'slots' && (
         <>
@@ -1714,14 +1756,6 @@ function CanvasWrapper() {
       <Suspense fallback={null}>
         <Scene />
         <Environment preset="night" background={false} />
-        <OrbitControls
-          enablePan={false}
-          enableZoom={false}
-          minPolarAngle={Math.PI / 2}
-          maxPolarAngle={Math.PI / 2}
-          rotateSpeed={0.5}
-          target={[0, 3.5, 0]}
-        />
       </Suspense>
     </Canvas>
   );
