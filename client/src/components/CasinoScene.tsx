@@ -494,6 +494,76 @@ function StarryCeiling({ roomSize, height }: { roomSize: number; height: number 
   );
 }
 
+// Video material component for fish tables
+function VideoMaterial({ videoUrl }: { videoUrl: string }) {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [videoTexture, setVideoTexture] = useState<THREE.VideoTexture | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  useEffect(() => {
+    const video = document.createElement('video');
+    video.src = videoUrl;
+    video.loop = true;
+    video.muted = true;
+    video.playsInline = true;
+    video.crossOrigin = 'anonymous';
+    video.autoplay = true;
+    
+    // Try to play when data is loaded
+    const handleLoadedData = () => {
+      video.play()
+        .then(() => setIsPlaying(true))
+        .catch(() => {
+          // Autoplay blocked - try again on any user interaction
+          const playOnInteraction = () => {
+            video.play()
+              .then(() => {
+                setIsPlaying(true);
+                document.removeEventListener('click', playOnInteraction);
+                document.removeEventListener('touchstart', playOnInteraction);
+                document.removeEventListener('keydown', playOnInteraction);
+              })
+              .catch(() => {});
+          };
+          
+          document.addEventListener('click', playOnInteraction, { once: true });
+          document.addEventListener('touchstart', playOnInteraction, { once: true });
+          document.addEventListener('keydown', playOnInteraction, { once: true });
+        });
+    };
+
+    video.addEventListener('loadeddata', handleLoadedData);
+
+    const texture = new THREE.VideoTexture(video);
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.format = THREE.RGBAFormat;
+    
+    videoRef.current = video;
+    setVideoTexture(texture);
+
+    return () => {
+      video.pause();
+      video.removeEventListener('loadeddata', handleLoadedData);
+      video.src = '';
+      texture.dispose();
+    };
+  }, [videoUrl]);
+
+  // Update texture each frame when playing
+  useFrame(() => {
+    if (videoTexture && videoRef.current && isPlaying) {
+      videoTexture.needsUpdate = true;
+    }
+  });
+
+  if (!videoTexture) {
+    return <meshStandardMaterial color="#000000" emissive="#06b6d4" emissiveIntensity={2} />;
+  }
+
+  return <meshStandardMaterial map={videoTexture} toneMapped={false} />;
+}
+
 // Game object component
 interface GameObjectProps {
   position: [number, number, number];
@@ -505,6 +575,7 @@ interface GameObjectProps {
   glowColor?: string;
   machineColor?: string;
   screenImage?: string;
+  videoUrl?: string;
 }
 
 function GameObject({
@@ -516,7 +587,8 @@ function GameObject({
   label,
   glowColor = "#10b981",
   machineColor = "#6366f1",
-  screenImage
+  screenImage,
+  videoUrl
 }: GameObjectProps) {
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
@@ -738,14 +810,18 @@ function GameObject({
               roughness={0.3}
             />
           </mesh>
-          {/* Screen - cyan glow rectangular */}
-          <mesh position={[0, 0.86, 0]} castShadow>
-            <boxGeometry args={[3.8, 0.05, 2.3]} />
-            <meshStandardMaterial 
-              color="#000000" 
-              emissive="#06b6d4" 
-              emissiveIntensity={2}
-            />
+          {/* Screen - video or cyan glow rectangular */}
+          <mesh position={[0, 0.86, 0]} castShadow rotation={[-Math.PI / 2, 0, 0]}>
+            <planeGeometry args={[3.8, 2.3]} />
+            {videoUrl ? (
+              <VideoMaterial videoUrl={videoUrl} />
+            ) : (
+              <meshStandardMaterial 
+                color="#000000" 
+                emissive="#06b6d4" 
+                emissiveIntensity={2}
+              />
+            )}
           </mesh>
           {/* Rectangular base */}
           <mesh position={[0, 0.4, 0]} castShadow receiveShadow>
@@ -1200,7 +1276,7 @@ function FishGameRoom() {
         />
       </mesh>
       
-      {/* 6 Rectangular Fish Tables in two rows */}
+      {/* 6 Rectangular Fish Tables in two rows with video screens */}
       {Array.from({ length: 6 }, (_, i) => (
         <GameObject
           key={`fish-${i}`}
@@ -1214,6 +1290,7 @@ function FishGameRoom() {
           onClick={handleGameClick}
           label={`Fish Table ${i + 1}`}
           glowColor="#06b6d4"
+          videoUrl={i % 2 === 0 ? "/videos/fish-game-1.mp4" : "/videos/fish-game-2.mp4"}
         />
       ))}
     </group>
