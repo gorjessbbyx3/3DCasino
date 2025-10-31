@@ -1113,6 +1113,24 @@ function SlotMachineRoom() {
     "#a855f7"  // Violet
   ];
 
+  // Calculate curved line positions for all 13 slot machines
+  const totalMachines = 13;
+  const machineSpacing = 3.2;
+  const curveAmount = 3; // How much the ends curve forward
+  
+  const slotPositions = Array.from({ length: totalMachines }, (_, i) => {
+    // Center the machines around x=0
+    const xPos = (i - (totalMachines - 1) / 2) * machineSpacing;
+    
+    // Calculate curve: parabolic curve where outer machines move forward
+    // Normalized position from -1 (leftmost) to 1 (rightmost)
+    const normalizedPos = (i - (totalMachines - 1) / 2) / ((totalMachines - 1) / 2);
+    // Parabolic curve: z = -14 + curve * (normalized^2)
+    const zPos = -14 + curveAmount * Math.pow(normalizedPos, 2);
+    
+    return { x: xPos, z: zPos };
+  });
+
   return (
     <group>
       {/* Starry Ceiling */}
@@ -1138,53 +1156,32 @@ function SlotMachineRoom() {
         />
       </mesh>
 
-      {/* U-SHAPED LAYOUT - Left wall: 4 machines facing right */}
-      {Array.from({ length: 4 }, (_, i) => (
+      {/* STRAIGHT LINE WITH CURVED ENDS - All 13 machines facing forward */}
+      {slotPositions.map((pos, i) => (
         <GameObject
-          key={`slot-left-${i}`}
-          position={[-14, 0, 12 - (i * 6)]}
-          rotation={[0, Math.PI / 2, 0]}
+          key={`slot-${i}`}
+          position={[pos.x, 0, pos.z]}
+          rotation={[0, 0, 0]}
           modelPath="slot-machine"
           scale={2.5}
           onClick={() => handleSlotMachineClick(i + 1)}
           label={`Slot Machine ${i + 1}`}
           glowColor="#a855f7"
-          machineColor={machineColors[i]}
-          videoUrl={i === 0 ? "/videos/olympus-promo.mp4" : i === 1 ? "/videos/bigger-bass.mp4" : undefined}
-          gameNameImage={i === 0 ? "/slot-olympus.png" : i === 1 ? "/slot-bass.webp" : undefined}
-        />
-      ))}
-
-      {/* U-SHAPED LAYOUT - Back wall: 5 machines facing forward */}
-      {Array.from({ length: 5 }, (_, i) => (
-        <GameObject
-          key={`slot-back-${i}`}
-          position={[-10 + (i * 5), 0, -14]}
-          rotation={[0, 0, 0]}
-          modelPath="slot-machine"
-          scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 5)}
-          label={`Slot Machine ${i + 5}`}
-          glowColor="#a855f7"
-          machineColor={machineColors[i + 4]}
-          videoUrl={i === 2 ? "/videos/slot-game-1.mp4" : i === 3 ? "/videos/slot-game-2.mp4" : undefined}
-          gameNameImage={i === 2 ? "/slot-olympus.png" : i === 3 ? "/slot-bass.webp" : undefined}
-        />
-      ))}
-
-      {/* U-SHAPED LAYOUT - Right wall: 4 machines facing left */}
-      {Array.from({ length: 4 }, (_, i) => (
-        <GameObject
-          key={`slot-right-${i}`}
-          position={[14, 0, -6 + (i * 6)]}
-          rotation={[0, -Math.PI / 2, 0]}
-          modelPath="slot-machine"
-          scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 10)}
-          label={`Slot Machine ${i + 10}`}
-          glowColor="#a855f7"
-          machineColor={machineColors[(i + 9) % machineColors.length]}
-          videoUrl={undefined}
+          machineColor={machineColors[i % machineColors.length]}
+          videoUrl={
+            i === 0 ? "/videos/olympus-promo.mp4" :
+            i === 1 ? "/videos/bigger-bass.mp4" :
+            i === 6 ? "/videos/slot-game-1.mp4" :
+            i === 7 ? "/videos/slot-game-2.mp4" :
+            undefined
+          }
+          gameNameImage={
+            i === 0 ? "/slot-olympus.png" :
+            i === 1 ? "/slot-bass.webp" :
+            i === 6 ? "/slot-olympus.png" :
+            i === 7 ? "/slot-bass.webp" :
+            undefined
+          }
         />
       ))}
     </group>
@@ -1287,13 +1284,14 @@ function RoomLighting({ roomType }: { roomType: 'slots' | 'fish' }) {
           shadow-mapSize-height={2048}
           color="#ffffff"
         />
-        {/* Purple lights for slot machines */}
-        <pointLight position={[-14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[-14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[-14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[14, 4, -10]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[14, 4, 0]} intensity={3} color="#a855f7" distance={12} />
-        <pointLight position={[14, 4, 10]} intensity={3} color="#a855f7" distance={12} />
+        {/* Purple lights for slot machines along the line */}
+        <pointLight position={[-15, 4, -12]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-10, 4, -14]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[-5, 4, -14]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[0, 4, -14]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[5, 4, -14]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[10, 4, -14]} intensity={3} color="#a855f7" distance={12} />
+        <pointLight position={[15, 4, -12]} intensity={3} color="#a855f7" distance={12} />
         {/* Cyan light for cashier window on back wall */}
         <pointLight position={[-10, 4, -16]} intensity={5} color="#00ffff" distance={12} />
       </>
