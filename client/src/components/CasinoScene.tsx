@@ -353,13 +353,13 @@ function RoomWalls({ roomSize = 35, backLeftDoor = false, backRightDoor = false,
 
       {/* Back wall sign - Image display */}
       {backSign && backSign === "JADE ROYALE" ? (
-        <mesh position={[0, wallHeight - 4, -roomSize / 2 + 0.6]}>
-          <planeGeometry args={[20, 8]} />
+        <mesh position={[0, 12, -roomSize / 2 + 0.6]}>
+          <planeGeometry args={[28, 12]} />
           <meshStandardMaterial 
             map={useTexture("/textures/jade-royale-sign.jpeg")}
             transparent={false}
           />
-          <pointLight position={[0, 0, 1]} color="#ffffff" intensity={30} distance={15} />
+          <pointLight position={[0, 0, 1]} color="#ffffff" intensity={40} distance={20} />
         </mesh>
       ) : backSign ? (
         <group position={[0, wallHeight - 2, -roomSize / 2 + 0.6]}>
@@ -1138,21 +1138,21 @@ function SlotMachineRoom() {
       {/* Starry Ceiling */}
       <StarryCeiling roomSize={35} height={22} />
       
-      {/* Left Wall with neon room image - positioned slightly inside to show in front of black wall */}
+      {/* Left Wall with new texture - positioned slightly inside to show in front of black wall */}
       <mesh position={[-17.0, 11, 0]} receiveShadow castShadow>
         <boxGeometry args={[0.1, 22, 35]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-room1.png")}
+          map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
           metalness={0.2}
         />
       </mesh>
 
-      {/* Right Wall with neon room image - positioned slightly inside to show in front of black wall */}
+      {/* Right Wall with new texture - positioned slightly inside to show in front of black wall */}
       <mesh position={[17.0, 11, 0]} receiveShadow castShadow>
         <boxGeometry args={[0.1, 22, 35]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-room2.png")}
+          map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
           metalness={0.2}
         />
@@ -1230,41 +1230,41 @@ function FishGameRoom() {
       {/* Starry Ceiling */}
       <StarryCeiling roomSize={35} height={22} />
       
-      {/* Left Wall with neon room image */}
+      {/* Left Wall with new texture */}
       <mesh position={[-roomSize / 2, 11, 0]} receiveShadow>
         <boxGeometry args={[1, 22, roomSize]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-room1.png")}
+          map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
           metalness={0.2}
         />
       </mesh>
 
-      {/* Right Wall with neon room image */}
+      {/* Right Wall with new texture */}
       <mesh position={[roomSize / 2, 11, 0]} receiveShadow>
         <boxGeometry args={[1, 22, roomSize]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-room2.png")}
+          map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
           metalness={0.2}
         />
       </mesh>
 
-      {/* Front Wall with neon room image */}
+      {/* Front Wall with new texture */}
       <mesh position={[0, 11, roomSize / 2]} receiveShadow>
         <boxGeometry args={[roomSize, 22, 1]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-room3.png")}
+          map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
           metalness={0.2}
         />
       </mesh>
 
-      {/* Back Wall with neon room image */}
+      {/* Back Wall with new texture */}
       <mesh position={[0, 11, -roomSize / 2]} receiveShadow>
         <boxGeometry args={[roomSize, 22, 1]} />
         <meshStandardMaterial 
-          map={useTexture("/neon-room4.png")}
+          map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
           metalness={0.2}
         />
