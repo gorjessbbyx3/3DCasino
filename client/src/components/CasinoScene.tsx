@@ -1511,6 +1511,33 @@ function Scene() {
 }
 
 function CanvasWrapper() {
+  const [webglError, setWebglError] = useState(false);
+
+  useEffect(() => {
+    // Check for WebGL support
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) {
+      setWebglError(true);
+    }
+  }, []);
+
+  if (webglError) {
+    return (
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 via-blue-900 to-black">
+        <div className="text-center p-8 max-w-md">
+          <h1 className="text-4xl font-bold text-white mb-4">🎰 Jade Royale Casino</h1>
+          <p className="text-xl text-purple-200 mb-4">
+            Your browser doesn't support WebGL, which is required for our 3D casino experience.
+          </p>
+          <p className="text-sm text-purple-300">
+            Please try using a modern browser like Chrome, Firefox, Safari, or Edge.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <Canvas
       shadows
@@ -1523,7 +1550,8 @@ function CanvasWrapper() {
       gl={{ 
         antialias: true, 
         alpha: false,
-        powerPreference: "high-performance"
+        powerPreference: "high-performance",
+        failIfMajorPerformanceCaveat: false
       }}
       onCreated={({ gl, scene }) => {
         gl.shadowMap.enabled = true;
