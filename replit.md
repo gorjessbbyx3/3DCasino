@@ -45,6 +45,10 @@ Preferred communication style: Simple, everyday language.
   - `SlotMachineModal`: Slot machine gameplay interface
   - `StatsModal`: Player statistics and analytics
 - `CasinoScene`: Main 3D environment renderer
+- `Navigation`: Transparent top navigation bar (authenticated users only)
+  - Left side: Daily Check-in and Free Credits clickable icons
+  - Right side: Credit balance display and user avatar dropdown menu
+  - Dropdown menu: View Stats, Change Password, Logout
 - `AudioManager`: Background music and SFX playback
 - Custom event system for cross-component communication
 
