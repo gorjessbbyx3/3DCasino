@@ -576,6 +576,7 @@ interface GameObjectProps {
   machineColor?: string;
   screenImage?: string;
   videoUrl?: string;
+  gameNameImage?: string;
 }
 
 function GameObject({
@@ -588,11 +589,17 @@ function GameObject({
   glowColor = "#10b981",
   machineColor = "#6366f1",
   screenImage,
-  videoUrl
+  videoUrl,
+  gameNameImage
 }: GameObjectProps) {
   const meshRef = useRef<THREE.Group>(null);
   const [hovered, setHovered] = useState(false);
   const coinsRef = useRef<Array<{ offset: [number, number, number], speed: number, angle: number, startTime: number }>>([]);
+  
+  // Load textures unconditionally (React hooks rule)
+  // Use a placeholder image if none provided to avoid conditional hook calls
+  const screenTexture = useTexture(screenImage || "/textures/disco-floor.png");
+  const gameNameTexture = useTexture(gameNameImage || "/textures/disco-floor.png");
   
   // Initialize coins for slot machine hover effect
   React.useEffect(() => {
@@ -608,11 +615,15 @@ function GameObject({
 
   const createPlaceholder = () => {
     if (modelPath.includes('slot-machine')) {
+      // 9:16 aspect ratio for vertical screen
+      const screenWidth = 0.9;
+      const screenHeight = screenWidth * (16 / 9); // 1.6
+      
       return (
         <group>
-          {/* Premium curved cabinet - IGT style sleek design - TALLER */}
-          <mesh position={[0, 1.8, 0]} castShadow receiveShadow>
-            <cylinderGeometry args={[0.65, 0.7, 3.6, 32]} />
+          {/* Premium curved cabinet - sleeker and taller for 9:16 screen */}
+          <mesh position={[0, 2.0, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[0.6, 0.65, 4.0, 32]} />
             <meshStandardMaterial 
               color="#0a0a1e" 
               metalness={0.98} 
@@ -622,15 +633,32 @@ function GameObject({
             />
           </mesh>
           
-          {/* Premium large screen - ultra bright display */}
-          <mesh position={[0, 2.2, 0.66]} castShadow>
-            <boxGeometry args={[1.2, 1.6, 0.08]} />
-            {screenImage ? (
+          {/* Game name image placeholder above screen */}
+          {gameNameImage && (
+            <mesh position={[0, 3.5, 0.66]} castShadow>
+              <planeGeometry args={[1.2, 0.4]} />
               <meshStandardMaterial 
-                map={useTexture(screenImage)}
-                color="#ffffff"
-                emissive="#ffffff"
-                emissiveIntensity={hovered ? 2.0 : 1.2}
+                map={gameNameTexture}
+                toneMapped={false}
+                transparent={true}
+              />
+              <pointLight 
+                position={[0, 0, 0.3]} 
+                color="#ffffff" 
+                intensity={3} 
+                distance={2} 
+              />
+            </mesh>
+          )}
+          
+          {/* 9:16 vertical screen - for game display or video */}
+          <mesh position={[0, 2.3, 0.61]} castShadow>
+            <planeGeometry args={[screenWidth, screenHeight]} />
+            {videoUrl ? (
+              <VideoMaterial videoUrl={videoUrl} />
+            ) : screenImage ? (
+              <meshStandardMaterial 
+                map={screenTexture}
                 toneMapped={false}
               />
             ) : (
@@ -643,18 +671,18 @@ function GameObject({
           </mesh>
           
           {/* Screen backlight for visibility */}
-          {screenImage && (
+          {(screenImage || videoUrl) && (
             <pointLight 
-              position={[0, 2.2, 0.8]} 
+              position={[0, 2.3, 0.8]} 
               color="#ffffff" 
-              intensity={hovered ? 8 : 5} 
-              distance={3} 
+              intensity={hovered ? 10 : 6} 
+              distance={3.5} 
             />
           )}
           
-          {/* Curved screen bezel - glossy frame */}
-          <mesh position={[0, 2.2, 0.68]} castShadow>
-            <boxGeometry args={[1.26, 1.66, 0.04]} />
+          {/* Screen bezel - slim frame around 9:16 screen */}
+          <mesh position={[0, 2.3, 0.65]} castShadow>
+            <boxGeometry args={[screenWidth + 0.1, screenHeight + 0.1, 0.06]} />
             <meshStandardMaterial 
               color="#1a1a2e" 
               metalness={1} 
@@ -664,53 +692,29 @@ function GameObject({
             />
           </mesh>
           
-          {/* Game logo frame above screen */}
-          <group position={[0, 3.25, 0.7]}>
-            {/* Golden decorative frame */}
-            <mesh castShadow>
-              <boxGeometry args={[1.4, 0.5, 0.08]} />
-              <meshStandardMaterial 
-                color="#d4af37"
-                metalness={1}
-                roughness={0.1}
-                emissive="#d4af37"
-                emissiveIntensity={0.3}
-              />
-            </mesh>
+          {/* LED strip lights around screen */}
+          {Array.from({ length: 20 }).map((_, i) => {
+            const perimeter = (screenWidth + screenHeight) * 2;
+            const distance = (i / 20) * perimeter;
+            let x = 0, y = 0;
             
-            {/* Game logo image */}
-            <mesh position={[0, 0, 0.05]}>
-              <planeGeometry args={[1.3, 0.4]} />
-              <meshStandardMaterial 
-                map={useTexture("/game-logo.png")}
-                transparent={true}
-              />
-            </mesh>
+            if (distance < screenWidth) {
+              x = -screenWidth / 2 + distance;
+              y = -screenHeight / 2;
+            } else if (distance < screenWidth + screenHeight) {
+              x = screenWidth / 2;
+              y = -screenHeight / 2 + (distance - screenWidth);
+            } else if (distance < screenWidth * 2 + screenHeight) {
+              x = screenWidth / 2 - (distance - screenWidth - screenHeight);
+              y = screenHeight / 2;
+            } else {
+              x = -screenWidth / 2;
+              y = screenHeight / 2 - (distance - screenWidth * 2 - screenHeight);
+            }
             
-            {/* Frame border lights */}
-            {[
-              [-0.7, 0.25], [0.7, 0.25], [-0.7, -0.25], [0.7, -0.25]
-            ].map((pos, i) => (
-              <mesh key={i} position={[pos[0], pos[1], 0.08]} castShadow>
-                <sphereGeometry args={[0.03, 8, 8]} />
-                <meshStandardMaterial
-                  color="#ffd700"
-                  emissive="#ffd700"
-                  emissiveIntensity={2}
-                />
-              </mesh>
-            ))}
-          </group>
-          
-          {/* LED strip lights around screen - premium marquee effect */}
-          {Array.from({ length: 16 }).map((_, i) => {
-            const angle = (i / 16) * Math.PI * 2;
-            const radius = 0.68;
-            const x = Math.sin(angle) * radius;
-            const y = 2.2 + Math.cos(angle) * radius * 0.65;
             return (
-              <mesh key={i} position={[x, y, 0.7]} castShadow>
-                <sphereGeometry args={[0.025, 8, 8]} />
+              <mesh key={i} position={[x, 2.3 + y, 0.68]} castShadow>
+                <sphereGeometry args={[0.02, 8, 8]} />
                 <meshStandardMaterial
                   color="#60a5fa"
                   emissive="#60a5fa"
@@ -1157,60 +1161,53 @@ function SlotMachineRoom() {
       {/* Cashier Window on back wall, left of Fish Games door */}
       <CashierWindow />
 
-      {/* Left wall slots - 5 machines */}
-      {/* Machine 1 - Gates of Olympus */}
-      <GameObject
-        key="slot-left-0"
-        position={[-14, 0, -10]}
-        rotation={[0, Math.PI / 2, 0]}
-        modelPath="slot-machine"
-        scale={2.5}
-        onClick={() => handleSlotMachineClick(1)}
-        label="Slot Machine 1"
-        glowColor="#a855f7"
-        machineColor={machineColors[0]}
-        screenImage="/slot-olympus.png"
-      />
-      {/* Machine 2 - Bigger Bass */}
-      <GameObject
-        key="slot-left-1"
-        position={[-14, 0, -5]}
-        rotation={[0, Math.PI / 2, 0]}
-        modelPath="slot-machine"
-        scale={2.5}
-        onClick={() => handleSlotMachineClick(2)}
-        label="Slot Machine 2"
-        glowColor="#a855f7"
-        machineColor={machineColors[1]}
-        screenImage="/slot-bass.png"
-      />
-      {/* Machines 3-5 - default screens */}
-      {Array.from({ length: 3 }, (_, i) => (
+      {/* U-SHAPED LAYOUT - Left wall: 4 machines facing right */}
+      {Array.from({ length: 4 }, (_, i) => (
         <GameObject
-          key={`slot-left-${i+2}`}
-          position={[-14, 0, (i) * 5]}
+          key={`slot-left-${i}`}
+          position={[-14, 0, 12 - (i * 6)]}
           rotation={[0, Math.PI / 2, 0]}
           modelPath="slot-machine"
           scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 3)}
-          label={`Slot Machine ${i + 3}`}
+          onClick={() => handleSlotMachineClick(i + 1)}
+          label={`Slot Machine ${i + 1}`}
           glowColor="#a855f7"
-          machineColor={machineColors[i + 2]}
+          machineColor={machineColors[i]}
+          screenImage={i === 0 ? "/slot-olympus.png" : i === 1 ? "/slot-bass.png" : undefined}
+          videoUrl={i === 2 ? "/videos/slot-game-1.mp4" : i === 3 ? "/videos/slot-game-2.mp4" : undefined}
+          gameNameImage={i === 0 ? "/slot-olympus.png" : undefined}
         />
       ))}
 
-      {/* Right wall slots - 5 machines */}
+      {/* U-SHAPED LAYOUT - Back wall: 5 machines facing forward */}
       {Array.from({ length: 5 }, (_, i) => (
         <GameObject
+          key={`slot-back-${i}`}
+          position={[-10 + (i * 5), 0, -14]}
+          rotation={[0, 0, 0]}
+          modelPath="slot-machine"
+          scale={2.5}
+          onClick={() => handleSlotMachineClick(i + 5)}
+          label={`Slot Machine ${i + 5}`}
+          glowColor="#a855f7"
+          machineColor={machineColors[i + 4]}
+          videoUrl={i % 2 === 0 ? "/videos/slot-game-1.mp4" : "/videos/slot-game-2.mp4"}
+        />
+      ))}
+
+      {/* U-SHAPED LAYOUT - Right wall: 4 machines facing left */}
+      {Array.from({ length: 4 }, (_, i) => (
+        <GameObject
           key={`slot-right-${i}`}
-          position={[14, 0, (i - 2) * 5]}
+          position={[14, 0, -6 + (i * 6)]}
           rotation={[0, -Math.PI / 2, 0]}
           modelPath="slot-machine"
           scale={2.5}
-          onClick={() => handleSlotMachineClick(i + 6)}
-          label={`Slot Machine ${i + 6}`}
+          onClick={() => handleSlotMachineClick(i + 10)}
+          label={`Slot Machine ${i + 10}`}
           glowColor="#a855f7"
-          machineColor={machineColors[i + 5]}
+          machineColor={machineColors[(i + 9) % machineColors.length]}
+          videoUrl={i % 2 === 0 ? "/videos/slot-game-2.mp4" : "/videos/slot-game-1.mp4"}
         />
       ))}
     </group>
