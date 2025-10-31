@@ -1246,6 +1246,18 @@ function SlotMachineRoom() {
             i === 7 ? "/videos/slot-game-2.mp4" :
             undefined
           }
+          screenImage={
+            i === 2 ? "/slot-placeholder-1.jpeg" :
+            i === 3 ? "/slot-placeholder-2.jpeg" :
+            i === 4 ? "/slot-placeholder-1.jpeg" :
+            i === 5 ? "/slot-placeholder-2.jpeg" :
+            i === 8 ? "/slot-placeholder-1.jpeg" :
+            i === 9 ? "/slot-placeholder-2.jpeg" :
+            i === 10 ? "/slot-placeholder-1.jpeg" :
+            i === 11 ? "/slot-placeholder-2.jpeg" :
+            i === 12 ? "/slot-placeholder-1.jpeg" :
+            undefined
+          }
           gameNameImage={
             i === 0 ? "/slot-olympus-new.jpeg" :
             i === 1 ? "/slot-bass.webp" :
