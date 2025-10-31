@@ -40,15 +40,16 @@ Preferred communication style: Simple, everyday language.
 
 **Component Structure:**
 - Modal-based interactions for games and transactions:
-  - `AuthModal`: User login/registration
+  - `AuthModal`: User login/registration with demo mode option
   - `CashierModal`: Deposits, withdrawals, transaction history
   - `SlotMachineModal`: Slot machine gameplay interface
   - `StatsModal`: Player statistics and analytics
+  - `UpgradeAccountModal`: Convert demo accounts to permanent accounts
 - `CasinoScene`: Main 3D environment renderer
 - `Navigation`: Transparent top navigation bar (authenticated users only)
   - Left side: Daily Check-in and Free Credits clickable icons
   - Right side: Credit balance display and user avatar dropdown menu
-  - Dropdown menu: View Stats, Change Password, Logout
+  - Dropdown menu: Upgrade Account (demo users only), View Stats, Change Password, Logout
 - `AudioManager`: Background music and SFX playback
 - Custom event system for cross-component communication
 
@@ -71,6 +72,8 @@ Preferred communication style: Simple, everyday language.
 - `POST /api/auth/login`: Authenticate user
 - `POST /api/auth/logout`: End user session
 - `GET /api/auth/me`: Get current user profile
+- `POST /api/auth/demo`: Create instant demo account with 2000 free credits
+- `POST /api/auth/upgrade-demo`: Convert demo account to permanent account
 - `POST /api/transactions`: Create transaction
 - `GET /api/transactions`: Retrieve user transaction history
 - `GET /api/stats`: Get player game statistics
@@ -95,6 +98,8 @@ Preferred communication style: Simple, everyday language.
   - username (unique text)
   - password (hashed text)
   - balance (integer, default 1000)
+  - isDemo (boolean, default false)
+  - createdAt (timestamp, default now())
 
 - `transactions` table: Financial and game activity log
   - id (serial primary key)
@@ -117,7 +122,17 @@ Preferred communication style: Simple, everyday language.
 - Session-based authentication using express-session
 - Session stored in memory (configurable for production)
 - HTTP-only cookies for session tokens
-- Password hashing with bcrypt (10 rounds)
+- Password hashing with bcrypt (10-12 rounds)
+- All auth responses include `isDemo` flag for client state management
+
+**Demo Mode:**
+- Instant access with "Try Demo Mode" button (no registration required)
+- Demo accounts receive 2000 free credits
+- Unique usernames generated with timestamp + random suffix
+- Retry logic (10 attempts) prevents username collisions
+- Demo users can upgrade to permanent accounts anytime
+- Upgrade validation: username trimming, character set enforcement (alphanumeric + underscore), length checks (3-20 chars), minimum 6-character passwords
+- Bcrypt cost 12 for upgraded accounts
 
 **Session Configuration:**
 - 7-day session expiration
