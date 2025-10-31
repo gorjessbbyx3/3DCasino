@@ -33,9 +33,9 @@ export function Navigation() {
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">
-      <div className="flex items-start justify-between p-4 gap-4">
+      <div className="flex items-start justify-between p-2 sm:p-4 gap-2 sm:gap-4">
         {/* Left side - Icons */}
-        <div className="flex gap-3 pointer-events-auto">
+        <div className="flex gap-2 sm:gap-3 pointer-events-auto">
           <button
             onClick={handleDailyCheckIn}
             className="group relative hover:scale-110 transition-transform duration-200"
@@ -44,9 +44,9 @@ export function Navigation() {
             <img 
               src="/daily-checkin-icon.png" 
               alt="Daily Check-in" 
-              className="w-16 h-16 drop-shadow-lg"
+              className="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-lg"
             />
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap hidden sm:block">
               Daily Check-in
             </div>
           </button>
@@ -59,21 +59,21 @@ export function Navigation() {
             <img 
               src="/free-credits-icon.png" 
               alt="Free Credits" 
-              className="w-16 h-16 drop-shadow-lg"
+              className="w-12 h-12 sm:w-16 sm:h-16 drop-shadow-lg"
             />
-            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap">
+            <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/80 text-white text-xs px-2 py-1 rounded whitespace-nowrap hidden sm:block">
               Free Credits
             </div>
           </button>
         </div>
 
         {/* Right side - User info and balance */}
-        <div className="flex items-center gap-3 pointer-events-auto">
+        <div className="flex items-center gap-2 sm:gap-3 pointer-events-auto">
           {/* Credit Balance */}
-          <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-full border border-yellow-400/30 shadow-lg">
-            <div className="flex items-center gap-2">
-              <Coins className="w-5 h-5 text-yellow-400" />
-              <span className="text-yellow-400 font-bold text-lg">
+          <div className="bg-black/40 backdrop-blur-md px-2 py-1 sm:px-4 sm:py-2 rounded-full border border-yellow-400/30 shadow-lg">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <Coins className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+              <span className="text-yellow-400 font-bold text-sm sm:text-lg">
                 ${user.balance.toLocaleString()}
               </span>
             </div>
@@ -83,10 +83,10 @@ export function Navigation() {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="bg-black/40 backdrop-blur-md p-2 rounded-full border border-emerald-400/30 hover:border-emerald-400/60 transition-all shadow-lg hover:scale-105"
+              className="bg-black/40 backdrop-blur-md p-1 sm:p-2 rounded-full border border-emerald-400/30 hover:border-emerald-400/60 transition-all shadow-lg hover:scale-105"
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
-                <User className="w-6 h-6 text-white" />
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-400 flex items-center justify-center">
+                <User className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
             </button>
 
