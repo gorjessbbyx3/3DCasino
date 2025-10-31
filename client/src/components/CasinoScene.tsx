@@ -1273,9 +1273,11 @@ function SlotMachineRoom() {
 
 // Holographic Video Display Component
 function HolographicVideo({ position, videoUrl }: { position: [number, number, number]; videoUrl: string }) {
+  console.log('HolographicVideo rendering at position:', position, 'with video:', videoUrl);
+  
   return (
     <group position={position}>
-      {/* Holographic frame with glowing edges */}
+      {/* Holographic frame with glowing edges - horizontal frame */}
       <mesh position={[0, 0, 0]}>
         <boxGeometry args={[4.5, 0.05, 3]} />
         <meshStandardMaterial 
@@ -1287,29 +1289,41 @@ function HolographicVideo({ position, videoUrl }: { position: [number, number, n
         />
       </mesh>
       
-      {/* Video plane floating above table */}
+      {/* Video plane - rotated to be horizontal and face upward for aerial view */}
       <mesh position={[0, 0, 0]} rotation={[-Math.PI / 2, 0, 0]}>
         <planeGeometry args={[4.2, 2.8]} />
         <VideoMaterial videoUrl={videoUrl} />
       </mesh>
       
       {/* Holographic glow effect */}
-      <pointLight position={[0, 0, 0]} color="#06b6d4" intensity={3} distance={8} />
+      <pointLight position={[0, 0.5, 0]} color="#06b6d4" intensity={5} distance={10} />
       
       {/* Corner markers for holographic effect */}
       {[
-        [-2.1, 0, -1.4], [2.1, 0, -1.4], 
-        [-2.1, 0, 1.4], [2.1, 0, 1.4]
+        [-2.1, 0.1, -1.4], [2.1, 0.1, -1.4], 
+        [-2.1, 0.1, 1.4], [2.1, 0.1, 1.4]
       ].map((pos, i) => (
         <mesh key={i} position={pos as [number, number, number]}>
-          <sphereGeometry args={[0.1, 16, 16]} />
+          <sphereGeometry args={[0.15, 16, 16]} />
           <meshStandardMaterial 
             color="#06b6d4" 
             emissive="#06b6d4" 
-            emissiveIntensity={3}
+            emissiveIntensity={4}
           />
         </mesh>
       ))}
+      
+      {/* Additional vertical light beam for visibility from above */}
+      <mesh position={[0, 2, 0]}>
+        <cylinderGeometry args={[0.1, 0.1, 4, 16]} />
+        <meshStandardMaterial 
+          color="#06b6d4" 
+          emissive="#06b6d4" 
+          emissiveIntensity={2}
+          transparent
+          opacity={0.3}
+        />
+      </mesh>
     </group>
   );
 }
@@ -1321,11 +1335,14 @@ function FishGameRoom() {
   const roomSize = 35;
 
   const handleTableClick = (tableNumber: number) => {
+    console.log('Fish table clicked:', tableNumber, 'Current user:', user ? 'logged in' : 'not logged in');
     if (!user) {
       setShowAuthModal(true);
     } else {
       // Toggle selection - if clicking the same table, deselect it
-      setSelectedFishTable(selectedFishTable === tableNumber ? null : tableNumber);
+      const newSelection = selectedFishTable === tableNumber ? null : tableNumber;
+      console.log('Setting selected fish table to:', newSelection);
+      setSelectedFishTable(newSelection);
     }
   };
 
@@ -1398,20 +1415,23 @@ function FishGameRoom() {
       ))}
       
       {/* Holographic video display above selected table */}
-      {selectedFishTable !== null && (
-        <HolographicVideo 
-          position={[
-            tablePositions[selectedFishTable - 1].x,
-            3.5, // Height above table
-            tablePositions[selectedFishTable - 1].z
-          ]}
-          videoUrl={
-            selectedFishTable % 2 === 0 
-              ? "/videos/fish-game-2.mp4" 
-              : "/videos/fish-game-1.mp4"
-          }
-        />
-      )}
+      {selectedFishTable !== null && (() => {
+        console.log('Rendering HolographicVideo for table:', selectedFishTable);
+        return (
+          <HolographicVideo 
+            position={[
+              tablePositions[selectedFishTable - 1].x,
+              3.5, // Height above table
+              tablePositions[selectedFishTable - 1].z
+            ]}
+            videoUrl={
+              selectedFishTable % 2 === 0 
+                ? "/videos/fish-game-2.mp4" 
+                : "/videos/fish-game-1.mp4"
+            }
+          />
+        );
+      })()}
     </group>
   );
 }
