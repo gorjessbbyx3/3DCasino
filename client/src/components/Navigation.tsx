@@ -29,7 +29,18 @@ export function Navigation() {
     openSpinWheel();
   };
 
-  if (!user) return null;
+  if (!user) {
+    return (
+      <div className="fixed top-4 right-4 z-50 pointer-events-auto">
+        <button
+          onClick={() => window.dispatchEvent(new Event('openAuthModal'))}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold px-6 py-3 rounded-full shadow-lg transition-all duration-200 hover:scale-105"
+        >
+          Login / Sign Up
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pointer-events-none">

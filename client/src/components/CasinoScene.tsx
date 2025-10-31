@@ -501,6 +501,7 @@ function VideoMaterial({ videoUrl }: { videoUrl: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
+    console.log('VideoMaterial: Loading video:', videoUrl);
     const video = document.createElement('video');
     video.src = videoUrl;
     video.loop = true;
@@ -511,9 +512,14 @@ function VideoMaterial({ videoUrl }: { videoUrl: string }) {
     
     // Try to play when data is loaded
     const handleLoadedData = () => {
+      console.log('VideoMaterial: Video data loaded, attempting to play:', videoUrl);
       video.play()
-        .then(() => setIsPlaying(true))
-        .catch(() => {
+        .then(() => {
+          console.log('VideoMaterial: Video playing successfully:', videoUrl);
+          setIsPlaying(true);
+        })
+        .catch((error) => {
+          console.log('VideoMaterial: Autoplay blocked, setting up interaction listener:', error);
           // Autoplay blocked - try again on any user interaction
           const playOnInteraction = () => {
             video.play()
