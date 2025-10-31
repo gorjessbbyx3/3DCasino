@@ -1379,6 +1379,16 @@ function KeyboardMovementControls() {
     const forward = new THREE.Vector3();
     const right = new THREE.Vector3();
 
+    // Adjust camera FOV for mobile devices to zoom in
+    const isMobile = window.innerWidth < 768;
+    if (isMobile && camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = 60;
+      camera.updateProjectionMatrix();
+    } else if (camera instanceof THREE.PerspectiveCamera) {
+      camera.fov = 75;
+      camera.updateProjectionMatrix();
+    }
+
     // Get camera direction vectors
     camera.getWorldDirection(forward);
     forward.y = 0; // Keep movement on horizontal plane

@@ -8,6 +8,7 @@ import { StatsModal } from "./components/StatsModal";
 import { AgeGateModal } from "./components/AgeGateModal";
 import { DailyCheckInModal } from "./components/DailyCheckInModal";
 import { SpinWheelModal } from "./components/SpinWheelModal";
+import { LandscapePrompt } from "./components/LandscapePrompt";
 import { AudioManager } from "./components/AudioManager";
 import { AudioControls } from "./components/AudioControls";
 import { Navigation } from "./components/Navigation";
@@ -37,6 +38,7 @@ function App() {
 
   return (
     <div style={{ width: '100vw', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      <LandscapePrompt />
       <AgeGateModal />
       <Navigation />
       <CasinoScene />
