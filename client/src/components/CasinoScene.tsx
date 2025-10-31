@@ -1115,7 +1115,7 @@ function SlotMachineRoom() {
 
   // Calculate curved line positions for all 13 slot machines
   const totalMachines = 13;
-  const machineSpacing = 3.2;
+  const machineSpacing = 3.8;
   const curveAmount = 3; // How much the ends curve forward
   
   const slotPositions = Array.from({ length: totalMachines }, (_, i) => {
