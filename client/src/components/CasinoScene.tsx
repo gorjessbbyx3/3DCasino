@@ -628,7 +628,7 @@ function GameObject({
           
           {/* Game name image placeholder above screen */}
           {gameNameImage && (
-            <mesh position={[0, 3.5, 0.66]} castShadow>
+            <mesh position={[0, 4.5, 0.66]} castShadow>
               <planeGeometry args={[1.2, 0.4]} />
               <meshStandardMaterial 
                 map={gameNameTexture}
