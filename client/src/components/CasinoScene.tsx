@@ -1170,9 +1170,8 @@ function SlotMachineRoom() {
           label={`Slot Machine ${i + 1}`}
           glowColor="#a855f7"
           machineColor={machineColors[i]}
-          screenImage={i === 1 ? "/slot-bass.png" : undefined}
-          videoUrl={i === 0 ? "/videos/olympus-promo.mp4" : i === 2 ? "/videos/slot-game-1.mp4" : i === 3 ? "/videos/slot-game-2.mp4" : undefined}
-          gameNameImage={i === 0 ? "/slot-olympus.png" : undefined}
+          videoUrl={i === 0 ? "/videos/olympus-promo.mp4" : i === 1 ? "/videos/bigger-bass.mp4" : i === 2 ? "/videos/slot-game-1.mp4" : i === 3 ? "/videos/slot-game-2.mp4" : undefined}
+          gameNameImage={i === 0 ? "/slot-olympus.png" : i === 1 ? "/slot-bass.webp" : undefined}
         />
       ))}
 
