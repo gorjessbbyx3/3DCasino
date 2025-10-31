@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import { Smartphone } from "lucide-react";
+import { useRoom } from "@/lib/stores/useRoom";
 
 export function LandscapePrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
+  const { currentRoom } = useRoom();
 
   useEffect(() => {
     const checkOrientation = () => {
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const isPortrait = window.innerHeight > window.innerWidth;
+      const isInFishArea = currentRoom === 'fish';
       
-      if (isMobile && isPortrait) {
+      if (isMobile && isPortrait && isInFishArea) {
         setShowPrompt(true);
       } else {
         setShowPrompt(false);
@@ -24,7 +27,7 @@ export function LandscapePrompt() {
       window.removeEventListener('resize', checkOrientation);
       window.removeEventListener('orientationchange', checkOrientation);
     };
-  }, []);
+  }, [currentRoom]);
 
   if (!showPrompt) return null;
 
@@ -60,12 +63,12 @@ export function LandscapePrompt() {
         </h2>
         
         <p className="text-gray-300 text-lg mb-6">
-          Please turn your device to landscape mode for the best casino experience
+          Please turn your device to landscape mode for the best fish game experience
         </p>
         
         <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-400/30 rounded-lg p-4">
           <p className="text-purple-300 text-sm">
-            💡 Landscape mode allows you to see all slot machines and game details clearly
+            💡 Landscape mode allows you to play fish games with better visibility and controls
           </p>
         </div>
       </div>

@@ -3,6 +3,7 @@ import { Canvas, useFrame, useThree, useLoader, ThreeEvent } from "@react-three/
 import { Environment, Text, OrbitControls, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
+import { useRoom } from "@/lib/stores/useRoom";
 
 const openCashierModal = () => {
   window.dispatchEvent(new CustomEvent('openCashierModal'));
@@ -11,20 +12,6 @@ const openCashierModal = () => {
 const openSlotMachineModal = (machineNumber: number) => {
   window.dispatchEvent(new CustomEvent('openSlotMachineModal', { detail: { machineNumber } }));
 };
-
-// Room state management
-type RoomType = 'slots' | 'fish';
-
-const useRoomState = () => {
-  const [currentRoom, setCurrentRoom] = useState<RoomType>('slots');
-  return { currentRoom, setCurrentRoom };
-};
-
-// Create a context for room state
-const RoomContext = React.createContext<{ currentRoom: RoomType; setCurrentRoom: (room: RoomType) => void }>({
-  currentRoom: 'slots',
-  setCurrentRoom: () => {}
-});
 
 
 // Clickable entrance component (to fish games)
@@ -70,7 +57,7 @@ function ClickableDoorExit({ position, doorWidth, doorHeight }: {
   doorHeight: number;
 }) {
   const { camera } = useThree();
-  const { setCurrentRoom } = React.useContext(RoomContext);
+  const { setCurrentRoom } = useRoom();
   
   const handleClick = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
@@ -1285,7 +1272,7 @@ function FishGameRoom() {
 }
 
 // Room lighting based on room type
-function RoomLighting({ roomType }: { roomType: RoomType }) {
+function RoomLighting({ roomType }: { roomType: 'slots' | 'fish' }) {
   if (roomType === 'slots') {
     return (
       <>
@@ -1341,7 +1328,7 @@ function RoomLighting({ roomType }: { roomType: RoomType }) {
 // Keyboard movement controls with smooth walking
 function KeyboardMovementControls() {
   const { camera, controls } = useThree();
-  const { currentRoom, setCurrentRoom } = React.useContext(RoomContext);
+  const { currentRoom, setCurrentRoom } = useRoom();
   const keysPressed = useRef<{ [key: string]: boolean }>({});
 
   useEffect(() => {
@@ -1500,7 +1487,7 @@ function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
 }
 
 function Scene() {
-  const { currentRoom } = React.useContext(RoomContext);
+  const { currentRoom } = useRoom();
 
   return (
     <>
@@ -1565,7 +1552,7 @@ function CanvasWrapper() {
 
 // Navigation arrows component
 function NavigationArrows() {
-  const { currentRoom, setCurrentRoom } = React.useContext(RoomContext);
+  const { currentRoom, setCurrentRoom } = useRoom();
   const { user, setShowAuthModal } = useUser();
 
   const handleLeftArrowClick = () => {
@@ -1619,12 +1606,10 @@ function NavigationArrows() {
 }
 
 export function CasinoScene() {
-  const roomState = useRoomState();
-
   return (
-    <RoomContext.Provider value={roomState}>
+    <>
       <CanvasWrapper />
       <NavigationArrows />
-    </RoomContext.Provider>
+    </>
   );
 }
