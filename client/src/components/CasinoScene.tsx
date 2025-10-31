@@ -1157,9 +1157,6 @@ function SlotMachineRoom() {
           metalness={0.2}
         />
       </mesh>
-      
-      {/* Cashier Window on back wall, left of Fish Games door */}
-      <CashierWindow />
 
       {/* U-SHAPED LAYOUT - Left wall: 4 machines facing right */}
       {Array.from({ length: 4 }, (_, i) => (
@@ -1510,7 +1507,7 @@ function Scene() {
       
       {currentRoom === 'slots' && (
         <>
-          <RoomWalls backRightDoor={true} backSign="JADE ROYALE" />
+          <RoomWalls backSign="JADE ROYALE" />
           <SlotMachineRoom />
         </>
       )}
@@ -1526,47 +1523,105 @@ function Scene() {
 }
 
 function CanvasWrapper() {
-  const roomState = useRoomState();
+  return (
+    <Canvas
+      shadows
+      camera={{ 
+        position: [0, 2.4, 14], 
+        fov: 75,
+        near: 0.1,
+        far: 1000
+      }}
+      gl={{ 
+        antialias: true, 
+        alpha: false,
+        powerPreference: "high-performance"
+      }}
+      onCreated={({ gl, scene }) => {
+        gl.shadowMap.enabled = true;
+        gl.shadowMap.type = THREE.PCFSoftShadowMap;
+        gl.setClearColor('#000011');
+        scene.fog = new THREE.Fog('#000011', 30, 60);
+      }}
+    >
+      <Suspense fallback={null}>
+        <Scene />
+        <Environment preset="night" background={false} />
+        <OrbitControls
+          enablePan={false}
+          enableZoom={false}
+          minPolarAngle={Math.PI / 2}
+          maxPolarAngle={Math.PI / 2}
+          rotateSpeed={0.5}
+          target={[0, 2.4, 0]}
+        />
+      </Suspense>
+    </Canvas>
+  );
+}
+
+// Navigation arrows component
+function NavigationArrows() {
+  const { currentRoom, setCurrentRoom } = React.useContext(RoomContext);
+  const { user, setShowAuthModal } = useUser();
+
+  const handleLeftArrowClick = () => {
+    if (!user) {
+      setShowAuthModal(true);
+    } else {
+      openCashierModal();
+    }
+  };
+
+  const handleRightArrowClick = () => {
+    if (currentRoom === 'slots') {
+      setCurrentRoom('fish');
+    }
+  };
+
+  // Only show navigation arrows in slots room
+  if (currentRoom !== 'slots') return null;
 
   return (
-    <RoomContext.Provider value={roomState}>
-      <Canvas
-        shadows
-        camera={{ 
-          position: [0, 2.4, 14], 
-          fov: 75,
-          near: 0.1,
-          far: 1000
-        }}
-        gl={{ 
-          antialias: true, 
-          alpha: false,
-          powerPreference: "high-performance"
-        }}
-        onCreated={({ gl, scene }) => {
-          gl.shadowMap.enabled = true;
-          gl.shadowMap.type = THREE.PCFSoftShadowMap;
-          gl.setClearColor('#000011');
-          scene.fog = new THREE.Fog('#000011', 30, 60);
-        }}
+    <>
+      {/* Left Arrow - Cashier */}
+      <button
+        onClick={handleLeftArrowClick}
+        className="fixed left-4 top-1/2 -translate-y-1/2 z-50 bg-cyan-500/80 hover:bg-cyan-400 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 group"
+        aria-label="Go to Cashier"
       >
-        <Suspense fallback={null}>
-          <Scene />
-          <Environment preset="night" background={false} />
-          <OrbitControls
-            enablePan={false}
-            enableZoom={false}
-            minPolarAngle={Math.PI / 2}
-            maxPolarAngle={Math.PI / 2}
-            rotateSpeed={0.5}
-            target={[0, 2.4, 0]}
-          />
-        </Suspense>
-      </Canvas>
-    </RoomContext.Provider>
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+        </svg>
+        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-black/80 text-white px-3 py-2 rounded text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          CASHIER
+        </div>
+      </button>
+
+      {/* Right Arrow - Fish Games */}
+      <button
+        onClick={handleRightArrowClick}
+        className="fixed right-4 top-1/2 -translate-y-1/2 z-50 bg-purple-500/80 hover:bg-purple-400 text-white p-4 rounded-full shadow-lg transition-all hover:scale-110 group"
+        aria-label="Go to Fish Games"
+      >
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+        </svg>
+        <div className="absolute right-full mr-2 top-1/2 -translate-y-1/2 bg-black/80 text-white px-3 py-2 rounded text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          FISH GAMES
+        </div>
+      </button>
+    </>
   );
 }
 
 export function CasinoScene() {
-  return <CanvasWrapper />;
+  const roomState = useRoomState();
+
+  return (
+    <RoomContext.Provider value={roomState}>
+      <CanvasWrapper />
+      <NavigationArrows />
+    </RoomContext.Provider>
+  );
 }
