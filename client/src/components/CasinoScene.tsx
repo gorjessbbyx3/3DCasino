@@ -1581,7 +1581,7 @@ function ClickableFloor({ roomSize = 55 }: { roomSize?: number }) {
     if (floorTexture) {
       floorTexture.wrapS = THREE.RepeatWrapping;
       floorTexture.wrapT = THREE.RepeatWrapping;
-      floorTexture.repeat.set(6, 6); // More repeats for colorful tiles
+      floorTexture.repeat.set(12, 12); // More repeats for colorful tiles
     }
   }, [floorTexture]);
 
@@ -1614,6 +1614,10 @@ function ClickableFloor({ roomSize = 55 }: { roomSize?: number }) {
         map={floorTexture}
         side={THREE.DoubleSide}
         toneMapped={false}
+        emissive="#ffffff"
+        emissiveIntensity={0.15}
+        roughness={0.7}
+        metalness={0.2}
       />
     </mesh>
   );
