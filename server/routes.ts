@@ -214,6 +214,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/daily-checkin/status", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1;
+      const monday = new Date(now);
+      monday.setDate(monday.getDate() - daysSinceMonday);
+      monday.setHours(0, 0, 0, 0);
+      const weekStartDate = monday.toISOString().split('T')[0];
+
+      const checkIns = await storage.getWeeklyCheckIns(userId, weekStartDate);
+      const claimedDays = checkIns.map(c => c.dayOfWeek);
+
+      res.json({
+        claimedDays,
+        currentDay,
+        weekStartDate,
+      });
+    } catch (error: any) {
+      res.status(500).json({ message: "Failed to fetch check-in status" });
+    }
+  });
+
+  app.post("/api/daily-checkin/claim", async (req, res) => {
+    const userId = (req.session as any).userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+
+    try {
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      const daysSinceMonday = currentDay === 0 ? 6 : currentDay - 1;
+      const monday = new Date(now);
+      monday.setDate(monday.getDate() - daysSinceMonday);
+      monday.setHours(0, 0, 0, 0);
+      const weekStartDate = monday.toISOString().split('T')[0];
+
+      const REWARDS = {
+        1: 300,  // Monday
+        2: 400,  // Tuesday
+        3: 500,  // Wednesday
+        4: 600,  // Thursday
+        5: 700,  // Friday
+        6: 800,  // Saturday
+        0: 900,  // Sunday
+      };
+
+      const reward = REWARDS[currentDay as keyof typeof REWARDS];
+
+      const result = await storage.claimDailyCheckIn(userId, currentDay, weekStartDate, reward);
+      
+      res.json({
+        user: {
+          id: result.user.id,
+          username: result.user.username,
+          balance: result.user.balance,
+        },
+        checkIn: result.checkIn,
+        reward,
+      });
+    } catch (error: any) {
+      res.status(400).json({ message: error.message || "Failed to claim reward" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

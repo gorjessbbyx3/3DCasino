@@ -3,6 +3,7 @@ import { useUser } from "@/lib/stores/useUser";
 import { Coins, LogOut, Lock, User, BarChart3 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { openStats } from "./StatsModal";
+import { openDailyCheckIn } from "./DailyCheckInModal";
 
 export function Navigation() {
   const { user, setUser } = useUser();
@@ -20,8 +21,7 @@ export function Navigation() {
   };
 
   const handleDailyCheckIn = () => {
-    // TODO: Implement daily check-in logic
-    console.log("Daily check-in clicked");
+    openDailyCheckIn();
   };
 
   const handleFreeCredits = () => {

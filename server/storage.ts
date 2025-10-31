@@ -1,7 +1,7 @@
-import { users, transactions, type User, type InsertUser, type Transaction, type InsertTransaction } from "@shared/schema";
+import { users, transactions, dailyCheckIns, type User, type InsertUser, type Transaction, type InsertTransaction, type DailyCheckIn, type InsertDailyCheckIn } from "@shared/schema";
 import { drizzle } from "drizzle-orm/neon-serverless";
 import { Pool, neonConfig } from "@neondatabase/serverless";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import ws from "ws";
 
 neonConfig.webSocketConstructor = ws;
@@ -36,6 +36,8 @@ export interface IStorage {
   withdraw(userId: number, amount: number, description?: string): Promise<{ user: User; transaction: Transaction }>;
   slotMachineSpin(userId: number, bet: number, machineNumber: number): Promise<{ user: User; symbols: string[]; winAmount: number }>;
   getUserStats(userId: number): Promise<GameStats>;
+  getWeeklyCheckIns(userId: number, weekStartDate: string): Promise<DailyCheckIn[]>;
+  claimDailyCheckIn(userId: number, dayOfWeek: number, weekStartDate: string, reward: number): Promise<{ user: User; checkIn: DailyCheckIn }>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -221,6 +223,65 @@ export class DatabaseStorage implements IStorage {
       winRate,
       biggestWin,
     };
+  }
+
+  async getWeeklyCheckIns(userId: number, weekStartDate: string): Promise<DailyCheckIn[]> {
+    const result = await db
+      .select()
+      .from(dailyCheckIns)
+      .where(
+        and(
+          eq(dailyCheckIns.userId, userId),
+          eq(dailyCheckIns.weekStartDate, weekStartDate)
+        )
+      );
+    return result;
+  }
+
+  async claimDailyCheckIn(userId: number, dayOfWeek: number, weekStartDate: string, reward: number): Promise<{ user: User; checkIn: DailyCheckIn }> {
+    const user = await this.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    const existingCheckIn = await db
+      .select()
+      .from(dailyCheckIns)
+      .where(
+        and(
+          eq(dailyCheckIns.userId, userId),
+          eq(dailyCheckIns.dayOfWeek, dayOfWeek),
+          eq(dailyCheckIns.weekStartDate, weekStartDate)
+        )
+      );
+
+    if (existingCheckIn.length > 0) {
+      throw new Error("Already claimed today");
+    }
+
+    const newBalance = user.balance + reward;
+    await this.updateUserBalance(userId, newBalance);
+
+    await this.createTransaction({
+      userId,
+      type: "deposit",
+      amount: reward,
+      balanceBefore: user.balance,
+      balanceAfter: newBalance,
+      description: "Daily Check-In Reward",
+    });
+
+    const checkInResult = await db
+      .insert(dailyCheckIns)
+      .values({
+        userId,
+        dayOfWeek,
+        weekStartDate,
+      })
+      .returning();
+
+    const updatedUser = await this.getUser(userId);
+    return { user: updatedUser!, checkIn: checkInResult[0] };
   }
 }
 

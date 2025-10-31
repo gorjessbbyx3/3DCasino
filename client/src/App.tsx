@@ -6,6 +6,7 @@ import { CashierModal } from "./components/CashierModal";
 import { SlotMachineModal } from "./components/SlotMachineModal";
 import { StatsModal } from "./components/StatsModal";
 import { AgeGateModal } from "./components/AgeGateModal";
+import { DailyCheckInModal } from "./components/DailyCheckInModal";
 import { AudioManager } from "./components/AudioManager";
 import { AudioControls } from "./components/AudioControls";
 import { Navigation } from "./components/Navigation";
@@ -41,6 +42,7 @@ function App() {
       <AuthModal />
       <CashierModal />
       <StatsModal />
+      <DailyCheckInModal />
       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
         <SlotMachineModal key={num} machineNumber={num} />
       ))}
