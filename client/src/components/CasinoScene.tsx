@@ -657,8 +657,20 @@ function GameObject({
             </mesh>
           )}
           
+          {/* Screen bezel - slim frame around 9:16 screen */}
+          <mesh position={[0, 2.3, 0.60]} castShadow>
+            <boxGeometry args={[screenWidth + 0.1, screenHeight + 0.1, 0.06]} />
+            <meshStandardMaterial 
+              color="#1a1a2e" 
+              metalness={1} 
+              roughness={0.02}
+              emissive={machineColor}
+              emissiveIntensity={hovered ? 0.8 : 0.4}
+            />
+          </mesh>
+          
           {/* 9:16 vertical screen - for game display or video */}
-          <mesh position={[0, 2.3, 0.61]} castShadow>
+          <mesh position={[0, 2.3, 0.66]} castShadow>
             <planeGeometry args={[screenWidth, screenHeight]} />
             {videoUrl ? (
               <VideoMaterial videoUrl={videoUrl} />
@@ -685,18 +697,6 @@ function GameObject({
               distance={3.5} 
             />
           )}
-          
-          {/* Screen bezel - slim frame around 9:16 screen */}
-          <mesh position={[0, 2.3, 0.65]} castShadow>
-            <boxGeometry args={[screenWidth + 0.1, screenHeight + 0.1, 0.06]} />
-            <meshStandardMaterial 
-              color="#1a1a2e" 
-              metalness={1} 
-              roughness={0.02}
-              emissive={machineColor}
-              emissiveIntensity={hovered ? 0.8 : 0.4}
-            />
-          </mesh>
           
           {/* LED strip lights around screen */}
           {Array.from({ length: 20 }).map((_, i) => {
