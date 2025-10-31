@@ -1134,11 +1134,11 @@ function SlotMachineRoom() {
   return (
     <group>
       {/* Starry Ceiling */}
-      <StarryCeiling roomSize={35} height={22} />
+      <StarryCeiling roomSize={55} height={22} />
       
       {/* Left Wall with new texture - positioned slightly inside to show in front of black wall */}
-      <mesh position={[-17.0, 11, 0]} receiveShadow castShadow>
-        <boxGeometry args={[0.1, 22, 35]} />
+      <mesh position={[-27.0, 11, 0]} receiveShadow castShadow>
+        <boxGeometry args={[0.1, 22, 55]} />
         <meshStandardMaterial 
           map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
@@ -1147,8 +1147,8 @@ function SlotMachineRoom() {
       </mesh>
 
       {/* Right Wall with new texture - positioned slightly inside to show in front of black wall */}
-      <mesh position={[17.0, 11, 0]} receiveShadow castShadow>
-        <boxGeometry args={[0.1, 22, 35]} />
+      <mesh position={[27.0, 11, 0]} receiveShadow castShadow>
+        <boxGeometry args={[0.1, 22, 55]} />
         <meshStandardMaterial 
           map={useTexture("/wall-texture.jpeg")}
           roughness={0.3}
@@ -1423,8 +1423,8 @@ function KeyboardMovementControls() {
       }
     }
 
-    // Keep camera within current room bounds (allow a bit of buffer for transitions)
-    camera.position.x = Math.max(-16.5, Math.min(16.5, camera.position.x));
+    // Keep camera within current room bounds (expanded for slot machine access)
+    camera.position.x = Math.max(-25, Math.min(25, camera.position.x));
     camera.position.z = Math.max(-18, Math.min(18, camera.position.z));
     camera.position.y = 2.4; // Always keep at eye level with slot machine screens
   });
@@ -1433,7 +1433,7 @@ function KeyboardMovementControls() {
 }
 
 // Clickable floor for teleportation
-function ClickableFloor({ roomSize = 35 }: { roomSize?: number }) {
+function ClickableFloor({ roomSize = 55 }: { roomSize?: number }) {
   const { camera } = useThree();
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
@@ -1495,7 +1495,7 @@ function Scene() {
       
       {currentRoom === 'slots' && (
         <>
-          <RoomWalls backSign="JADE ROYALE" />
+          <RoomWalls roomSize={55} backSign="JADE ROYALE" />
           <SlotMachineRoom />
         </>
       )}
