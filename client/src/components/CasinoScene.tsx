@@ -644,18 +644,6 @@ function GameObject({
             </mesh>
           )}
           
-          {/* Screen bezel - slim frame around 9:16 screen */}
-          <mesh position={[0, 2.3, 0.60]} castShadow>
-            <boxGeometry args={[screenWidth + 0.1, screenHeight + 0.1, 0.06]} />
-            <meshStandardMaterial 
-              color="#1a1a2e" 
-              metalness={1} 
-              roughness={0.02}
-              emissive={machineColor}
-              emissiveIntensity={hovered ? 0.8 : 0.4}
-            />
-          </mesh>
-          
           {/* 9:16 vertical screen - for game display or video */}
           <mesh position={[0, 2.3, 0.66]} castShadow>
             <planeGeometry args={[screenWidth, screenHeight]} />
@@ -1463,10 +1451,10 @@ function KeyboardMovementControls() {
     if (moved && controls) {
       const orbitControls = controls as any;
       if (orbitControls.target) {
-        // Keep the target in front of the camera at eye level
+        // Keep the target in front of the camera
         const targetPosition = camera.position.clone();
         targetPosition.addScaledVector(forward, 5);
-        targetPosition.y = 2.4;
+        targetPosition.y = 3.5;
         orbitControls.target.copy(targetPosition);
       }
     }
@@ -1476,21 +1464,21 @@ function KeyboardMovementControls() {
       // Back door to fish games (under sign)
       if (camera.position.z < -17) {
         setCurrentRoom('fish');
-        camera.position.set(0, 2.4, 15);
+        camera.position.set(0, 3.5, 15);
       }
     } else if (currentRoom === 'fish') {
       // Front door back to slots lobby
       if (camera.position.z > 17) {
         setCurrentRoom('slots');
         setSelectedFishTable(null); // Clear fish table selection when leaving
-        camera.position.set(0, 2.4, -15);
+        camera.position.set(0, 3.5, -15);
       }
     }
 
     // Keep camera within current room bounds (expanded for slot machine access)
     camera.position.x = Math.max(-25, Math.min(25, camera.position.x));
     camera.position.z = Math.max(-18, Math.min(18, camera.position.z));
-    camera.position.y = 2.4; // Always keep at eye level with slot machine screens
+    camera.position.y = 3.5; // Elevated view to see more of the casino
   });
 
   return null;
@@ -1517,8 +1505,8 @@ function ClickableFloor({ roomSize = 55 }: { roomSize?: number }) {
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
     event.stopPropagation();
     const point = event.point;
-    // Teleport camera to clicked position, keeping eye level
-    camera.position.set(point.x, 2.4, point.z);
+    // Teleport camera to clicked position, elevated view
+    camera.position.set(point.x, 3.5, point.z);
   };
 
   return (
@@ -1606,7 +1594,7 @@ function CanvasWrapper() {
     <Canvas
       shadows
       camera={{ 
-        position: [0, 2.4, 14], 
+        position: [0, 3.5, 14], 
         fov: 50,
         near: 0.1,
         far: 1000
@@ -1633,7 +1621,7 @@ function CanvasWrapper() {
           minPolarAngle={Math.PI / 2}
           maxPolarAngle={Math.PI / 2}
           rotateSpeed={0.5}
-          target={[0, 2.4, 0]}
+          target={[0, 3.5, 0]}
         />
       </Suspense>
     </Canvas>
