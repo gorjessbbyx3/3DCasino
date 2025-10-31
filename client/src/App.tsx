@@ -53,6 +53,14 @@ function App() {
       <AudioManager />
       <AudioControls />
       <Toaster position="top-right" richColors />
+
+      <div className="absolute bottom-8 left-0 right-0 z-10 text-center opacity-60">
+        <div className="inline-flex items-center gap-3 glass-morphism px-4 py-2 rounded-xl border border-purple-400/30 shadow-lg shadow-purple-500/20">
+          <p className="text-gradient-casino text-xs font-medium tracking-wide">
+            🖱️ Click floor to move • Drag to look around • 🎮 Click games to play
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
