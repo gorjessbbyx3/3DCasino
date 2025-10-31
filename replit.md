@@ -8,6 +8,15 @@ The platform provides user authentication, virtual currency management, slot mac
 
 ## Recent Changes
 
+**October 31, 2025 - Cashier Redesign & Visual Enhancements:**
+- Redesigned cashier station with interactive video display using user-uploaded content
+- Added dual interactive text bubbles: "💵 Add Credits?" (left, green hover) and "🏦 Withdraw?" (right, gold hover)
+- Implemented video playback using useVideoTexture for smooth looping animation
+- Enhanced cashier booth dimensions (8x5 units) with cyan ambient lighting
+- Raised "JADE ROYALE" sign to y=16 for better visibility from elevated camera
+- Raised camera height from 2.4 to 3.5 units for improved perspective (less floor visible)
+- Removed black frame/bezel from slot machine video displays for clean edge-to-edge video
+
 **October 31, 2025 - Backend APIs & Fish Table Redesign:**
 - Implemented complete backend for daily check-in feature (7-day calendar with $300-$900 rewards)
 - Implemented complete backend for spin wheel feature (12-hour cooldown, 250-700 credit prizes)

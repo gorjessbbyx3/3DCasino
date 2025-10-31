@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree, useLoader, ThreeEvent } from "@react-three/fiber";
-import { Environment, Text, OrbitControls, useTexture } from "@react-three/drei";
+import { Environment, Text, OrbitControls, useTexture, useVideoTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { useUser } from "@/lib/stores/useUser";
 import { useRoom } from "@/lib/stores/useRoom";
@@ -1001,13 +1001,24 @@ function GameObject({
   );
 }
 
-// Cashier Window Component with Image
+// Video Material Component for Cashier
+function CashierVideoMaterial() {
+  const texture = useVideoTexture('/videos/cashier.mp4');
+
+  return (
+    <meshBasicMaterial
+      map={texture}
+      toneMapped={false}
+    />
+  );
+}
+
+// Cashier Window Component with Video and Text Bubbles
 function CashierWindow() {
   const { setShowAuthModal, user } = useUser();
-  const [hovered, setHovered] = useState(false);
-  const texture = useLoader(THREE.TextureLoader, '/Copilot_20251028_193236_1761716033443.png');
+  const [hoveredButton, setHoveredButton] = useState<'add' | 'withdraw' | null>(null);
 
-  const handleCashierClick = () => {
+  const handleButtonClick = (action: 'add' | 'withdraw') => {
     if (!user) {
       setShowAuthModal(true);
     } else {
@@ -1018,20 +1029,8 @@ function CashierWindow() {
   return (
     <group position={[-10, 3, -16.5]}>
       {/* Cashier booth frame */}
-      <mesh 
-        position={[0, 2, 0]} 
-        castShadow
-        onClick={handleCashierClick}
-        onPointerOver={() => {
-          setHovered(true);
-          document.body.style.cursor = "pointer";
-        }}
-        onPointerOut={() => {
-          setHovered(false);
-          document.body.style.cursor = "auto";
-        }}
-      >
-        <boxGeometry args={[6, 4, 0.5]} />
+      <mesh position={[0, 2, 0]} castShadow>
+        <boxGeometry args={[8, 5, 0.5]} />
         <meshStandardMaterial 
           color="#1a0f2e" 
           metalness={0.6}
@@ -1039,38 +1038,122 @@ function CashierWindow() {
         />
       </mesh>
 
-      {/* Window with pitbull image */}
+      {/* Video display */}
       <mesh position={[0, 2, 0.26]} castShadow>
-        <planeGeometry args={[5.5, 3.5]} />
-        <meshStandardMaterial 
-          map={texture}
-          emissive="#ffffff"
-          emissiveIntensity={hovered ? 0.3 : 0.1}
-        />
+        <planeGeometry args={[7.5, 4.5]} />
+        <CashierVideoMaterial />
       </mesh>
 
       {/* Glowing CASHIER sign above */}
       <Text
-        position={[0, 4.5, 0.3]}
-        fontSize={0.6}
+        position={[0, 5, 0.3]}
+        fontSize={0.7}
         color="#00ffff"
         anchorX="center"
         anchorY="middle"
         outlineWidth={0.05}
         outlineColor="#0891b2"
       >
-        CASHIER
+        💰 CASHIER 💰
       </Text>
 
-      {/* Glow effect when hovered */}
-      {hovered && (
-        <pointLight
-          position={[0, 2, 1]}
-          color="#00ffff"
-          intensity={10}
-          distance={8}
-        />
-      )}
+      {/* Add Credits Button - Left side */}
+      <group position={[-3.5, 0, 0.5]}>
+        {/* Speech bubble background */}
+        <mesh
+          onClick={() => handleButtonClick('add')}
+          onPointerOver={() => {
+            setHoveredButton('add');
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={() => {
+            setHoveredButton(null);
+            document.body.style.cursor = "auto";
+          }}
+        >
+          <planeGeometry args={[2.8, 1.2]} />
+          <meshBasicMaterial 
+            color={hoveredButton === 'add' ? "#00ff00" : "#ffffff"}
+            transparent
+            opacity={0.95}
+          />
+        </mesh>
+        
+        {/* Button text */}
+        <Text
+          position={[0, 0, 0.01]}
+          fontSize={0.35}
+          color={hoveredButton === 'add' ? "#000000" : "#1a0f2e"}
+          anchorX="center"
+          anchorY="middle"
+          fontWeight="bold"
+        >
+          💵 Add Credits?
+        </Text>
+
+        {/* Glow effect */}
+        {hoveredButton === 'add' && (
+          <pointLight
+            position={[0, 0, 0.5]}
+            color="#00ff00"
+            intensity={8}
+            distance={4}
+          />
+        )}
+      </group>
+
+      {/* Withdraw Button - Right side */}
+      <group position={[3.5, 0, 0.5]}>
+        {/* Speech bubble background */}
+        <mesh
+          onClick={() => handleButtonClick('withdraw')}
+          onPointerOver={() => {
+            setHoveredButton('withdraw');
+            document.body.style.cursor = "pointer";
+          }}
+          onPointerOut={() => {
+            setHoveredButton(null);
+            document.body.style.cursor = "auto";
+          }}
+        >
+          <planeGeometry args={[2.8, 1.2]} />
+          <meshBasicMaterial 
+            color={hoveredButton === 'withdraw' ? "#ffd700" : "#ffffff"}
+            transparent
+            opacity={0.95}
+          />
+        </mesh>
+        
+        {/* Button text */}
+        <Text
+          position={[0, 0, 0.01]}
+          fontSize={0.35}
+          color={hoveredButton === 'withdraw' ? "#000000" : "#1a0f2e"}
+          anchorX="center"
+          anchorY="middle"
+          fontWeight="bold"
+        >
+          🏦 Withdraw?
+        </Text>
+
+        {/* Glow effect */}
+        {hoveredButton === 'withdraw' && (
+          <pointLight
+            position={[0, 0, 0.5]}
+            color="#ffd700"
+            intensity={8}
+            distance={4}
+          />
+        )}
+      </group>
+
+      {/* Ambient lighting for cashier area */}
+      <pointLight
+        position={[0, 2, 2]}
+        color="#00ffff"
+        intensity={5}
+        distance={10}
+      />
     </group>
   );
 }
