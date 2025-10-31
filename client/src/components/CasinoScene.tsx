@@ -1249,12 +1249,12 @@ function SlotMachineRoom() {
           screenImage={
             i === 2 ? "/slot-placeholder-1.jpeg" :
             i === 3 ? "/slot-placeholder-2.jpeg" :
-            i === 4 ? "/slot-placeholder-1.jpeg" :
-            i === 5 ? "/slot-placeholder-2.jpeg" :
+            i === 4 ? "/slot-placeholder-3.jpeg" :
+            i === 5 ? "/slot-placeholder-4.jpeg" :
             i === 8 ? "/slot-placeholder-1.jpeg" :
             i === 9 ? "/slot-placeholder-2.jpeg" :
-            i === 10 ? "/slot-placeholder-1.jpeg" :
-            i === 11 ? "/slot-placeholder-2.jpeg" :
+            i === 10 ? "/slot-placeholder-3.jpeg" :
+            i === 11 ? "/slot-placeholder-4.jpeg" :
             i === 12 ? "/slot-placeholder-1.jpeg" :
             undefined
           }
